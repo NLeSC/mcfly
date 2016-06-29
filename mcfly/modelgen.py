@@ -27,7 +27,8 @@ def generate_models(x_shape, number_of_classes, number_of_models=5, model_type=N
     return models
 
 
-def generate_DeepConvLSTM_model(x_shape, class_number, filters, lstm_dims, learning_rate=0.01):
+def generate_DeepConvLSTM_model(x_shape, class_number, filters, lstm_dims, learning_rate=0.01,
+                                regularization_rate=0.01):
     """
     Generate a model with convolution and LSTM layers.
     See Ordonez et al., 2016, http://dx.doi.org/10.3390/s16010115
@@ -47,7 +48,7 @@ def generate_DeepConvLSTM_model(x_shape, class_number, filters, lstm_dims, learn
         # filt: number of filters used in a layer
         # filters: vector of filt values
         model.add(
-            Convolution2D(filt, nb_row=3, nb_col=1, border_mode='same', W_regularizer=l2(0.01)))
+            Convolution2D(filt, nb_row=3, nb_col=1, border_mode='same', W_regularizer=l2(regularization_rate)))
         model.add(Activation('relu'))
     # reshape 3 dimensional array back into a 2 dimensional array,
     # but now with more dept as we have the the filters for each channel
@@ -59,7 +60,7 @@ def generate_DeepConvLSTM_model(x_shape, class_number, filters, lstm_dims, learn
 
     model.add(Dropout(0.5)) #dropout before the dense layer
     # set up final dense layer such that every timestamp is given one classification
-    model.add(TimeDistributed(Dense(output_dim)))
+    model.add(TimeDistributed(Dense(output_dim, W_regularizer=l2(regularization_rate))))
     model.add(Activation("softmax"))
     # Final classification layer - per timestep
     model.add(Lambda(lambda x: x[:, -1, :], output_shape=[output_dim]))
@@ -71,7 +72,7 @@ def generate_DeepConvLSTM_model(x_shape, class_number, filters, lstm_dims, learn
     return model
 
 
-def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes, learning_rate=0.01):
+def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes, learning_rate=0.01, regularization_rate=0.01):
     """
     Generate a convolutional neural network (CNN) model.
 
@@ -85,12 +86,13 @@ def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes, learning
     # TODO: weight initialization (in layer constructor)
     # TODO: regularation etc
     model.add(
-        Convolution1D(filters[0], 3, border_mode='same', input_shape=(dim_length, dim_channels)))
+        Convolution1D(filters[0], 3, border_mode='same', input_shape=(dim_length, dim_channels),
+                      W_regularizer=l2(regularization_rate)))
     for filter_number in filters[1:]:
-        model.add(Convolution1D(filter_number, 3, border_mode='same'))
+        model.add(Convolution1D(filter_number, 3, border_mode='same', W_regularizer=l2(regularization_rate)))
         model.add(Activation('relu'))
     model.add(Flatten())
-    model.add(Dense(output_dim=fc_hidden_nodes))  # Fully connected layer
+    model.add(Dense(output_dim=fc_hidden_nodes, W_regularizer=l2(regularization_rate)))  # Fully connected layer
     model.add(Activation('relu'))  # Relu activation
     model.add(Dense(output_dim=outputdim))
     model.add(Activation("softmax"))  # Final classification layer
@@ -135,6 +137,7 @@ def generate_base_hyperparameter_set():
     """ Generate a base set of hyperparameters that are necessary for any model, but sufficient for none."""
     hyperparameters = {}
     hyperparameters['learning_rate'] = get_learning_rate()
+    hyperparameters['regularization_rate'] = get_regularization()
     return hyperparameters
 
 
@@ -142,3 +145,8 @@ def get_learning_rate(low=1, high=4):
     """ Return random learning rate 10^-n where n is sampled uniformly between low and high bounds."""
     result = 10 ** (-np.random.uniform(low, high))
     return result
+
+
+def get_regularization(low = 1, high = 4):
+    """ Return random regularization rate 10^-n where n is sampled uniformly between low and high bounds."""
+    return 10**(-np.random.uniform(low, high))
