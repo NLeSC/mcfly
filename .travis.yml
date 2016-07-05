@@ -1,22 +1,14 @@
 language: python
 
-virtualenv: 
-  system_site_packages: true
-
 python:
 - "2.7"
 - "3.4"  
 
 before_install:
-#- "curl -qsSLkO \ https://repo.continuum.io/miniconda/Miniconda-latest-Linux-`uname -p`.sh \
-#  && bash Miniconda-latest-Linux-`uname -p`.sh -b \
-#  && rm Miniconda-latest-Linux-`uname -p`.sh"
 - "sudo apt-get -qq install liblapack-dev gfortran"
 - "pip install coverage nose"
 - "pip install -q scipy"  # Install this one seperately otherwise travis-ci times out on installing requirements.
 - "pip install -qr requirements.txt"
-#- "PATH=/root/miniconda2/bin:$PATH"
-#- "RUN conda install -y \ h5py \ pandas \ theano \ && conda clean --yes --tarballs --packages --source-cache \ && pip install --upgrade -I setuptools \ && pip install --upgrade \ keras"
 
 install:
 - "echo done"
