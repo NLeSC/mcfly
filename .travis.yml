@@ -11,6 +11,7 @@ before_install:
 - "curl -qsSLkO \ https://repo.continuum.io/miniconda/Miniconda-latest-Linux-`uname -p`.sh \
   && bash Miniconda-latest-Linux-`uname -p`.sh -b \
   && rm Miniconda-latest-Linux-`uname -p`.sh"
+- "sudo apt-get -qq install libpcl-all python-liblas liblas-bin liblas1 liblas-dev libatlas-base-dev python-gdal"
 - "pip install coverage"
 - "pip install -r requirements.txt"
 - "PATH=/root/miniconda2/bin:$PATH"
