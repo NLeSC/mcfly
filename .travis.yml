@@ -1,0 +1,27 @@
+language: python
+
+virtualenv: 
+  system_site_packages: true
+
+python:
+- "2.7"
+- "3.5"  
+
+before_install:
+- "curl -qsSLkO \ https://repo.continuum.io/miniconda/Miniconda-latest-Linux-`uname -p`.sh \
+  && bash Miniconda-latest-Linux-`uname -p`.sh -b \
+  && rm Miniconda-latest-Linux-`uname -p`.sh"
+- "pip install coverage"
+- "pip install -r requirements.txt"
+- "PATH=/root/miniconda2/bin:$PATH"
+- "RUN conda install -y \ h5py \ pandas \ theano \ && conda clean --yes --tarballs --packages --source-cache \ && pip install --upgrade -I setuptools \ && pip install --upgrade \ keras"
+
+install:
+- "echo done"
+
+# command to run tests, e.g. python setup.py test
+script: nosetests --with-coverage --cover-package=scripts,patty
+
+after_script:
+- "pip install scrutinizer-ocular"
+- "ocular"
