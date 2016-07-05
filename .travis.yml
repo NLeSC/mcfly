@@ -5,14 +5,14 @@ virtualenv:
 
 python:
 - "2.7"
-- "3.5"  
+- "3.4"  
 
 before_install:
-- "curl -qsSLkO \ https://repo.continuum.io/miniconda/Miniconda-latest-Linux-`uname -p`.sh \
-  && bash Miniconda-latest-Linux-`uname -p`.sh -b \
-  && rm Miniconda-latest-Linux-`uname -p`.sh"
-- "sudo apt-get -qq install python-liblas liblas-bin liblas1 liblas-dev libatlas-base-dev python-gdal"
-- "pip install coverage"
+#- "curl -qsSLkO \ https://repo.continuum.io/miniconda/Miniconda-latest-Linux-`uname -p`.sh \
+#  && bash Miniconda-latest-Linux-`uname -p`.sh -b \
+#  && rm Miniconda-latest-Linux-`uname -p`.sh"
+- "sudo apt-get -qq install liblapack-dev gfortran"
+- "pip install coverage nose"
 - "pip install -r requirements.txt"
 - "PATH=/root/miniconda2/bin:$PATH"
 - "RUN conda install -y \ h5py \ pandas \ theano \ && conda clean --yes --tarballs --packages --source-cache \ && pip install --upgrade -I setuptools \ && pip install --upgrade \ keras"
