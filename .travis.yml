@@ -13,6 +13,7 @@ before_install:
 #  && rm Miniconda-latest-Linux-`uname -p`.sh"
 - "sudo apt-get -qq install liblapack-dev gfortran"
 - "pip install coverage nose"
+- "pip install -q scipy"  # Install this one seperately otherwise travis-ci times out on installing requirements.
 - "pip install -qr requirements.txt"
 #- "PATH=/root/miniconda2/bin:$PATH"
 #- "RUN conda install -y \ h5py \ pandas \ theano \ && conda clean --yes --tarballs --packages --source-cache \ && pip install --upgrade -I setuptools \ && pip install --upgrade \ keras"
