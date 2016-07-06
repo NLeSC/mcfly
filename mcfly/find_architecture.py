@@ -1,10 +1,17 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from . import modelgen
-
-
+# Summary:
+# Function generate_models from modelgen.py generates and compiles models
+# Function train_models_on_samples trains those models
+# Function plotTrainingProcess plots the training process
+# Function find_best_architecture is wrapper function that combines
+# these steps
+# Example function calls in 'EvaluateDifferentModels.ipynb'
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             nr_epochs=5, subsize_set=100, verbose=True):
+    #<= subsize_set maybe needs to be a percentage or at least a check that
+    # value is feasible
     '''
     Given a list of compiled models, this function trains
     them all on a subset of the train data
@@ -36,7 +43,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     val_losses : list of floats
         validation losses of the models
     '''
-    nr_epochs = 5
+    nr_epochs = 5 #<= this line should be omitted as it overwrites args!
     X_train_sub = X_train[:subsize_set, :, :]
     y_train_sub = y_train[:subsize_set, :]
 
@@ -45,7 +52,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     val_losses = []
     for model, params, model_types in models:
         history = model.fit(X_train_sub, y_train_sub,
-                            nb_epoch=nr_epochs, batch_size=20,
+                            nb_epoch=nr_epochs, batch_size=20, #<= see comment on subsize_set
                             validation_data=(X_val, y_val),
                             verbose=verbose)
         histories.append(history)
@@ -56,14 +63,15 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
 
 
 def plotTrainingProcess(history, name='Model', ax=None):
+    # text made specific to one model
     '''
     This function plots the loss and accuracy on the train and validation set,
-    for each epoch in the history.
+    for each epoch in the history of one model.
 
     Parameters
     ----------
-    history : keras History object
-        The history object of the training process
+    history : keras History object for one model
+        The history object of the training process corresponding to one model
     Returns
     ----------
 
@@ -130,7 +138,8 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
     best_model_index = np.argmax(val_accuracies)
     best_model, best_params, best_model_type = models[best_model_index]
     if verbose:
-        for i in range(len(models)):
+        for i in range(len(models)): #<= now one plot per model, ultimately we
+            # may want all models in one plot to allow for direct comparison
             name = str(models[i][1])
             plotTrainingProcess(histories[i], name)
         print('Best model: model ', best_model_index)
