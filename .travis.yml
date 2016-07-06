@@ -1,5 +1,7 @@
 language: python
 
+cache: pip
+
 python:
 - "2.7"
 - "3.4"  
@@ -7,6 +9,7 @@ python:
 before_install:
 - "sudo apt-get -qq install liblapack-dev gfortran"
 - "pip install coverage nose"
+- "pip install -q numpy"
 - "pip install -q scipy"  # Install this one seperately otherwise travis-ci times out on installing requirements.
 - "pip install -qr requirements.txt"
 
