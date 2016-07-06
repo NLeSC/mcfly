@@ -7,17 +7,15 @@ python:
 - "3.4"  
 
 before_install:
-- "sudo apt-get -qq install liblapack-dev gfortran"
+- "sudo apt-get -qq install liblapack-dev python-numpy python-scipy python-sklearn"
 - "pip install coverage nose"
-- "pip install -q numpy"
-- "pip install -q scipy"  # Install this one seperately otherwise travis-ci times out on installing requirements.
 - "pip install -qr requirements.txt"
 
 install:
 - "echo done"
 
 # command to run tests, e.g. python setup.py test
-script: nosetests --with-coverage --cover-package=scripts,patty
+script: nosetests --with-coverage --cover-package=mcfly
 
 after_script:
 - "pip install scrutinizer-ocular"
