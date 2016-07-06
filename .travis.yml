@@ -9,7 +9,7 @@ python:
 before_install:
 - "sudo apt-get -qq install liblapack-dev python-numpy python-scipy python-sklearn"
 - "pip install coverage nose"
-- "pip install -qr requirements.txt"
+- "pip install -r requirements.txt"
 
 install:
 - "echo done"
