@@ -1,0 +1,22 @@
+language: python
+
+cache: pip
+
+python:
+- "2.7"
+- "3.4"  
+
+before_install:
+- "sudo apt-get -qq install liblapack-dev python-numpy python-scipy python-sklearn gfortran"
+- "pip install coverage nose"
+- "pip install -r requirements.txt"
+
+install:
+- "echo done"
+
+# command to run tests, e.g. python setup.py test
+script: nosetests --with-coverage --cover-package=mcfly
+
+after_script:
+- "pip install scrutinizer-ocular"
+- "ocular"
