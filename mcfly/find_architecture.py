@@ -1,7 +1,8 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from . import modelgen
-
+from sklearn import neighbors, metrics
+import warnings
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             nr_epochs=5, subsize_set=100, verbose=True):
@@ -117,18 +118,23 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
         Dictionary containing the hyperparameters for the best model
     best_model_type : str
         Type of the best model
+    knn_acc : float
+        accuaracy for kNN prediction on validation set
     '''
     models = modelgen.generate_models(X_train.shape, y_train.shape[1],
                                       number_of_models=number_of_models,
                                       **kwargs)
+    subsize_set = 100
     histories, val_accuracies, val_losses = train_models_on_samples(X_train,
                                                                     y_train,
                                                                     X_val,
                                                                     y_val,
                                                                     models,
+                                                                    subsize_set=subsize_set,
                                                                     verbose=verbose)
     best_model_index = np.argmax(val_accuracies)
     best_model, best_params, best_model_type = models[best_model_index]
+    knn_acc = kNN_accuracy(X_train[:subsize_set, :, :], y_train[:subsize_set, :], X_val, y_val)
     if verbose:
         for i in range(len(models)):
             name = str(models[i][1])
@@ -136,5 +142,20 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
         print('Best model: model ', best_model_index)
         print('Model type: ', best_model_type)
         print('Hyperparameters: ', best_params)
-        print('Accuracy on train set: ', val_accuracies[best_model_index])
-    return best_model, best_params, best_model_type
+        print('Accuracy on validation set: ', val_accuracies[best_model_index])
+        print('Accuracy of kNN on validation set', knn_acc)
+
+    if val_accuracies[best_model_index] < knn_acc:
+        warnings.warn('Best model not beter than kNN: ' +
+                      str(val_accuracies[best_model_index]) + ' vs  ' +
+                      str(knn_acc))
+    return best_model, best_params, best_model_type, knn_acc
+
+
+def kNN_accuracy(X_train, y_train, X_val, y_val, k=1):
+    num_samples, num_timesteps, num_channels = X_train.shape
+    clf = neighbors.KNeighborsClassifier(k)
+    clf.fit(X_train.reshape(num_samples, num_timesteps*num_channels), y_train)
+    num_samples, num_timesteps, num_channels = X_val.shape
+    val_predict = clf.predict(X_val.reshape(num_samples, num_timesteps*num_channels))
+    return metrics.accuracy_score(val_predict, y_val)
