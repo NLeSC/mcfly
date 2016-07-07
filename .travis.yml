@@ -19,7 +19,7 @@ before_install:
 - "pip install coverage nose"
 - "pip install 'six>=1.10.0'"
 - "pip install numpy"
-- "pip install 'scikit-learn>=0.10.0'"
+- "pip install 'scikit-learn>=0.15.0'"
 - "pip install matplotlib"
 - "pip install 'scipy>=0.9.0'"
 - "pip install 'Keras==1.0.3'"
