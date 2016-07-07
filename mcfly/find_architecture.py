@@ -16,11 +16,10 @@ import warnings
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             nr_epochs=5, subsize_set=100, verbose=True):
-    # TODO: subsize_set maybe needs to be a percentage or at least a check that
-    # value is feasible
     '''
     Given a list of compiled models, this function trains
-    them all on a subset of the train data
+    them all on a subset of the train data. If the given size of the subset is
+    smaller then the size of the data, the complete data set is used.
     Parameters
     ----------
     X_train : numpy array of shape (num_samples, num_timesteps, num_channels)
@@ -49,6 +48,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     val_losses : list of floats
         validation losses of the models
     '''
+    # if subset_size is smaller then X_train, this will work fine
     X_train_sub = X_train[:subsize_set, :, :]
     y_train_sub = y_train[:subsize_set, :]
 
@@ -101,7 +101,7 @@ def plotTrainingProcess(history, name='Model', ax=None):
 
 
 def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
-                           number_of_models=5, **kwargs):
+                           number_of_models=5, nr_epochs=5, **kwargs):
     '''
     Tries out a number of models on a subsample of the data,
     and outputs the best found architecture and hyperparameters.
@@ -141,6 +141,7 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                                                                     X_val,
                                                                     y_val,
                                                                     models,
+                                                                    nr_epochs,
                                                                     subsize_set=subsize_set,
                                                                     verbose=verbose)
     best_model_index = np.argmax(val_accuracies)
@@ -160,7 +161,8 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
     if val_accuracies[best_model_index] < knn_acc:
         warnings.warn('Best model not beter than kNN: ' +
                       str(val_accuracies[best_model_index]) + ' vs  ' +
-                      str(knn_acc))
+                      str(knn_acc)
+                      )
     return best_model, best_params, best_model_type, knn_acc
 
 
