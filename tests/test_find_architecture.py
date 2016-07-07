@@ -49,7 +49,7 @@ class FindArchitectureSuite(unittest.TestCase):
         X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
         y_val = to_categorical(np.array([0, 1, 1]))
         best_model, best_params, best_model_type, knn_acc = find_architecture.find_best_architecture(
-            X_train, y_train, X_val, y_val, verbose=True,
+            X_train, y_train, X_val, y_val, verbose=False,
             number_of_models=1, nr_epochs=1)
         assert hasattr(best_model, 'fit')
         self.assertIsNotNone(best_params)

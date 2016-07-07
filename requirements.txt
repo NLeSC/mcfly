@@ -1,8 +1,7 @@
-Keras==1.0.3
 matplotlib
 numpy
-scikit-learn>=0.10.0
-scipy>=0.9.0
+scikit-learn>=0.15.0
+scipy>=0.11
 six==1.10.0
 Theano==0.8.2
-
+Keras==1.0.3
