@@ -6,6 +6,9 @@ python:
 
 before_install:
 - "sudo apt-get -qq install liblapack-dev python-numpy python-scipy python-sklearn" # gfortran
+- "which pip"
+- "pip -V"
+- "pip show scipy"
 - "pip install coverage nose"
 - "pip install 'six>=1.10.0'"
 - "pip install numpy"
