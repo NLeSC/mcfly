@@ -9,8 +9,8 @@ python:
 
 before_install: 
 - "sudo apt-get -qq install liblapack-dev python-numpy python-scipy python3-scipy python-sklearn gfortran"
-- "pip install 'coverage>4' nose"
-- "pip install 'scikit-learn>=0.15.0'"  # So less time can be spent building requirements and Travis-ci wont time out
+- "pip install -q 'coverage>4' nose"
+- "pip install -q 'scikit-learn>=0.15.0'"  # So less time can be spent building requirements and Travis-ci wont time out
 - "pip install -qr requirements.txt"
 
 install:
