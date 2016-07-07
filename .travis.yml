@@ -6,7 +6,7 @@ python:
 
 before_install:
 - "which pip"
-- "sudo apt-get -qq install liblapack-dev python-numpy python-scipy python-sklearn pip" # gfortran
+- "sudo apt-get -qq install liblapack-dev python-numpy python-scipy python-sklearn python-pip" # gfortran
 - "which pip"
 - "pip -V"
 - "which python"
