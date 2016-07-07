@@ -28,4 +28,4 @@ checks:
             methods: '[a-z_][a-z0-9_]{2,30}$'
         classes_no_self_argument: true
         classes_bad_mcs_method_argument: true
-classes_bad_classmethod_argument: true
+        classes_bad_classmethod_argument: true
