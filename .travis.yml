@@ -7,9 +7,16 @@ python:
 - "3.4"  
 
 before_install:
-- "sudo apt-get -qq install liblapack-dev python-numpy python-scipy python-sklearn gfortran"
+- "sudo apt-get -qq install liblapack-dev python-numpy python-scipy python-sklearn" # gfortran
 - "pip install coverage nose"
-- "pip install -qr requirements.txt"
+- "pip install six==1.10.0"
+- "pip install numpy"
+- "pip install scikit-learn"
+- "pip install matplotlib"
+- "pip install scipy"
+- "pip install Keras==1.0.3"
+- "pip install Theano==0.8.2"
+- "pip install -r requirements.txt"
 
 install:
 - "echo done"
