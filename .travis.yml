@@ -1,9 +1,5 @@
 language: python
 
-filter:
-    excluded_paths:
-        - "tests/"
-
 python:
 - "2.7"
 - "3.2"  
