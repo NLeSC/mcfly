@@ -8,10 +8,16 @@ python:
 - "3.2"  
 
 before_install: 
-- "sudo apt-get -qq install liblapack-dev python-numpy python-scipy python3-scipy python-sklearn gfortran"
+- if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then       
+    wget http://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;       
+  else
+    wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh; 
+  fi
+- bash miniconda.sh -b -p $HOME/miniconda
+- export PATH="$HOME/miniconda/bin:$PATH"
+- conda install -q pip
 - "pip install -q nose"
 - "pip install 'coverage<4'"  # After 4, there is some issue when using python 3.2
-- "pip install -q 'scikit-learn>=0.15.0'"  # So less time can be spent building requirements and Travis-ci wont time out
 - "pip install -qr requirements.txt"
 
 install:
