@@ -38,7 +38,7 @@ def generate_DeepConvLSTM_model(x_shape, class_number, filters, lstm_dims, learn
     dim_length = x_shape[1] # number of samples in a time series
     dim_channels = x_shape[2] # number of channels
     output_dim = class_number # number of classes
-
+    weightinit = 'lecun_uniform' # weight initialization
     model = Sequential() # initialize model
     # reshape a 2 dimensional array per file/person/object into a
     # 3 dimensional array
@@ -48,7 +48,8 @@ def generate_DeepConvLSTM_model(x_shape, class_number, filters, lstm_dims, learn
         # filt: number of filters used in a layer
         # filters: vector of filt values
         model.add(
-            Convolution2D(filt, nb_row=3, nb_col=1, border_mode='same', W_regularizer=l2(regularization_rate)))
+            Convolution2D(filt, nb_row=3, nb_col=1, border_mode='same',
+             W_regularizer=l2(regularization_rate),init = weightinit))
         model.add(Activation('relu'))
     # reshape 3 dimensional array back into a 2 dimensional array,
     # but now with more dept as we have the the filters for each channel
@@ -81,20 +82,20 @@ def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes, learning
     dim_length = x_shape[1] # number of samples in a time series
     dim_channels = x_shape[2] # number of channels
     outputdim = class_number # number of classes
-
+    weightinit = 'lecun_uniform' # weight initialization
     model = Sequential()
-    # TODO: weight initialization (in layer constructor)
-    # TODO: regularation etc
     model.add(
         Convolution1D(filters[0], 3, border_mode='same', input_shape=(dim_length, dim_channels),
-                      W_regularizer=l2(regularization_rate)))
+                      W_regularizer=l2(regularization_rate),init = weightinit))
     for filter_number in filters[1:]:
-        model.add(Convolution1D(filter_number, 3, border_mode='same', W_regularizer=l2(regularization_rate)))
+        model.add(Convolution1D(filter_number, 3, border_mode='same',
+         W_regularizer=l2(regularization_rate),init = weightinit))
         model.add(Activation('relu'))
     model.add(Flatten())
-    model.add(Dense(output_dim=fc_hidden_nodes, W_regularizer=l2(regularization_rate)))  # Fully connected layer
+    model.add(Dense(output_dim=fc_hidden_nodes,
+     W_regularizer=l2(regularization_rate),init = weightinit))  # Fully connected layer
     model.add(Activation('relu'))  # Relu activation
-    model.add(Dense(output_dim=outputdim))
+    model.add(Dense(output_dim=outputdim,init = weightinit))
     model.add(Activation("softmax"))  # Final classification layer
 
     model.compile(loss='categorical_crossentropy',
