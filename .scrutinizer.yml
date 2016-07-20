@@ -4,7 +4,7 @@ tools:
 
 filter:
     excluded_paths:
-        - "tests/"
+        - "tests/*"
 
 checks:
     python:
