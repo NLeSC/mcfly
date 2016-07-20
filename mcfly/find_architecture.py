@@ -159,7 +159,7 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
         print('Accuracy of kNN on validation set', knn_acc)
 
     if val_accuracies[best_model_index] < knn_acc:
-        warnings.warn('Best model not beter than kNN: ' +
+        warnings.warn('Best model not better than kNN: ' +
                       str(val_accuracies[best_model_index]) + ' vs  ' +
                       str(knn_acc)
                       )
