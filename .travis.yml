@@ -1,7 +1,8 @@
 language: python
 
-virtualenv:
-  system_site_packages: true
+filter:
+    excluded_paths:
+        - "tests/"
 
 python:
 - "2.7"
