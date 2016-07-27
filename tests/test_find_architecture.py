@@ -37,6 +37,7 @@ class FindArchitectureSuite(unittest.TestCase):
         assert_almost_equal(acc, 0)
 
     def test_find_best_architecture(self):
+        """ Find_best_architecture should return a single model, parameters, type and valid knn accuracy."""
         num_timesteps = 100
         num_channels = 2
         num_samples_train = 5
@@ -54,7 +55,7 @@ class FindArchitectureSuite(unittest.TestCase):
         assert hasattr(best_model, 'fit')
         self.assertIsNotNone(best_params)
         self.assertIsNotNone(best_model_type)
-        assert knn_acc >= 0 and knn_acc <= 1
+        assert 1 >= knn_acc >= 0
 
     def setUp(self):
         np.random.seed(1234)
