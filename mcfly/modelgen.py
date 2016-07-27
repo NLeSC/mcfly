@@ -1,5 +1,5 @@
 from keras.models import Sequential
-from keras.layers import Dense, Activation, Convolution1D, Flatten, MaxPooling1D, Lambda, Convolution2D, Flatten, Reshape, LSTM, Dropout, TimeDistributed, Permute
+from keras.layers import Dense, Activation, Convolution1D, Flatten, MaxPooling1D, Lambda, Convolution2D, Flatten, Reshape, LSTM, Dropout, TimeDistributed, Permute, BatchNormalization
 from keras.regularizers import l2
 from keras.optimizers import Adam
 import numpy as np
@@ -84,12 +84,10 @@ def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes, learning
     outputdim = class_number # number of classes
     weightinit = 'lecun_uniform' # weight initialization
     model = Sequential()
-    model.add(
-        Convolution1D(filters[0], 3, border_mode='same', input_shape=(dim_length, dim_channels),
-                      W_regularizer=l2(regularization_rate),init = weightinit))
-    for filter_number in filters[1:]:
+    model.add(BatchNormalization(input_shape=(dim_length, dim_channels)))
+    for filter_number in filters:
         model.add(Convolution1D(filter_number, 3, border_mode='same',
-         W_regularizer=l2(regularization_rate),init = weightinit))
+                                W_regularizer=l2(regularization_rate),init = weightinit))
         model.add(Activation('relu'))
     model.add(Flatten())
     model.add(Dense(output_dim=fc_hidden_nodes,
