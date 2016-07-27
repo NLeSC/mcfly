@@ -5,6 +5,7 @@ tools:
 filter:
     excluded_paths:
         - "tests/*"
+        - "notebooks/*"
 
 checks:
     python:
