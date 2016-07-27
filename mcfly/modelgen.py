@@ -40,10 +40,11 @@ def generate_DeepConvLSTM_model(x_shape, class_number, filters, lstm_dims, learn
     output_dim = class_number  # number of classes
     weightinit = 'lecun_uniform'  # weight initialization
     model = Sequential()  # initialize model
+    model.add(BatchNormalization(input_shape=(dim_length, dim_channels)))
     # reshape a 2 dimensional array per file/person/object into a
     # 3 dimensional array
     model.add(
-        Reshape(target_shape=(1, dim_length, dim_channels), input_shape=(dim_length, dim_channels)))
+        Reshape(target_shape=(1, dim_length, dim_channels)))
     for filt in filters:
         # filt: number of filters used in a layer
         # filters: vector of filt values
