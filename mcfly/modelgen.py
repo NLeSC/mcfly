@@ -9,17 +9,17 @@ def generate_models(x_shape, number_of_classes, number_of_models=5, model_type=N
     """ Generate one or multiple Keras models with random (default), or predefined, hyperparameters."""
     models = []
     for _ in range(0, number_of_models):
-        if model_type == None: # random model choice:
+        if model_type is None:  # random model choice:
             current_model_type = 'CNN' if np.random.random(
             ) < 0.5 else 'DeepConvLSTM'
-        else: # user-defined model choice:
+        else:  # user-defined model choice:
             current_model_type = model_type
 
         if current_model_type == 'CNN':
-            generate_model = generate_CNN_model #object is a function
+            generate_model = generate_CNN_model  # object is a function
             generate_hyperparameter_set = generate_CNN_hyperparameter_set
         if current_model_type == 'DeepConvLSTM':
-            generate_model = generate_DeepConvLSTM_model #object is a function
+            generate_model = generate_DeepConvLSTM_model  # object is a function
             generate_hyperparameter_set = generate_DeepConvLSTM_hyperparameter_set
         hyperparameters = generate_hyperparameter_set(**kwargs)
         models.append(
@@ -35,11 +35,11 @@ def generate_DeepConvLSTM_model(x_shape, class_number, filters, lstm_dims, learn
 
     The compiled Keras model is returned.
     """
-    dim_length = x_shape[1] # number of samples in a time series
-    dim_channels = x_shape[2] # number of channels
-    output_dim = class_number # number of classes
-    weightinit = 'lecun_uniform' # weight initialization
-    model = Sequential() # initialize model
+    dim_length = x_shape[1]  # number of samples in a time series
+    dim_channels = x_shape[2]  # number of channels
+    output_dim = class_number  # number of classes
+    weightinit = 'lecun_uniform'  # weight initialization
+    model = Sequential()  # initialize model
     # reshape a 2 dimensional array per file/person/object into a
     # 3 dimensional array
     model.add(
@@ -49,7 +49,7 @@ def generate_DeepConvLSTM_model(x_shape, class_number, filters, lstm_dims, learn
         # filters: vector of filt values
         model.add(
             Convolution2D(filt, nb_row=3, nb_col=1, border_mode='same',
-             W_regularizer=l2(regularization_rate),init = weightinit))
+                          W_regularizer=l2(regularization_rate), init=weightinit))
         model.add(Activation('relu'))
     # reshape 3 dimensional array back into a 2 dimensional array,
     # but now with more dept as we have the the filters for each channel
@@ -59,7 +59,7 @@ def generate_DeepConvLSTM_model(x_shape, class_number, filters, lstm_dims, learn
         model.add(LSTM(output_dim=lstm_dim, return_sequences=True,
                        activation='tanh'))
 
-    model.add(Dropout(0.5)) #dropout before the dense layer
+    model.add(Dropout(0.5))  # dropout before the dense layer
     # set up final dense layer such that every timestamp is given one classification
     model.add(TimeDistributed(Dense(output_dim, W_regularizer=l2(regularization_rate))))
     model.add(Activation("softmax"))
@@ -73,27 +73,28 @@ def generate_DeepConvLSTM_model(x_shape, class_number, filters, lstm_dims, learn
     return model
 
 
-def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes, learning_rate=0.01, regularization_rate=0.01):
+def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes,
+                       learning_rate=0.01, regularization_rate=0.01):
     """
     Generate a convolutional neural network (CNN) model.
 
     The compiled Keras model is returned.
     """
-    dim_length = x_shape[1] # number of samples in a time series
-    dim_channels = x_shape[2] # number of channels
-    outputdim = class_number # number of classes
-    weightinit = 'lecun_uniform' # weight initialization
+    dim_length = x_shape[1]  # number of samples in a time series
+    dim_channels = x_shape[2]  # number of channels
+    outputdim = class_number  # number of classes
+    weightinit = 'lecun_uniform'  # weight initialization
     model = Sequential()
     model.add(BatchNormalization(input_shape=(dim_length, dim_channels)))
     for filter_number in filters:
         model.add(Convolution1D(filter_number, 3, border_mode='same',
-                                W_regularizer=l2(regularization_rate),init = weightinit))
+                                W_regularizer=l2(regularization_rate), init=weightinit))
         model.add(Activation('relu'))
     model.add(Flatten())
     model.add(Dense(output_dim=fc_hidden_nodes,
-     W_regularizer=l2(regularization_rate),init = weightinit))  # Fully connected layer
+                    W_regularizer=l2(regularization_rate), init=weightinit))  # Fully connected layer
     model.add(Activation('relu'))  # Relu activation
-    model.add(Dense(output_dim=outputdim,init = weightinit))
+    model.add(Dense(output_dim=outputdim, init=weightinit))
     model.add(Activation("softmax"))  # Final classification layer
 
     model.compile(loss='categorical_crossentropy',
@@ -146,6 +147,6 @@ def get_learning_rate(low=1, high=4):
     return result
 
 
-def get_regularization(low = 1, high = 4):
+def get_regularization(low=1, high=4):
     """ Return random regularization rate 10^-n where n is sampled uniformly between low and high bounds."""
     return 10**(-np.random.uniform(low, high))
