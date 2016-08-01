@@ -107,9 +107,10 @@ def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes,
 
 def generate_CNN_hyperparameter_set(min_layers=1, max_layers=10,
                                     min_filters=10, max_filters=100,
-                                    min_fc_nodes=10, max_fc_nodes=100):
+                                    min_fc_nodes=10, max_fc_nodes=100,
+                                    low_lr=1, high_lr=4, low_reg=1, high_reg=4):
     """ Generate a hyperparameter set that define a CNN model."""
-    hyperparameters = generate_base_hyper_parameter_set()
+    hyperparameters = generate_base_hyper_parameter_set(low_lr, high_lr, low_reg, high_reg)
     number_of_layers = np.random.randint(min_layers, max_layers)
     hyperparameters['filters'] = np.random.randint(
         min_filters, max_filters, number_of_layers)
@@ -122,9 +123,10 @@ def generate_DeepConvLSTM_hyperparameter_set(
     min_conv_layers=1, max_conv_layers=10,
     min_conv_filters=10, max_conv_filters=100,
     min_lstm_layers=1, max_lstm_layers=5,
-        min_lstm_dims=10, max_lstm_dims=100):
+        min_lstm_dims=10, max_lstm_dims=100,
+    low_lr=1, high_lr=4, low_reg=1, high_reg=4):
     """ Generate a hyperparameter set that defines a DeepConvLSTM model."""
-    hyperparameters = generate_base_hyper_parameter_set()
+    hyperparameters = generate_base_hyper_parameter_set(low_lr, high_lr, low_reg, high_reg)
     number_of_conv_layers = np.random.randint(min_conv_layers, max_conv_layers)
     hyperparameters['filters'] = np.random.randint(
         min_conv_filters, max_conv_filters, number_of_conv_layers)
@@ -134,11 +136,11 @@ def generate_DeepConvLSTM_hyperparameter_set(
     return hyperparameters
 
 
-def generate_base_hyper_parameter_set():
+def generate_base_hyper_parameter_set(low_lr=1, high_lr = 4, low_reg=1, high_reg=4):
     """ Generate a base set of hyperparameters that are necessary for any model, but sufficient for none."""
     hyperparameters = {}
-    hyperparameters['learning_rate'] = get_learning_rate()
-    hyperparameters['regularization_rate'] = get_regularization()
+    hyperparameters['learning_rate'] = get_learning_rate(low_lr, high_lr)
+    hyperparameters['regularization_rate'] = get_regularization(low_reg, high_reg)
     return hyperparameters
 
 
