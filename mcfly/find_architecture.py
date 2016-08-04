@@ -15,7 +15,7 @@ import warnings
 
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
-                            nr_epochs=5, subsize_set=100, verbose=True):
+                            nr_epochs=5, subset_size=100, verbose=True):
     '''
     Given a list of compiled models, this function trains
     them all on a subset of the train data. If the given size of the subset is
@@ -49,8 +49,8 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         validation losses of the models
     '''
     # if subset_size is smaller then X_train, this will work fine
-    X_train_sub = X_train[:subsize_set, :, :]
-    y_train_sub = y_train[:subsize_set, :]
+    X_train_sub = X_train[:subset_size, :, :]
+    y_train_sub = y_train[:subset_size, :]
 
     histories = []
     val_accuracies = []
@@ -101,7 +101,7 @@ def plotTrainingProcess(history, name='Model', ax=None):
 
 
 def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
-                           number_of_models=5, nr_epochs=5, **kwargs):
+                           number_of_models=5, nr_epochs=5, subset_size=100, **kwargs):
     '''
     Tries out a number of models on a subsample of the data,
     and outputs the best found architecture and hyperparameters.
@@ -135,18 +135,17 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
     models = modelgen.generate_models(X_train.shape, y_train.shape[1],
                                       number_of_models=number_of_models,
                                       **kwargs)
-    subsize_set = 100
     histories, val_accuracies, val_losses = train_models_on_samples(X_train,
                                                                     y_train,
                                                                     X_val,
                                                                     y_val,
                                                                     models,
                                                                     nr_epochs,
-                                                                    subsize_set=subsize_set,
+                                                                    subset_size=subset_size,
                                                                     verbose=verbose)
     best_model_index = np.argmax(val_accuracies)
     best_model, best_params, best_model_type = models[best_model_index]
-    knn_acc = kNN_accuracy(X_train[:subsize_set, :, :], y_train[:subsize_set, :], X_val, y_val)
+    knn_acc = kNN_accuracy(X_train[:subset_size, :, :], y_train[:subset_size, :], X_val, y_val)
     if verbose:
         for i in range(len(models)): #<= now one plot per model, ultimately we
             # may want all models in one plot to allow for direct comparison
