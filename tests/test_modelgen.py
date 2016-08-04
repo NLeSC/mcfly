@@ -25,8 +25,14 @@ class ModelGenerationSuite(unittest.TestCase):
 
     def test_cnn_starts_with_batchnorm(self):
         """ CNN models should always start with a batch normalization layer. """
-        model = modelgen.generate_CNN_model((None, 3, 20), 2, [32, 32], 100)
+        model = modelgen.generate_CNN_model((None, 20, 3), 2, [32, 32], 100)
         assert_equal(str(type(model.layers[0])), "<class 'keras.layers.normalization.BatchNormalization'>", 'Wrong layer type.')
+
+    def test_cnn_batchnorm_dim(self):
+        "The output shape of the batchnorm should be (None, nr_timesteps, nr_filters)"
+        model = modelgen.generate_CNN_model((None, 20, 3), 2, [32, 32], 100)
+        batchnormlay = model.layers[2]
+        assert_equal(batchnormlay.output_shape, (None, 20, 32))
 
     def test_CNN_hyperparameters_nrlayers(self):
         """ Number of Conv layers from range [4, 4] should be 4. """
@@ -40,7 +46,7 @@ class ModelGenerationSuite(unittest.TestCase):
 
     def test_deepconvlstm_starts_with_batchnorm(self):
         """ DeepConvLSTM models should always start with a batch normalization layer. """
-        model = modelgen.generate_DeepConvLSTM_model((None, 3, 20), 2, [32, 32], [32, 32])
+        model = modelgen.generate_DeepConvLSTM_model((None, 20, 3), 2, [32, 32], [32, 32])
         assert_equal(str(type(model.layers[0])), "<class 'keras.layers.normalization.BatchNormalization'>",
                      'Wrong layer type.')
 

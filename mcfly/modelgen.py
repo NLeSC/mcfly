@@ -192,16 +192,18 @@ def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes,
     outputdim = class_number  # number of classes
     weightinit = 'lecun_uniform'  # weight initialization
     model = Sequential()
-    model.add(BatchNormalization(input_shape=(dim_length, dim_channels)))
+    model.add(BatchNormalization(input_shape=(dim_length, dim_channels), mode=0, axis=2))
     for filter_number in filters:
         model.add(Convolution1D(filter_number, 3, border_mode='same',
                                 W_regularizer=l2(regularization_rate), init=weightinit))
+        model.add(BatchNormalization())
         model.add(Activation('relu'))
     model.add(Flatten())
     model.add(Dense(output_dim=fc_hidden_nodes,
                     W_regularizer=l2(regularization_rate), init=weightinit))  # Fully connected layer
     model.add(Activation('relu'))  # Relu activation
     model.add(Dense(output_dim=outputdim, init=weightinit))
+    model.add(BatchNormalization())
     model.add(Activation("softmax"))  # Final classification layer
 
     model.compile(loss='categorical_crossentropy',

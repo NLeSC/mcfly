@@ -38,6 +38,7 @@ class FindArchitectureSuite(unittest.TestCase):
 
     def test_find_best_architecture(self):
         """ Find_best_architecture should return a single model, parameters, type and valid knn accuracy."""
+        np.random.seed(123)
         num_timesteps = 100
         num_channels = 2
         num_samples_train = 5
