@@ -16,7 +16,7 @@ import warnings
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             nr_epochs=5, subset_size=100, verbose=True):
-    '''
+    """
     Given a list of compiled models, this function trains
     them all on a subset of the train data. If the given size of the subset is
     smaller then the size of the data, the complete data set is used.
@@ -47,7 +47,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         validation accuraracies of the models
     val_losses : list of floats
         validation losses of the models
-    '''
+    """
     # if subset_size is smaller then X_train, this will work fine
     X_train_sub = X_train[:subset_size, :, :]
     y_train_sub = y_train[:subset_size, :]
@@ -68,7 +68,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
 
 
 def plotTrainingProcess(history, name='Model', ax=None):
-    '''
+    """
     This function plots the loss and accuracy on the train and validation set,
     for each epoch in the history of one model.
 
@@ -79,7 +79,7 @@ def plotTrainingProcess(history, name='Model', ax=None):
     Returns
     ----------
 
-    '''
+    """
     if ax is None:
         fig, ax = plt.subplots()
     ax2 = ax.twinx()
@@ -101,8 +101,10 @@ def plotTrainingProcess(history, name='Model', ax=None):
 
 
 def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
-                           number_of_models=5, nr_epochs=5, subset_size=100, **kwargs):
-    '''
+                           number_of_models=5, nr_epochs=5, subset_size=100,
+                           **kwargs
+                           ):
+    """
     Tries out a number of models on a subsample of the data,
     and outputs the best found architecture and hyperparameters.
 
@@ -119,7 +121,7 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
     verbose : bool, optional
         flag for displaying verbose output
     **kwargs: key-value parameters
-        parameters for generating the models
+        parameters for generating the models (see docstring for modelgen.generate_models)
 
     Returns
     ----------
@@ -131,7 +133,7 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
         Type of the best model
     knn_acc : float
         accuaracy for kNN prediction on validation set
-    '''
+    """
     models = modelgen.generate_models(X_train.shape, y_train.shape[1],
                                       number_of_models=number_of_models,
                                       **kwargs)
