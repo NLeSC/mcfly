@@ -34,6 +34,8 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         List of keras models to train
     nr_epochs : int, optional
         nr of epochs to use for training one model
+    subset_size :
+        The number of samples used from the complete train set
     subsize_set : int, optional
         number of samples to use from the training set for training these models
     verbose : bool, optional
@@ -57,7 +59,8 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     val_losses = []
     for model, params, model_types in models:
         history = model.fit(X_train_sub, y_train_sub,
-                            nb_epoch=nr_epochs, batch_size=20, # see comment on subsize_set
+                            nb_epoch=nr_epochs, batch_size=20,
+                            # see comment on subsize_set
                             validation_data=(X_val, y_val),
                             verbose=verbose)
         histories.append(history)
@@ -76,8 +79,6 @@ def plotTrainingProcess(history, name='Model', ax=None):
     ----------
     history : keras History object for one model
         The history object of the training process corresponding to one model
-    Returns
-    ----------
 
     """
     if ax is None:
@@ -120,6 +121,12 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
         The output classes for the validation data, in binary format
     verbose : bool, optional
         flag for displaying verbose output
+    number_of_models : int
+        The number of models to generate and test
+    nr_epochs : int
+        The number of epochs that each model is trained
+    subset_size : int
+        The size of the subset of the data that is used for finding the optimal architecture
     **kwargs: key-value parameters
         parameters for generating the models (see docstring for modelgen.generate_models)
 
@@ -147,9 +154,10 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                                                                     verbose=verbose)
     best_model_index = np.argmax(val_accuracies)
     best_model, best_params, best_model_type = models[best_model_index]
-    knn_acc = kNN_accuracy(X_train[:subset_size, :, :], y_train[:subset_size, :], X_val, y_val)
+    knn_acc = kNN_accuracy(
+        X_train[:subset_size, :, :], y_train[:subset_size, :], X_val, y_val)
     if verbose:
-        for i in range(len(models)): #<= now one plot per model, ultimately we
+        for i in range(len(models)):  # <= now one plot per model, ultimately we
             # may want all models in one plot to allow for direct comparison
             name = str(models[i][1])
             plotTrainingProcess(histories[i], name)
@@ -168,9 +176,37 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
 
 
 def kNN_accuracy(X_train, y_train, X_val, y_val, k=1):
+    """
+    Performs k-Neigherst Neighbors and returns the accuracy score.
+
+    Parameters
+    ----------
+    X_train : numpy array
+        Train set of shape (num_samples, num_timesteps, num_channels)
+    y_train : numpy array
+        Class labels for train set
+    X_val : numpy array
+        Validation set of shape (num_samples, num_timesteps, num_channels)
+    y_val : numpy array
+        Class labels for validation set
+    k : int
+        number of neighbors to use for classifying
+
+    Returns
+    -------
+    accuracy: float
+        accuracy score on the validation set
+    """
     num_samples, num_timesteps, num_channels = X_train.shape
     clf = neighbors.KNeighborsClassifier(k)
-    clf.fit(X_train.reshape(num_samples, num_timesteps*num_channels), y_train)
+    clf.fit(
+        X_train.reshape(
+            num_samples,
+            num_timesteps *
+            num_channels),
+        y_train)
     num_samples, num_timesteps, num_channels = X_val.shape
-    val_predict = clf.predict(X_val.reshape(num_samples, num_timesteps*num_channels))
+    val_predict = clf.predict(
+        X_val.reshape(num_samples,
+                      num_timesteps * num_channels))
     return metrics.accuracy_score(val_predict, y_val)
