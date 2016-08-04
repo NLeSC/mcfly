@@ -5,8 +5,71 @@ from keras.optimizers import Adam
 import numpy as np
 
 
-def generate_models(x_shape, number_of_classes, number_of_models=5, model_type=None, **kwargs):
-    """ Generate one or multiple Keras models with random (default), or predefined, hyperparameters."""
+def generate_models(
+    x_shape, number_of_classes, number_of_models=5, model_type=None,
+    cnn_min_layers=1, cnn_max_layers=10,
+    cnn_min_filters=10, cnn_max_filters=100,
+    cnn_min_fc_nodes=10, cnn_max_fc_nodes=100,
+    deepconvlstm_min_conv_layers=1, deepconvlstm_max_conv_layers=10,
+    deepconvlstm_min_conv_filters=10, deepconvlstm_max_conv_filters=100,
+    deepconvlstm_min_lstm_layers=1, deepconvlstm_max_lstm_layers=5,
+    deepconvlstm_min_lstm_dims=10, deepconvlstm_max_lstm_dims=100,
+    low_lr=1, high_lr=4, low_reg=1, high_reg=4
+):
+    """
+    Generate one or multiple Keras models with random hyperparameters.
+
+    Parameters
+    ----------
+    x_shape
+        Shape of the input dataset: (num_samples, num_timesteps, num_channels)
+    number_of_classes
+        Number of classes for classification task
+    number_of_models
+        Number of models to generate
+    model_type : str (optional)
+        Type of model to build: 'CNN' or 'DeepConvLSTM'. Default option None generates both models.
+    cnn_min_layers : int
+        minimum of Conv layers in CNN model
+    cnn_max_layers : int
+        maximum of Conv layers in CNN model
+    cnn_min_filters : int
+        minimum number of filters per Conv layer in CNN model
+    cnn_max_filters : int
+        maximum number of filters per Conv layer in CNN model
+    cnn_min_fc_nodes : int
+        minimum number of hidden nodes per Dense layer in CNN model
+    cnn_max_fc_nodes : int
+        maximum number of hidden nodes per Dense layer in CNN model
+    deepconvlstm_min_conv_layers : int
+        minimum number of Conv layers in DeepConvLSTM model
+    deepconvlstm_max_conv_layers : int
+        maximum number of Conv layers in DeepConvLSTM model
+    deepconvlstm_min_conv_filters : int
+        minimum number of filters per Conv layer in DeepConvLSTM model
+    deepconvlstm_max_conv_filters : int
+        maximum number of filters per Conv layer in DeepConvLSTM model
+    deepconvlstm_min_lstm_layers : int
+        minimum number of Conv layers in DeepConvLSTM model
+    deepconvlstm_max_lstm_layers : int
+        maximum number of Conv layers in DeepConvLSTM model
+    deepconvlstm_min_lstm_dims : int
+        minimum number of hidden nodes per LSTM layer in DeepConvLSTM model
+    deepconvlstm_max_lstm_dims : int
+        maximum number of hidden nodes per LSTM layer in DeepConvLSTM model
+    low_lr : float
+        minimum of log range for learning rate: learning rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+    high_lr : float
+        maximum  of log range for learning rate: learning rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+    low_reg : float
+        minimum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+    high_reg : float
+        maximum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+
+    Returns
+    -------
+    List of compiled models
+    """
     models = []
     for _ in range(0, number_of_models):
         if model_type is None:  # random model choice:
@@ -14,26 +77,50 @@ def generate_models(x_shape, number_of_classes, number_of_models=5, model_type=N
             ) < 0.5 else 'DeepConvLSTM'
         else:  # user-defined model choice:
             current_model_type = model_type
-
+        generate_model = None
         if current_model_type == 'CNN':
             generate_model = generate_CNN_model  # object is a function
-            generate_hyperparameter_set = generate_CNN_hyperparameter_set
+            hyperparameters = generate_CNN_hyperparameter_set(
+                min_layers=cnn_min_layers, max_layers=cnn_max_layers,
+                min_filters=cnn_min_filters, max_filters=cnn_max_filters,
+                min_fc_nodes=cnn_min_fc_nodes, max_fc_nodes=cnn_max_fc_nodes,
+                low_lr=low_lr, high_lr=high_lr, low_reg=low_reg, high_reg=high_reg)
         if current_model_type == 'DeepConvLSTM':
             generate_model = generate_DeepConvLSTM_model  # object is a function
-            generate_hyperparameter_set = generate_DeepConvLSTM_hyperparameter_set
-        hyperparameters = generate_hyperparameter_set(**kwargs)
+            hyperparameters = generate_DeepConvLSTM_hyperparameter_set(
+                min_conv_layers=deepconvlstm_min_conv_layers, max_conv_layers=deepconvlstm_max_conv_layers,
+                min_conv_filters=deepconvlstm_min_conv_filters, max_conv_filters=deepconvlstm_max_conv_filters,
+                min_lstm_layers=deepconvlstm_min_lstm_layers, max_lstm_layers=deepconvlstm_max_lstm_layers,
+                min_lstm_dims=deepconvlstm_min_lstm_dims, max_lstm_dims=deepconvlstm_max_lstm_dims,
+                low_lr=low_lr, high_lr=high_lr, low_reg=low_reg, high_reg=high_reg)
         models.append(
             (generate_model(x_shape, number_of_classes, **hyperparameters), hyperparameters, current_model_type))
     return models
 
 
-def generate_DeepConvLSTM_model(x_shape, class_number, filters, lstm_dims, learning_rate=0.01,
-                                regularization_rate=0.01):
+def generate_DeepConvLSTM_model(
+    x_shape, class_number, filters, lstm_dims, learning_rate=0.01,
+        regularization_rate=0.01):
     """
     Generate a model with convolution and LSTM layers.
     See Ordonez et al., 2016, http://dx.doi.org/10.3390/s16010115
 
-    The compiled Keras model is returned.
+    Parameters
+    ----------
+    x_shape : tuple
+        Shape of the input dataset: (num_samples, num_timesteps, num_channels)
+    class_number : int
+        Number of classes for classification task
+    filters : list of ints
+        number of filters for each convolutional layer
+    lstm_dims : list of ints
+        number of hidden nodes for each LSTM layer
+    learning_rate : float
+    regularization_rate : float
+
+    Returns
+    -------
+    The compiled Keras model
     """
     dim_length = x_shape[1]  # number of samples in a time series
     dim_channels = x_shape[2]  # number of channels
@@ -61,8 +148,10 @@ def generate_DeepConvLSTM_model(x_shape, class_number, filters, lstm_dims, learn
                        activation='tanh'))
 
     model.add(Dropout(0.5))  # dropout before the dense layer
-    # set up final dense layer such that every timestamp is given one classification
-    model.add(TimeDistributed(Dense(output_dim, W_regularizer=l2(regularization_rate))))
+    # set up final dense layer such that every timestamp is given one
+    # classification
+    model.add(
+        TimeDistributed(Dense(output_dim, W_regularizer=l2(regularization_rate))))
     model.add(Activation("softmax"))
     # Final classification layer - per timestep
     model.add(Lambda(lambda x: x[:, -1, :], output_shape=[output_dim]))
@@ -80,6 +169,23 @@ def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes,
     Generate a convolutional neural network (CNN) model.
 
     The compiled Keras model is returned.
+
+    Parameters
+    ----------
+    x_shape : tuple
+        Shape of the input dataset: (num_samples, num_timesteps, num_channels)
+    class_number : int
+        Number of classes for classification task
+    filters : list of ints
+        number of filters for each convolutional layer
+    fc_hidden_nodes : int
+        number of hidden nodes for the hidden dense layer
+    learning_rate : float
+    regularization_rate : float
+
+    Returns
+    -------
+    The compiled Keras model
     """
     dim_length = x_shape[1]  # number of samples in a time series
     dim_channels = x_shape[2]  # number of channels
@@ -109,13 +215,43 @@ def generate_CNN_hyperparameter_set(min_layers=1, max_layers=10,
                                     min_filters=10, max_filters=100,
                                     min_fc_nodes=10, max_fc_nodes=100,
                                     low_lr=1, high_lr=4, low_reg=1, high_reg=4):
-    """ Generate a hyperparameter set that define a CNN model."""
-    hyperparameters = generate_base_hyper_parameter_set(low_lr, high_lr, low_reg, high_reg)
-    number_of_layers = np.random.randint(min_layers, max_layers)
+    """ Generate a hyperparameter set that define a CNN model.
+
+    Parameters
+    ----------
+    min_layers : int
+        minimum of Conv layers
+    max_layers : int
+        maximum of Conv layers
+    min_filters : int
+        minimum number of filters per Conv layer
+    max_filters : int
+        maximum number of filters per Conv layer
+    min_fc_nodes : int
+        minimum number of hidden nodes per Dense layer
+    max_fc_nodes : int
+        maximum number of hidden nodes per Dense layer
+    low_lr : float
+        minimum of log range for learning rate: learning rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+    high_lr : float
+        maximum  of log range for learning rate: learning rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+    low_reg : float
+        minimum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+    high_reg : float
+        maximum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+
+    Returns
+    ----------
+    hyperparameters : dict
+        parameters for a CNN model
+    """
+    hyperparameters = generate_base_hyper_parameter_set(
+        low_lr, high_lr, low_reg, high_reg)
+    number_of_layers = np.random.randint(min_layers, max_layers + 1)
     hyperparameters['filters'] = np.random.randint(
-        min_filters, max_filters, number_of_layers)
+        min_filters, max_filters + 1, number_of_layers)
     hyperparameters['fc_hidden_nodes'] = np.random.randint(
-        min_fc_nodes, max_fc_nodes)
+        min_fc_nodes, max_fc_nodes + 1)
     return hyperparameters
 
 
@@ -123,33 +259,107 @@ def generate_DeepConvLSTM_hyperparameter_set(
     min_conv_layers=1, max_conv_layers=10,
     min_conv_filters=10, max_conv_filters=100,
     min_lstm_layers=1, max_lstm_layers=5,
-        min_lstm_dims=10, max_lstm_dims=100,
-    low_lr=1, high_lr=4, low_reg=1, high_reg=4):
-    """ Generate a hyperparameter set that defines a DeepConvLSTM model."""
-    hyperparameters = generate_base_hyper_parameter_set(low_lr, high_lr, low_reg, high_reg)
-    number_of_conv_layers = np.random.randint(min_conv_layers, max_conv_layers)
+    min_lstm_dims=10, max_lstm_dims=100,
+        low_lr=1, high_lr=4, low_reg=1, high_reg=4):
+    """ Generate a hyperparameter set that defines a DeepConvLSTM model.
+
+    Parameters
+    ----------
+    min_conv_layers : int
+        minimum number of Conv layers in DeepConvLSTM model
+    max_conv_layers : int
+        maximum number of Conv layers in DeepConvLSTM model
+    min_conv_filters : int
+        minimum number of filters per Conv layer in DeepConvLSTM model
+    max_conv_filters : int
+        maximum number of filters per Conv layer in DeepConvLSTM model
+    min_lstm_layers : int
+        minimum number of Conv layers in DeepConvLSTM model
+    max_lstm_layers : int
+        maximum number of Conv layers in DeepConvLSTM model
+    min_lstm_dims : int
+        minimum number of hidden nodes per LSTM layer in DeepConvLSTM model
+    max_lstm_dims : int
+        maximum number of hidden nodes per LSTM layer in DeepConvLSTM model
+    low_lr : float
+        minimum of log range for learning rate: learning rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+    high_lr : float
+        maximum  of log range for learning rate: learning rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+    low_reg : float
+        minimum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+    high_reg : float
+        maximum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+
+    Returns
+    ----------
+    hyperparameters: dict
+        hyperparameters for a DeepConvLSTM model
+    """
+    hyperparameters = generate_base_hyper_parameter_set(
+        low_lr, high_lr, low_reg, high_reg)
+    number_of_conv_layers = np.random.randint(
+        min_conv_layers, max_conv_layers + 1)
     hyperparameters['filters'] = np.random.randint(
-        min_conv_filters, max_conv_filters, number_of_conv_layers)
-    number_of_lstm_layers = np.random.randint(min_lstm_layers, max_lstm_layers)
+        min_conv_filters, max_conv_filters + 1, number_of_conv_layers)
+    number_of_lstm_layers = np.random.randint(
+        min_lstm_layers, max_lstm_layers + 1)
     hyperparameters['lstm_dims'] = np.random.randint(
-        min_lstm_dims, max_lstm_dims, number_of_lstm_layers)
+        min_lstm_dims, max_lstm_dims + 1, number_of_lstm_layers)
     return hyperparameters
 
 
-def generate_base_hyper_parameter_set(low_lr=1, high_lr = 4, low_reg=1, high_reg=4):
-    """ Generate a base set of hyperparameters that are necessary for any model, but sufficient for none."""
+def generate_base_hyper_parameter_set(
+    low_lr=1,
+    high_lr=4,
+    low_reg=1,
+        high_reg=4):
+    """ Generate a base set of hyperparameters that are necessary for any model, but sufficient for none.
+
+    Parameters
+    ----------
+    low_lr : float
+        minimum of log range for learning rate: learning rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+    high_lr : float
+        maximum  of log range for learning rate: learning rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+    low_reg : float
+        minimum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+    high_reg : float
+        maximum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+
+    Returns
+    -------
+    hyperparameters : dict
+        basis hyperpameters
+    """
     hyperparameters = {}
     hyperparameters['learning_rate'] = get_learning_rate(low_lr, high_lr)
-    hyperparameters['regularization_rate'] = get_regularization(low_reg, high_reg)
+    hyperparameters['regularization_rate'] = get_regularization(
+        low_reg, high_reg)
     return hyperparameters
 
 
 def get_learning_rate(low=1, high=4):
-    """ Return random learning rate 10^-n where n is sampled uniformly between low and high bounds."""
+    """ Return random learning rate 10^-n where n is sampled uniformly between low and high bounds.
+
+    Parameters
+    ----------
+    low : float
+        low bound
+    high : float
+        high bound
+    """
     result = 10 ** (-np.random.uniform(low, high))
     return result
 
 
 def get_regularization(low=1, high=4):
-    """ Return random regularization rate 10^-n where n is sampled uniformly between low and high bounds."""
-    return 10**(-np.random.uniform(low, high))
+    """ Return random regularization rate 10^-n where n is sampled uniformly between low and high bounds.
+
+    Parameters
+    ----------
+    low : float
+        low bound
+    high : float
+        high bound
+    """
+    return 10 ** (-np.random.uniform(low, high))

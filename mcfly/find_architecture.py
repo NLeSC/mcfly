@@ -15,8 +15,8 @@ import warnings
 
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
-                            nr_epochs=5, subsize_set=100, verbose=True):
-    '''
+                            nr_epochs=5, subset_size=100, verbose=True):
+    """
     Given a list of compiled models, this function trains
     them all on a subset of the train data. If the given size of the subset is
     smaller then the size of the data, the complete data set is used.
@@ -34,6 +34,8 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         List of keras models to train
     nr_epochs : int, optional
         nr of epochs to use for training one model
+    subset_size :
+        The number of samples used from the complete train set
     subsize_set : int, optional
         number of samples to use from the training set for training these models
     verbose : bool, optional
@@ -47,17 +49,18 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         validation accuraracies of the models
     val_losses : list of floats
         validation losses of the models
-    '''
+    """
     # if subset_size is smaller then X_train, this will work fine
-    X_train_sub = X_train[:subsize_set, :, :]
-    y_train_sub = y_train[:subsize_set, :]
+    X_train_sub = X_train[:subset_size, :, :]
+    y_train_sub = y_train[:subset_size, :]
 
     histories = []
     val_accuracies = []
     val_losses = []
     for model, params, model_types in models:
         history = model.fit(X_train_sub, y_train_sub,
-                            nb_epoch=nr_epochs, batch_size=20, # see comment on subsize_set
+                            nb_epoch=nr_epochs, batch_size=20,
+                            # see comment on subsize_set
                             validation_data=(X_val, y_val),
                             verbose=verbose)
         histories.append(history)
@@ -68,7 +71,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
 
 
 def plotTrainingProcess(history, name='Model', ax=None):
-    '''
+    """
     This function plots the loss and accuracy on the train and validation set,
     for each epoch in the history of one model.
 
@@ -76,10 +79,8 @@ def plotTrainingProcess(history, name='Model', ax=None):
     ----------
     history : keras History object for one model
         The history object of the training process corresponding to one model
-    Returns
-    ----------
 
-    '''
+    """
     if ax is None:
         fig, ax = plt.subplots()
     ax2 = ax.twinx()
@@ -101,8 +102,10 @@ def plotTrainingProcess(history, name='Model', ax=None):
 
 
 def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
-                           number_of_models=5, nr_epochs=5, **kwargs):
-    '''
+                           number_of_models=5, nr_epochs=5, subset_size=100,
+                           **kwargs
+                           ):
+    """
     Tries out a number of models on a subsample of the data,
     and outputs the best found architecture and hyperparameters.
 
@@ -118,8 +121,14 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
         The output classes for the validation data, in binary format
     verbose : bool, optional
         flag for displaying verbose output
+    number_of_models : int
+        The number of models to generate and test
+    nr_epochs : int
+        The number of epochs that each model is trained
+    subset_size : int
+        The size of the subset of the data that is used for finding the optimal architecture
     **kwargs: key-value parameters
-        parameters for generating the models
+        parameters for generating the models (see docstring for modelgen.generate_models)
 
     Returns
     ----------
@@ -131,24 +140,24 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
         Type of the best model
     knn_acc : float
         accuaracy for kNN prediction on validation set
-    '''
+    """
     models = modelgen.generate_models(X_train.shape, y_train.shape[1],
                                       number_of_models=number_of_models,
                                       **kwargs)
-    subsize_set = 100
     histories, val_accuracies, val_losses = train_models_on_samples(X_train,
                                                                     y_train,
                                                                     X_val,
                                                                     y_val,
                                                                     models,
                                                                     nr_epochs,
-                                                                    subsize_set=subsize_set,
+                                                                    subset_size=subset_size,
                                                                     verbose=verbose)
     best_model_index = np.argmax(val_accuracies)
     best_model, best_params, best_model_type = models[best_model_index]
-    knn_acc = kNN_accuracy(X_train[:subsize_set, :, :], y_train[:subsize_set, :], X_val, y_val)
+    knn_acc = kNN_accuracy(
+        X_train[:subset_size, :, :], y_train[:subset_size, :], X_val, y_val)
     if verbose:
-        for i in range(len(models)): #<= now one plot per model, ultimately we
+        for i in range(len(models)):  # <= now one plot per model, ultimately we
             # may want all models in one plot to allow for direct comparison
             name = str(models[i][1])
             plotTrainingProcess(histories[i], name)
@@ -167,9 +176,37 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
 
 
 def kNN_accuracy(X_train, y_train, X_val, y_val, k=1):
+    """
+    Performs k-Neigherst Neighbors and returns the accuracy score.
+
+    Parameters
+    ----------
+    X_train : numpy array
+        Train set of shape (num_samples, num_timesteps, num_channels)
+    y_train : numpy array
+        Class labels for train set
+    X_val : numpy array
+        Validation set of shape (num_samples, num_timesteps, num_channels)
+    y_val : numpy array
+        Class labels for validation set
+    k : int
+        number of neighbors to use for classifying
+
+    Returns
+    -------
+    accuracy: float
+        accuracy score on the validation set
+    """
     num_samples, num_timesteps, num_channels = X_train.shape
     clf = neighbors.KNeighborsClassifier(k)
-    clf.fit(X_train.reshape(num_samples, num_timesteps*num_channels), y_train)
+    clf.fit(
+        X_train.reshape(
+            num_samples,
+            num_timesteps *
+            num_channels),
+        y_train)
     num_samples, num_timesteps, num_channels = X_val.shape
-    val_predict = clf.predict(X_val.reshape(num_samples, num_timesteps*num_channels))
+    val_predict = clf.predict(
+        X_val.reshape(num_samples,
+                      num_timesteps * num_channels))
     return metrics.accuracy_score(val_predict, y_val)
