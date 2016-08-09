@@ -2,7 +2,7 @@ from mcfly import find_architecture
 import numpy as np
 from nose.tools import assert_equal, assert_equals, assert_almost_equal
 from keras.utils.np_utils import to_categorical
-
+import os
 import unittest
 
 
@@ -60,6 +60,26 @@ class FindArchitectureSuite(unittest.TestCase):
 
     def setUp(self):
         np.random.seed(1234)
+
+    def test_storetrainhist2json(self):
+            """
+            The code should produce a json file
+            """
+            params = {'fc_hidden_nodes': 1, 'learning_rate': 1,
+                        'regularization_rate': 0,
+                        'filters': np.array([1, 1])}
+            history = {'loss': [1, 1], 'acc': [0, 0],
+                        'val_loss': [1, 1], 'val_acc': [0, 0]}
+            model_type = 'ABC'
+            outputpath = os.getcwd() # get current working directory
+            find_architecture.storetrainhist2json(params, model_type, history, outputpath)
+            filename = outputpath + '/modelshistory.json'
+            test = os.path.isfile(filename)
+            if test is True:
+                os.remove(filename)
+            assert test
+
+
 
 if __name__ == '__main__':
     unittest.main()
