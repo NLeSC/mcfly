@@ -9,7 +9,7 @@ def generate_models(
     x_shape, number_of_classes, number_of_models=5, model_type=None,
     cnn_min_layers=1, cnn_max_layers=10,
     cnn_min_filters=10, cnn_max_filters=100,
-    cnn_min_fc_nodes=10, cnn_max_fc_nodes=100,
+    cnn_min_fc_nodes=10, cnn_max_fc_nodes=2000,
     deepconvlstm_min_conv_layers=1, deepconvlstm_max_conv_layers=10,
     deepconvlstm_min_conv_filters=10, deepconvlstm_max_conv_filters=100,
     deepconvlstm_min_lstm_layers=1, deepconvlstm_max_lstm_layers=5,
@@ -216,7 +216,7 @@ def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes,
 
 def generate_CNN_hyperparameter_set(min_layers=1, max_layers=10,
                                     min_filters=10, max_filters=100,
-                                    min_fc_nodes=10, max_fc_nodes=100,
+                                    min_fc_nodes=10, max_fc_nodes=2000,
                                     low_lr=1, high_lr=4, low_reg=1, high_reg=4):
     """ Generate a hyperparameter set that define a CNN model.
 
