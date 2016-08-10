@@ -138,6 +138,7 @@ def generate_DeepConvLSTM_model(
         model.add(
             Convolution2D(filt, nb_row=3, nb_col=1, border_mode='same',
                           W_regularizer=l2(regularization_rate), init=weightinit))
+        model.add(BatchNormalization())
         model.add(Activation('relu'))
     # reshape 3 dimensional array back into a 2 dimensional array,
     # but now with more dept as we have the the filters for each channel

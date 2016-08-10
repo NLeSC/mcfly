@@ -34,6 +34,12 @@ class ModelGenerationSuite(unittest.TestCase):
         batchnormlay = model.layers[2]
         assert_equal(batchnormlay.output_shape, (None, 20, 32))
 
+    def test_deepconvlstm_batchnorm_dim(self):
+        "The output shape of the batchnorm should be (None, nr_filters, nr_timesteps, nr_channels)"
+        model = modelgen.generate_DeepConvLSTM_model((None, 20, 3), 2, [32, 32], [32, 32])
+        batchnormlay = model.layers[3]
+        assert_equal(batchnormlay.output_shape, (None, 32, 20, 3))
+
     def test_CNN_hyperparameters_nrlayers(self):
         """ Number of Conv layers from range [4, 4] should be 4. """
         hyperparams = modelgen.generate_CNN_hyperparameter_set(min_layers=4, max_layers=4)
