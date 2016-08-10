@@ -59,7 +59,9 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     histories = []
     val_accuracies = []
     val_losses = []
-    for model, params, model_types in models:
+    for i, (model, params, model_types) in enumerate(models):
+        if verbose:
+            print('Training model %d'%i, model_types)
         history = model.fit(X_train_sub, y_train_sub,
                             nb_epoch=nr_epochs, batch_size=20,
                             # see comment on subsize_set
@@ -87,7 +89,9 @@ def storetrainhist2json(params, model_type, history, outputfile):
 
     """
     jsondata = params.copy()
-    jsondata['filters'] = jsondata['filters'].tolist()
+    for k in jsondata.keys():
+        if type(jsondata[k]) == np.ndarray:
+            jsondata[k] = jsondata[k].tolist()
     jsondata['train_acc'] = history['acc']
     jsondata['train_loss'] = history['loss']
     jsondata['val_acc'] = history['val_acc']

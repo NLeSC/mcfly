@@ -67,7 +67,9 @@ class FindArchitectureSuite(unittest.TestCase):
             """
             params = {'fc_hidden_nodes': 1, 'learning_rate': 1,
                         'regularization_rate': 0,
-                        'filters': np.array([1, 1])}
+                        'filters': np.array([1, 1]),
+                      'lstm_dims': np.array([1, 1])
+                      }
             history = {'loss': [1, 1], 'acc': [0, 0],
                         'val_loss': [1, 1], 'val_acc': [0, 0]}
             model_type = 'ABC'
@@ -77,6 +79,7 @@ class FindArchitectureSuite(unittest.TestCase):
             if test is True:
                 os.remove(filename)
             assert test
+
 
 
 
