@@ -17,7 +17,7 @@ import os
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             nr_epochs=5, subset_size=100, verbose=True,
-                            outputpath=None):
+                            outputfile=None):
     """
     Given a list of compiled models, this function trains
     them all on a subset of the train data. If the given size of the subset is
@@ -68,41 +68,39 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         histories.append(history)
         val_accuracies.append(history.history['val_acc'][-1])
         val_losses.append(history.history['val_loss'][-1])
-        if outputpath is not None:
-            storetrainhist2json(params, model_types, history.history, outputpath)
+        if outputfile is not None:
+            storetrainhist2json(params, model_types, history.history, outputfile)
     return histories, val_accuracies, val_losses
 
 
-def storetrainhist2json(params, model_type, history, outputpath):
+def storetrainhist2json(params, model_type, history, outputfile):
     """
     This function stores the model parameters, the loss and accuracy history
-    of one model.
+    of one model in a JSON file. It appends the model information to the existing models in the file.
 
     Parameters
     ----------
     params : dictionary with parameters for one model
     model_type : Keras model object for one model
     history : dictionary with training history from one model
-    outputpath : str of path where the json file needs to be stored
+    outputfile : str of path where the json file needs to be stored
 
     """
     jsondata = params.copy()
     jsondata['filters'] = jsondata['filters'].tolist()
-    jsondata['train_acc'] = history['acc'] #history.
-    jsondata['train_loss'] = history['loss'] #history.
-    jsondata['val_acc'] = history['val_acc'] #history.
-    jsondata['val_loss'] = history['val_loss'] #history.
+    jsondata['train_acc'] = history['acc']
+    jsondata['train_loss'] = history['loss']
+    jsondata['val_acc'] = history['val_acc']
+    jsondata['val_loss'] = history['val_loss']
     jsondata['modeltype'] = model_type
     jsondata['modeltype'] = model_type
-    filename = outputpath + '/modelshistory.json'
-    if os.path.isfile(filename):
-        with open(filename, 'r') as outfile:
+    if os.path.isfile(outputfile):
+        with open(outputfile, 'r') as outfile:
             previousdata = json.load(outfile)
     else:
         previousdata = []
     previousdata.append(jsondata)
-    print(jsondata)
-    with open(filename, 'w') as outfile:
+    with open(outputfile, 'w') as outfile:
             json.dump(previousdata, outfile, sort_keys = True, indent = 4,ensure_ascii=False)
 
 
@@ -188,7 +186,7 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                                                                     nr_epochs,
                                                                     subset_size=subset_size,
                                                                     verbose=verbose,
-                                                                    outputpath=outputpath)
+                                                                    outputfile=outputpath)
     best_model_index = np.argmax(val_accuracies)
     best_model, best_params, best_model_type = models[best_model_index]
     knn_acc = kNN_accuracy(
