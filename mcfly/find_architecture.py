@@ -1,4 +1,4 @@
-'''
+"""
  Summary:
  Function generate_models from modelgen.py generates and compiles models
  Function train_models_on_samples trains those models
@@ -6,7 +6,7 @@
  Function find_best_architecture is wrapper function that combines
  these steps
  Example function calls in 'EvaluateDifferentModels.ipynb'
-'''
+"""
 import numpy as np
 from matplotlib import pyplot as plt
 from . import modelgen
@@ -53,8 +53,8 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         validation losses of the models
     """
     # if subset_size is smaller then X_train, this will work fine
-    X_train_sub = X_train[:subset_size, :, :]
-    y_train_sub = y_train[:subset_size, :]
+    X_train_sub = X_train[:subset_size,:,:]
+    y_train_sub = y_train[:subset_size,:]
 
     histories = []
     val_accuracies = []
@@ -90,7 +90,7 @@ def storetrainhist2json(params, model_type, history, outputfile):
     """
     jsondata = params.copy()
     for k in jsondata.keys():
-        if type(jsondata[k]) == np.ndarray:
+        if isinstance(jsondata[k], np.ndarray):
             jsondata[k] = jsondata[k].tolist()
     jsondata['train_acc'] = history['acc']
     jsondata['train_loss'] = history['loss']
@@ -105,7 +105,7 @@ def storetrainhist2json(params, model_type, history, outputfile):
         previousdata = []
     previousdata.append(jsondata)
     with open(outputfile, 'w') as outfile:
-            json.dump(previousdata, outfile, sort_keys = True, indent = 4,ensure_ascii=False)
+            json.dump(previousdata, outfile, sort_keys = True, indent = 4, ensure_ascii=False)
 
 
 def plotTrainingProcess(history, name='Model', ax=None):
@@ -194,7 +194,7 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
     best_model_index = np.argmax(val_accuracies)
     best_model, best_params, best_model_type = models[best_model_index]
     knn_acc = kNN_accuracy(
-        X_train[:subset_size, :, :], y_train[:subset_size, :], X_val, y_val)
+        X_train[:subset_size,:,:], y_train[:subset_size,:], X_val, y_val)
     if verbose:
         for i in range(len(models)):  # <= now one plot per model, ultimately we
             # may want all models in one plot to allow for direct comparison

@@ -1,5 +1,6 @@
 from keras.models import Sequential
-from keras.layers import Dense, Activation, Convolution1D, Flatten, MaxPooling1D, Lambda, Convolution2D, Flatten, Reshape, LSTM, Dropout, TimeDistributed, Permute, BatchNormalization
+from keras.layers import Dense, Activation, Convolution1D, Lambda, Convolution2D, Flatten, \
+    Reshape, LSTM, Dropout, TimeDistributed, BatchNormalization
 from keras.regularizers import l2
 from keras.optimizers import Adam
 import numpy as np
@@ -60,11 +61,14 @@ def generate_models(
     low_lr : float
         minimum of log range for learning rate: learning rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
     high_lr : float
-        maximum  of log range for learning rate: learning rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+        maximum  of log range for learning rate: learning rate is sampled between `10**(-low_reg)`
+        and `10**(-high_reg)`
     low_reg : float
-        minimum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+        minimum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)`
+        and `10**(-high_reg)`
     high_reg : float
-        maximum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+        maximum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)`
+        and `10**(-high_reg)`
 
     Returns
     -------
@@ -193,7 +197,13 @@ def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes,
     outputdim = class_number  # number of classes
     weightinit = 'lecun_uniform'  # weight initialization
     model = Sequential()
-    model.add(BatchNormalization(input_shape=(dim_length, dim_channels), mode=0, axis=2))
+    model.add(
+        BatchNormalization(
+            input_shape=(
+                dim_length,
+                dim_channels),
+            mode=0,
+            axis=2))
     for filter_number in filters:
         model.add(Convolution1D(filter_number, 3, border_mode='same',
                                 W_regularizer=l2(regularization_rate), init=weightinit))
@@ -235,13 +245,17 @@ def generate_CNN_hyperparameter_set(min_layers=1, max_layers=10,
     max_fc_nodes : int
         maximum number of hidden nodes per Dense layer
     low_lr : float
-        minimum of log range for learning rate: learning rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+        minimum of log range for learning rate: learning rate is sampled between `10**(-low_reg)`
+        and `10**(-high_reg)`
     high_lr : float
-        maximum  of log range for learning rate: learning rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+        maximum  of log range for learning rate: learning rate is sampled between `10**(-low_reg)`
+        and `10**(-high_reg)`
     low_reg : float
-        minimum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+        minimum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)`
+        and `10**(-high_reg)`
     high_reg : float
-        maximum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+        maximum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)`
+        and `10**(-high_reg)`
 
     Returns
     ----------
@@ -285,13 +299,17 @@ def generate_DeepConvLSTM_hyperparameter_set(
     max_lstm_dims : int
         maximum number of hidden nodes per LSTM layer in DeepConvLSTM model
     low_lr : float
-        minimum of log range for learning rate: learning rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+        minimum of log range for learning rate: learning rate is sampled between `10**(-low_reg)`
+        and `10**(-high_reg)`
     high_lr : float
-        maximum  of log range for learning rate: learning rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+        maximum  of log range for learning rate: learning rate is sampled between `10**(-low_reg)`
+        and `10**(-high_reg)`
     low_reg : float
-        minimum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+        minimum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)`
+        and `10**(-high_reg)`
     high_reg : float
-        maximum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+        maximum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)`
+        and `10**(-high_reg)`
 
     Returns
     ----------
@@ -323,11 +341,14 @@ def generate_base_hyper_parameter_set(
     low_lr : float
         minimum of log range for learning rate: learning rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
     high_lr : float
-        maximum  of log range for learning rate: learning rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+        maximum  of log range for learning rate: learning rate is sampled between `10**(-low_reg)`
+        and `10**(-high_reg)`
     low_reg : float
-        minimum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+        minimum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)`
+        and `10**(-high_reg)`
     high_reg : float
-        maximum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)` and `10**(-high_reg)`
+        maximum  of log range for regularization rate: regularization rate is sampled between `10**(-low_reg)`
+        and `10**(-high_reg)`
 
     Returns
     -------
