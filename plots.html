@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>dc.js - Filtering Example</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/dc.css"/>
+</head>
+<body>
+
+<div class="container">
+<script type="text/javascript" src="header.js"></script>
+  <div id="val-chart" style="width:600px; height:300px">
+    <div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
+      <a href="javascript:valChart.filterAll();dc.redrawAll();">reset</a>
+    </div>
+  </div>
+  <div id="chart-modeltype" style="width:300px; height:300px">
+    <div class="reset" style="visibility: hidden;">range: <span class="filter"></span>
+      <a href="javascript:modeltypeChart.filterAll();dc.redrawAll();">reset</a>
+    </div>
+  </div>
+  <div id="chart-filters" style="width:300px; height:300px">
+    <div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
+      <a href="javascript:spenderRowChart.filterAll();dc.redrawAll();">reset</a>
+    </div>
+  </div>
+
+<script type="text/javascript" src="js/d3.js"></script>
+<script type="text/javascript" src="js/crossfilter.js"></script>
+<script type="text/javascript" src="js/dc.js"></script>
+<script type="text/javascript" src="js/reductio.js"></script>
+<script type="text/javascript">
+
+var valChart = dc.seriesChart("#val-chart"),
+    modeltypeChart  = dc.rowChart("#chart-modeltype"),
+    filterChart = dc.rowChart("#chart-filters");
+
+
+d3.json("flatdata.json", function(error, data) {
+    console.log(data); // this is your data
+
+	var ndx = crossfilter(data),
+	    runDimension = ndx.dimension(function(d) {return [+d.model, +d.iteration]; }),
+        runGroup = runDimension.group().reduceSum(function(d) { return +d.val_acc; }),
+        modeltypeDim = ndx.dimension(function(d){return d.modeltype;}),
+        nrconvlayersDim = ndx.dimension(function(d){return +d.nr_convlayers;}),
+        countPerModeltype = modeltypeDim.group().reduceCount(),
+        modelTypeGroup = modeltypeDim.group(),
+        convLayerGroup = nrconvlayersDim.group(),
+        accPerModeltype = modeltypeDim.group().reduceSum(function(d) {return d.final_val_acc;}),
+        //accPerConvlayer = convLayerGroup.reduceSum(function(d) {return d.final_val_acc;})
+        accPerConvlayer = reductio().avg(function(d){return +d.final_val_acc})(convLayerGroup)
+        ;
+    //accPerModeltype = reductio().avg(function(d){return +d.final_val_acc})(modelTypeGroup)
+
+    console.log(accPerModeltype.all());
+    console.log(accPerConvlayer.all());
+    console.log(accPerConvlayer);
+
+    //console.log(accPerConvlayer.all());
+    valChart
+      //.width(768)
+      //.height(480)
+      .chart(function(c) { return dc.lineChart(c); }) //.interpolate('basis')
+      .x(d3.scale.linear()) //.domain([0,15]))
+      .brushOn(false)
+      .yAxisLabel("Validation loss")
+      .xAxisLabel("Iteration")
+      .clipPadding(10)
+      .elasticY(true)
+      .elasticX(true)
+      .dimension(runDimension)
+      .group(runGroup)
+      .mouseZoomable(true)
+      .seriesAccessor(function(d) {return "Model " + d.key[0];})
+      .keyAccessor(function(d) {return +d.key[1];})
+      .valueAccessor(function(d) {return +d.value;})
+      .legend(dc.legend().x(350).y(350).itemHeight(13).gap(5).horizontal(1).legendWidth(140).itemWidth(70));
+
+    modeltypeChart
+      .margins({top: 20, left: 10, right: 10, bottom: 20})
+        .dimension(modeltypeDim)
+        .group(countPerModeltype)
+        //.x(d3.scale.linear().domain([0,10]))
+        .elasticX(true)
+        .controlsUseVisibility(true);
+
+	filterChart
+    .margins({top: 20, left: 10, right: 10, bottom: 20})
+      .dimension(nrconvlayersDim)
+      .group(accPerConvlayer)
+      .valueAccessor(function(d) {return +d.value.avg;})
+      //.x(d3.scale.linear().domain([0,10]))
+      .elasticX(true)
+      .controlsUseVisibility(true);
+
+	dc.renderAll();
+});
+
+
+
+</script>
+
+</div>
+</body>
+</html>
