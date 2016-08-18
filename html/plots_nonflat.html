@@ -15,24 +15,15 @@
       <a href="javascript:valChart.filterAll();dc.redrawAll();">reset</a>
     </div>
   </div>
-
-  <div class="row">
-    <h4>
-        Nr of models
-      <div id="chart-modeltype" style="width:300px; height:300px" class="span12">
-        <div class="reset" style="visibility: hidden;">range: <span class="filter"></span>
-          <a href="javascript:modeltypeChart.filterAll();dc.redrawAll();">reset</a>
-        </div>
-      </div>
-  </h4>
-      <h4>
-      <div class="span4" id="chart-filters" style="width:300px; height:300px">
-          Average accuracy per Nr of Conv layers
-        <div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
-          <a href="javascript:spenderRowChart.filterAll();dc.redrawAll();">reset</a>
-        </div>
-      </div>
-    </h4>
+  <div id="chart-modeltype" style="width:300px; height:300px">
+    <div class="reset" style="visibility: hidden;">range: <span class="filter"></span>
+      <a href="javascript:modeltypeChart.filterAll();dc.redrawAll();">reset</a>
+    </div>
+  </div>
+  <div id="chart-filters" style="width:300px; height:300px">
+    <div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
+      <a href="javascript:spenderRowChart.filterAll();dc.redrawAll();">reset</a>
+    </div>
   </div>
 
 <script type="text/javascript" src="js/d3.js"></script>
@@ -46,69 +37,90 @@ var valChart = dc.seriesChart("#val-chart"),
     filterChart = dc.rowChart("#chart-filters");
 
 
-d3.json("flatdata.json", function(error, data) {
+d3.json("data.json", function(error, data) {
     console.log(data); // this is your data
 
+    // Add some indices
+    for (var i=0; i<data.length; i++){
+        data[i].model = i;
+        var val_acc = {};
+        for (var j=0; j<data[i].val_acc.length; j++){
+            val_acc[j] = data[i].val_acc[j];
+        }
+        data[i].val_acc = val_acc;
+    }
+    console.log(data);
 	var ndx = crossfilter(data),
+        modelDimension = ndx.dimension(function(d) {return d.model;}),
+        iterationGroup = modelDimension.group().reduce(
+            //reduceAdd
+            function(a, d) {
+                for (var key in d.val_acc) {
+                    a[key] = d.val_acc[key];
+                }
+                return a;
+            },
+            //reduceRemove
+            function(a, d) {
+                return a;
+            },
+            //reduceInit
+            function() {
+                return {};
+            }
+        ),
 	    runDimension = ndx.dimension(function(d) {return [+d.model, +d.iteration]; }),
         runGroup = runDimension.group().reduceSum(function(d) { return +d.val_acc; }),
         modeltypeDim = ndx.dimension(function(d){return d.modeltype;}),
         nrconvlayersDim = ndx.dimension(function(d){return +d.nr_convlayers;}),
-        //countPerModeltype = modeltypeDim.group().reduceCount(),
-        countPerModeltype = reductio()
-                                .exception(function(d) {return d.model;})
-                                .exceptionCount(true)(modeltypeDim.group()),
+        countPerModeltype = modeltypeDim.group().reduceCount(),
         modelTypeGroup = modeltypeDim.group(),
         convLayerGroup = nrconvlayersDim.group(),
         accPerModeltype = modeltypeDim.group().reduceSum(function(d) {return d.final_val_acc;}),
-        //accPerConvlayer = reductio().max(function(d){return +d.final_val_acc})(convLayerGroup)
-        accPerConvlayer = reductio()
-                            .exception(function(d) {return d.model;})
-                            .exceptionCount(true)
-                            .exceptionSum(function(d) {return d.final_val_acc})(nrconvlayersDim.group())
+        //accPerConvlayer = convLayerGroup.reduceSum(function(d) {return d.final_val_acc;})
+        accPerConvlayer = reductio().avg(function(d){return +d.final_val_acc})(convLayerGroup)
         ;
     //accPerModeltype = reductio().avg(function(d){return +d.final_val_acc})(modelTypeGroup)
-
-    console.log(accPerModeltype.all());
-    console.log(accPerConvlayer.all());
-    console.log(countPerModeltype.all());
+    console.log(modelDimension.group());
+    console.log(iterationGroup);
+    console.log(iterationGroup.all());
+    //console.log(accPerModeltype.all());
+    //console.log(accPerConvlayer.all());
+    //console.log(accPerConvlayer);
 
     //console.log(accPerConvlayer.all());
     valChart
       //.width(768)
       //.height(480)
-      //.margins({top: 0, left: 10, right: 10, bottom: 20})
       .chart(function(c) { return dc.lineChart(c); }) //.interpolate('basis')
       .x(d3.scale.linear()) //.domain([0,15]))
       .brushOn(false)
-      .yAxisLabel("Validation accuracy")
+      .yAxisLabel("Validation loss")
       .xAxisLabel("Iteration")
-      //.clipPadding(10)
+      .clipPadding(10)
       .elasticY(true)
       .elasticX(true)
-      .dimension(runDimension)
-      .group(runGroup)
-      //.mouseZoomable(true)
-      .seriesAccessor(function(d) {return "Model " + d.key[0];})
-      .keyAccessor(function(d) {return +d.key[1];})
+      .dimension(modelDimension)
+      .group(iterationGroup)
+      .mouseZoomable(true)
+      .seriesAccessor(function(d) {return "Model " + d.key;})
+      .keyAccessor(function(d) {return +d.value;})
       .valueAccessor(function(d) {return +d.value;})
-      .controlsUseVisibility(true);
-      //.legend(dc.legend().x(-10).y(-10).itemHeight(13).gap(5).horizontal(1).legendWidth(140).itemWidth(70));
+      .legend(dc.legend().x(350).y(350).itemHeight(13).gap(5).horizontal(1).legendWidth(140).itemWidth(70));
 
     modeltypeChart
-      .margins({top: 0, left: 10, right: 10, bottom: 20})
+      .margins({top: 20, left: 10, right: 10, bottom: 20})
         .dimension(modeltypeDim)
         .group(countPerModeltype)
-         .valueAccessor(function(d) {return +d.value.exceptionCount;})
         //.x(d3.scale.linear().domain([0,10]))
         .elasticX(true)
         .controlsUseVisibility(true);
 
 	filterChart
-    .margins({top: 0, left: 10, right: 10, bottom: 20})
+    .margins({top: 20, left: 10, right: 10, bottom: 20})
       .dimension(nrconvlayersDim)
       .group(accPerConvlayer)
-      .valueAccessor(function(d) {return +(d.value.exceptionSum / d.value.exceptionCount);})
+      .valueAccessor(function(d) {return +d.value.avg;})
       //.x(d3.scale.linear().domain([0,10]))
       .elasticX(true)
       .controlsUseVisibility(true);
