@@ -15,6 +15,7 @@ import warnings
 import json
 import os
 
+
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             nr_epochs=5, subset_size=100, verbose=True,
                             outputfile=None):
@@ -39,9 +40,11 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     subset_size :
         The number of samples used from the complete train set
     subsize_set : int, optional
-        number of samples to use from the training set for training these models
+        number of samples to use from the training set for training the models
     verbose : bool, optional
         flag for displaying verbose output
+    outputfile : str, optional
+        File location to store the model results
 
     Returns
     ----------
@@ -71,14 +74,16 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         val_accuracies.append(history.history['val_acc'][-1])
         val_losses.append(history.history['val_loss'][-1])
         if outputfile is not None:
-            storetrainhist2json(params, model_types, history.history, outputfile)
+            storetrainhist2json(params, model_types,
+                                history.history, outputfile)
     return histories, val_accuracies, val_losses
 
 
 def storetrainhist2json(params, model_type, history, outputfile):
     """
     This function stores the model parameters, the loss and accuracy history
-    of one model in a JSON file. It appends the model information to the existing models in the file.
+    of one model in a JSON file. It appends the model information to the
+    existing models in the file.
 
     Parameters
     ----------
@@ -105,7 +110,8 @@ def storetrainhist2json(params, model_type, history, outputfile):
         previousdata = []
     previousdata.append(jsondata)
     with open(outputfile, 'w') as outfile:
-            json.dump(previousdata, outfile, sort_keys = True, indent = 4, ensure_ascii=False)
+            json.dump(previousdata, outfile, sort_keys = True,
+                      indent = 4, ensure_ascii=False)
 
 
 def plotTrainingProcess(history, name='Model', ax=None):
@@ -164,9 +170,11 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
     nr_epochs : int
         The number of epochs that each model is trained
     subset_size : int
-        The size of the subset of the data that is used for finding the optimal architecture
+        The size of the subset of the data that is used for finding
+        the optimal architecture
     **kwargs: key-value parameters
-        parameters for generating the models (see docstring for modelgen.generate_models)
+        parameters for generating the models
+        (see docstring for modelgen.generate_models)
 
     Returns
     ----------
@@ -196,7 +204,7 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
     knn_acc = kNN_accuracy(
         X_train[:subset_size,:,:], y_train[:subset_size,:], X_val, y_val)
     if verbose:
-        for i in range(len(models)):  # <= now one plot per model, ultimately we
+        for i in range(len(models)):  # now one plot per model, ultimately we
             # may want all models in one plot to allow for direct comparison
             name = str(models[i][1])
             plotTrainingProcess(histories[i], name)

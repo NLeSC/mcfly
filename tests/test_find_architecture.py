@@ -7,7 +7,6 @@ import unittest
 
 
 class FindArchitectureSuite(unittest.TestCase):
-
     """Basic test cases."""
 
     def test_kNN_accuracy_1(self):
@@ -62,25 +61,23 @@ class FindArchitectureSuite(unittest.TestCase):
         np.random.seed(1234)
 
     def test_storetrainhist2json(self):
-            """
-            The code should produce a json file
-            """
-            params = {'fc_hidden_nodes': 1, 'learning_rate': 1,
-                        'regularization_rate': 0,
-                        'filters': np.array([1, 1]),
-                      'lstm_dims': np.array([1, 1])
-                      }
-            history = {'loss': [1, 1], 'acc': [0, 0],
-                        'val_loss': [1, 1], 'val_acc': [0, 0]}
-            model_type = 'ABC'
-            filename = os.getcwd() + '/modelshistory.json' # get current working directory
-            find_architecture.storetrainhist2json(params, model_type, history, filename)
-            test = os.path.isfile(filename)
-            if test is True:
-                os.remove(filename)
-            assert test
-
-
+        """
+        The code should produce a json file
+        """
+        params = {'fc_hidden_nodes': 1, 'learning_rate': 1,
+                  'regularization_rate': 0,
+                  'filters': np.array([1, 1]),
+                  'lstm_dims': np.array([1, 1])
+                  }
+        history = {'loss': [1, 1], 'acc': [0, 0],
+                   'val_loss': [1, 1], 'val_acc': [0, 0]}
+        model_type = 'ABC'
+        filename = os.getcwd() + '/modelshistory.json'  # get current working directory
+        find_architecture.storetrainhist2json(params, model_type, history, filename)
+        test = os.path.isfile(filename)
+        if test is True:
+            os.remove(filename)
+        assert test
 
 
 if __name__ == '__main__':
