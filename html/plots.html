@@ -1,106 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <title>dc.js - Filtering Example</title>
+    <title>Charts on flat data</title>
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="css/dc.css"/>
 </head>
+
 <body>
 
 <div class="container">
 <script type="text/javascript" src="header.js"></script>
+
+<div class="row">
+
   <div id="val-chart" style="width:600px; height:300px">
     <div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
       <a href="javascript:valChart.filterAll();dc.redrawAll();">reset</a>
     </div>
   </div>
 
-  <div class="row">
-    <h4>
-        Nr of models
-      <div id="chart-modeltype" style="width:300px; height:300px" class="span12">
-        <div class="reset" style="visibility: hidden;">range: <span class="filter"></span>
-          <a href="javascript:modeltypeChart.filterAll();dc.redrawAll();">reset</a>
-        </div>
-      </div>
+  <h4>
+      Select model
   </h4>
-      <h4>
-      <div class="span4" id="chart-filters" style="width:300px; height:300px">
+    <div id="model-chart" style="width:300px; height:300px">
+      <div class="reset" style="visibility: hidden;">range: <span class="filter"></span>
+        <a href="javascript:modelChart.filterAll();dc.redrawAll();">reset</a>
+      </div>
+    </div>
+</div>
+
+<div class="row">
+    <div id="chart-modeltype" style="width:300px; height:300px">
+        <h4>
+            Nr of models
+        </h4>
+        <div class="reset" style="visibility: hidden;">range: <span class="filter"></span>
+            <a href="javascript:modeltypeChart.filterAll();dc.redrawAll();">reset</a>
+        </div>
+    </div>
+    <div id="chart-filters" style="width:300px; height:300px">
+        <h4>
           Average accuracy per Nr of Conv layers
+        </h4>
         <div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
-          <a href="javascript:spenderRowChart.filterAll();dc.redrawAll();">reset</a>
+          <a href="javascript:filterChart.filterAll();dc.redrawAll();">reset</a>
         </div>
       </div>
-    </h4>
-  </div>
+ </div>
 
 <script type="text/javascript" src="js/d3.js"></script>
 <script type="text/javascript" src="js/crossfilter.js"></script>
 <script type="text/javascript" src="js/dc.js"></script>
 <script type="text/javascript" src="js/reductio.js"></script>
+<script type="text/javascript" src="flattenJson.js"></script>
 <script type="text/javascript">
 
 var valChart = dc.seriesChart("#val-chart"),
+    modelChart = dc.rowChart("#model-chart"),
     modeltypeChart  = dc.rowChart("#chart-modeltype"),
     filterChart = dc.rowChart("#chart-filters");
 
 
-d3.json("flatdata.json", function(error, data) {
+d3.json("data.json", function(error, data) {
     console.log(data); // this is your data
+    data = flattenModels(data);
+    console.log(data);
+	var ndx = crossfilter(data);
 
-	var ndx = crossfilter(data),
-	    runDimension = ndx.dimension(function(d) {return [+d.model, +d.iteration]; }),
-        runGroup = runDimension.group().reduceSum(function(d) { return +d.val_acc; }),
-        modeltypeDim = ndx.dimension(function(d){return d.modeltype;}),
-        nrconvlayersDim = ndx.dimension(function(d){return +d.nr_convlayers;}),
-        //countPerModeltype = modeltypeDim.group().reduceCount(),
-        countPerModeltype = reductio()
-                                .exception(function(d) {return d.model;})
-                                .exceptionCount(true)(modeltypeDim.group()),
-        modelTypeGroup = modeltypeDim.group(),
-        convLayerGroup = nrconvlayersDim.group(),
-        accPerModeltype = modeltypeDim.group().reduceSum(function(d) {return d.final_val_acc;}),
-        //accPerConvlayer = reductio().max(function(d){return +d.final_val_acc})(convLayerGroup)
-        accPerConvlayer = reductio()
+    // First plot: iterations
+    var runDimension = ndx.dimension(function(d) {return [+d.model, +d.iteration]; });
+    var runGroup = runDimension.group().reduceSum(function(d) { return +d.val_acc; });
+
+    //Second plot: select model
+    var modelDimension = ndx.dimension(function(d) {return +d.model; });
+    var modelAccGroup = reductio().max(function(d) {return +d.final_val_acc})(modelDimension.group());
+
+    //Third plot: modeltype
+    var modeltypeDim = ndx.dimension(function(d){return d.modeltype;});
+    var modelTypeGroup = modeltypeDim.group();
+    var countPerModeltype = reductio()
+                            .exception(function(d) {return d.model;})
+                            .exceptionCount(true)(modelTypeGroup);
+    //var accPerModeltype = modelTypeGroup.reduceSum(function(d) {return d.final_val_acc;});
+
+    //Fourth plot: Nr of  conv layers
+    var nrconvlayersDim = ndx.dimension(function(d){return +d.nr_convlayers;});
+    var convLayerGroup = nrconvlayersDim.group();
+    var accPerConvlayer = reductio()
                             .exception(function(d) {return d.model;})
                             .exceptionCount(true)
                             .exceptionSum(function(d) {return d.final_val_acc})(nrconvlayersDim.group())
         ;
-    //accPerModeltype = reductio().avg(function(d){return +d.final_val_acc})(modelTypeGroup)
-
-    console.log(accPerModeltype.all());
-    console.log(accPerConvlayer.all());
-    console.log(countPerModeltype.all());
 
     //console.log(accPerConvlayer.all());
     valChart
-      //.width(768)
-      //.height(480)
-      //.margins({top: 0, left: 10, right: 10, bottom: 20})
-      .chart(function(c) { return dc.lineChart(c); }) //.interpolate('basis')
-      .x(d3.scale.linear()) //.domain([0,15]))
+      .chart(dc.lineChart)
+      .x(d3.scale.linear())
       .brushOn(false)
       .yAxisLabel("Validation accuracy")
       .xAxisLabel("Iteration")
-      //.clipPadding(10)
-      .elasticY(true)
+      .colors(d3.scale.category20())
       .elasticX(true)
       .dimension(runDimension)
       .group(runGroup)
-      //.mouseZoomable(true)
       .seriesAccessor(function(d) {return "Model " + d.key[0];})
       .keyAccessor(function(d) {return +d.key[1];})
       .valueAccessor(function(d) {return +d.value;})
       .controlsUseVisibility(true);
-      //.legend(dc.legend().x(-10).y(-10).itemHeight(13).gap(5).horizontal(1).legendWidth(140).itemWidth(70));
+
+  modelChart
+    .margins({top: 0, left: 10, right: 10, bottom: 20})
+      .dimension(modelDimension)
+      .group(modelAccGroup)
+       .valueAccessor(function(d) {return +d.value.max;})
+      .elasticX(true)
+      .colors(d3.scale.category20()) // Use the same colors as the valChart
+      .controlsUseVisibility(true);
 
     modeltypeChart
       .margins({top: 0, left: 10, right: 10, bottom: 20})
         .dimension(modeltypeDim)
         .group(countPerModeltype)
          .valueAccessor(function(d) {return +d.value.exceptionCount;})
-        //.x(d3.scale.linear().domain([0,10]))
         .elasticX(true)
         .controlsUseVisibility(true);
 
@@ -108,9 +131,15 @@ d3.json("flatdata.json", function(error, data) {
     .margins({top: 0, left: 10, right: 10, bottom: 20})
       .dimension(nrconvlayersDim)
       .group(accPerConvlayer)
-      .valueAccessor(function(d) {return +(d.value.exceptionSum / d.value.exceptionCount);})
-      //.x(d3.scale.linear().domain([0,10]))
-      .elasticX(true)
+      .valueAccessor(function(d) {
+          if(d.value.exceptionCount == 0){return 0;}
+          else {return +(d.value.exceptionSum / d.value.exceptionCount);}
+      })
+      .label(function(d) {
+          if(d.key == 1) { return d.key + " layer";}
+          else { return d.key + " layers"; }
+      })
+      .elasticX(false)
       .controlsUseVisibility(true);
 
 	dc.renderAll();

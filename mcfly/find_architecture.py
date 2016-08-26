@@ -110,8 +110,8 @@ def storetrainhist2json(params, model_type, history, outputfile):
         previousdata = []
     previousdata.append(jsondata)
     with open(outputfile, 'w') as outfile:
-            json.dump(previousdata, outfile, sort_keys = True,
-                      indent = 4, ensure_ascii=False)
+        json.dump(previousdata, outfile, sort_keys = True,
+                  indent = 4, ensure_ascii=False)
 
 
 def plotTrainingProcess(history, name='Model', ax=None):
