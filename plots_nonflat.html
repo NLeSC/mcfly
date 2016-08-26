@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>dc.js - Filtering Example</title>
+    <title>Charts on nested data</title>
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="css/dc.css"/>
@@ -30,11 +30,37 @@
 <script type="text/javascript" src="js/crossfilter.js"></script>
 <script type="text/javascript" src="js/dc.js"></script>
 <script type="text/javascript" src="js/reductio.js"></script>
+<script type="text/javascript" src="customSeriesChart.js"></script>
 <script type="text/javascript">
 
-var valChart = dc.seriesChart("#val-chart"),
+var valChart = customSeriesChart("#val-chart"),
     modeltypeChart  = dc.rowChart("#chart-modeltype"),
     filterChart = dc.rowChart("#chart-filters");
+
+var addAllTopOrderFunctions = function(group) {
+      group.all = function() {
+        var newObject = [];
+        for (var key in this) {
+          if (this.hasOwnProperty(key) && key !== 'all' && key !== 'top' && key !== 'order') {
+            newObject.push({
+              key: key,
+              value: this[key]
+            });
+          }
+        }
+        return newObject;
+      };
+      group.top = function(n) {
+        var newObject = this.all().sort(function(a, b) {
+          return b.value - a.value;
+        }).slice(0, n);
+
+        return newObject;
+      };
+      group.order = function(p) {
+        return p;
+      };
+    };
 
 
 d3.json("data.json", function(error, data) {
@@ -51,25 +77,47 @@ d3.json("data.json", function(error, data) {
     }
     console.log(data);
 	var ndx = crossfilter(data),
-        modelDimension = ndx.dimension(function(d) {return d.model;}),
-        iterationGroup = modelDimension.group().reduce(
+        modelDimension = ndx.dimension(function(d) {return d.model;});
+    var iterationGroup = modelDimension.group().reduce(
             //reduceAdd
             function(a, d) {
-                for (var key in d.val_acc) {
-                    a[key] = d.val_acc[key];
+                if (a.key === undefined) {
+                    a.key = "Model "+d.model;
                 }
+                valuesList = []
+                for(var iteration in Object.keys(d.val_acc)){
+                    keyValuePair = {};
+                    keyValuePair.key = [+d.model, +iteration];
+                    keyValuePair.value = d.val_acc[iteration];
+                    valuesList.push(keyValuePair);
+                }
+                a.values = valuesList;
+
                 return a;
             },
             //reduceRemove
             function(a, d) {
+                delete a.key;
+                delete a.values;
                 return a;
             },
             //reduceInit
             function() {
                 return {};
             }
-        ),
-	    runDimension = ndx.dimension(function(d) {return [+d.model, +d.iteration]; }),
+        );//.value();
+    // var iterationGroupNewList = [];
+    // for(var model in Object.keys(iterationGroup)) {
+    //     for(var iteration in Object.keys(iterationGroup[model].key)){
+    //         item = {};
+    //         item.key = [+model, +iteration];
+    //         item.value = iterationGroup[model].value[iteration];
+    //         iterationGroupNewList.push(item);
+    //     }
+    // }
+    //addAllTopOrderFunctions(iterationGroup);
+
+	var  runDimension = ndx.dimension(function(d) {return [+d.model, +d.iteration]; }),
         runGroup = runDimension.group().reduceSum(function(d) { return +d.val_acc; }),
         modeltypeDim = ndx.dimension(function(d){return d.modeltype;}),
         nrconvlayersDim = ndx.dimension(function(d){return +d.nr_convlayers;}),
@@ -103,10 +151,59 @@ d3.json("data.json", function(error, data) {
       .dimension(modelDimension)
       .group(iterationGroup)
       .mouseZoomable(true)
-      .seriesAccessor(function(d) {return "Model " + d.key;})
-      .keyAccessor(function(d) {return +d.value;})
+      .seriesAccessor(function(d) {
+          return d.key[0];
+      })
+      .keyAccessor(function(d) {return +d.key[1];})
       .valueAccessor(function(d) {return +d.value;})
       .legend(dc.legend().x(350).y(350).itemHeight(13).gap(5).horizontal(1).legendWidth(140).itemWidth(70));
+
+    // dc.override(valChart, '_preprocessData', function () {
+    //         var keep = [];
+    //         var childrenChanged;
+    //         // var nester = d3.nest().key(valChart.seriesAccessor());
+    //         // if (_seriesSort) {
+    //         //     nester.sortKeys(_seriesSort);
+    //         // }
+    //         // if (_valueSort) {
+    //         //     nester.sortValues(_valueSort);
+    //         // }
+    //         var nesting = this.data();
+    //         this._charts = {};
+    //         var children =
+    //             nesting.map(function (sub, i) {
+    //                 var subChart = this._charts[sub.key] || this.chart.call(this, this, this.chartGroup, sub.key, i);
+    //                 if (!this._charts[sub.key]) {
+    //                     childrenChanged = true;
+    //                 }
+    //                 this._charts[sub.key] = subChart;
+    //                 //console.log(sub);
+    //                 keep.push(sub.key);
+    //                 return subChart
+    //                     .dimension(this.dimension())
+    //                     .group({all: d3.functor(sub.values)}, sub.key)
+    //                     .keyAccessor(this.keyAccessor())
+    //                     .valueAccessor(this.valueAccessor())
+    //                     .brushOn(this.brushOn());
+    //             }, this);
+    //         // this works around the fact compositeChart doesn't really
+    //         // have a removal interface
+    //         // Object.keys(this._charts)
+    //         //     .filter(function (c) {return keep.indexOf(c) === -1;})
+    //         //     .forEach(function (c) {
+    //         //         if (this._charts[c].g()) {
+    //         //             this._charts[c].g().remove();
+    //         //         }
+    //         //         delete this._charts[c];
+    //         //         childrenChanged = true;
+    //         //     }, this);
+    //         // this._compose(children);
+    //         // if (childrenChanged && this.legend()) {
+    //         //     this.legend().render();
+    //         // }
+    //     }
+    // );
+
 
     modeltypeChart
       .margins({top: 20, left: 10, right: 10, bottom: 20})
