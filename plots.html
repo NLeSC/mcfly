@@ -48,6 +48,15 @@
           <a href="javascript:filterChart.filterAll();dc.redrawAll();">reset</a>
         </div>
       </div>
+
+      <div id="heatmap" style="width:300px; height:300px">
+          <h4>
+            Learning rate and Regularization rate
+          </h4>
+          <div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
+            <a href="javascript:heatmap.filterAll();dc.redrawAll();">reset</a>
+          </div>
+        </div>
  </div>
 
 <script type="text/javascript" src="js/d3.js"></script>
@@ -55,99 +64,7 @@
 <script type="text/javascript" src="js/dc.js"></script>
 <script type="text/javascript" src="js/reductio.js"></script>
 <script type="text/javascript" src="flattenJson.js"></script>
-<script type="text/javascript">
-
-var valChart = dc.seriesChart("#val-chart"),
-    modelChart = dc.rowChart("#model-chart"),
-    modeltypeChart  = dc.rowChart("#chart-modeltype"),
-    filterChart = dc.rowChart("#chart-filters");
-
-
-d3.json("data.json", function(error, data) {
-    console.log(data); // this is your data
-    data = flattenModels(data);
-    console.log(data);
-	var ndx = crossfilter(data);
-
-    // First plot: iterations
-    var runDimension = ndx.dimension(function(d) {return [+d.model, +d.iteration]; });
-    var runGroup = runDimension.group().reduceSum(function(d) { return +d.val_acc; });
-
-    //Second plot: select model
-    var modelDimension = ndx.dimension(function(d) {return +d.model; });
-    var modelAccGroup = reductio().max(function(d) {return +d.final_val_acc})(modelDimension.group());
-
-    //Third plot: modeltype
-    var modeltypeDim = ndx.dimension(function(d){return d.modeltype;});
-    var modelTypeGroup = modeltypeDim.group();
-    var countPerModeltype = reductio()
-                            .exception(function(d) {return d.model;})
-                            .exceptionCount(true)(modelTypeGroup);
-    //var accPerModeltype = modelTypeGroup.reduceSum(function(d) {return d.final_val_acc;});
-
-    //Fourth plot: Nr of  conv layers
-    var nrconvlayersDim = ndx.dimension(function(d){return +d.nr_convlayers;});
-    var convLayerGroup = nrconvlayersDim.group();
-    var accPerConvlayer = reductio()
-                            .exception(function(d) {return d.model;})
-                            .exceptionCount(true)
-                            .exceptionSum(function(d) {return d.final_val_acc})(nrconvlayersDim.group())
-        ;
-
-    //console.log(accPerConvlayer.all());
-    valChart
-      .chart(dc.lineChart)
-      .x(d3.scale.linear())
-      .brushOn(false)
-      .yAxisLabel("Validation accuracy")
-      .xAxisLabel("Iteration")
-      .colors(d3.scale.category20())
-      .elasticX(true)
-      .dimension(runDimension)
-      .group(runGroup)
-      .seriesAccessor(function(d) {return "Model " + d.key[0];})
-      .keyAccessor(function(d) {return +d.key[1];})
-      .valueAccessor(function(d) {return +d.value;})
-      .controlsUseVisibility(true);
-
-  modelChart
-    .margins({top: 0, left: 10, right: 10, bottom: 20})
-      .dimension(modelDimension)
-      .group(modelAccGroup)
-       .valueAccessor(function(d) {return +d.value.max;})
-      .elasticX(true)
-      .colors(d3.scale.category20()) // Use the same colors as the valChart
-      .controlsUseVisibility(true);
-
-    modeltypeChart
-      .margins({top: 0, left: 10, right: 10, bottom: 20})
-        .dimension(modeltypeDim)
-        .group(countPerModeltype)
-         .valueAccessor(function(d) {return +d.value.exceptionCount;})
-        .elasticX(true)
-        .controlsUseVisibility(true);
-
-	filterChart
-    .margins({top: 0, left: 10, right: 10, bottom: 20})
-      .dimension(nrconvlayersDim)
-      .group(accPerConvlayer)
-      .valueAccessor(function(d) {
-          if(d.value.exceptionCount == 0){return 0;}
-          else {return +(d.value.exceptionSum / d.value.exceptionCount);}
-      })
-      .label(function(d) {
-          if(d.key == 1) { return d.key + " layer";}
-          else { return d.key + " layers"; }
-      })
-      .elasticX(false)
-      .controlsUseVisibility(true);
-
-	dc.renderAll();
-});
-
-
-
-</script>
+<script type="text/javascript" src ="plots.js"></script>
 
 </div>
 </body>
