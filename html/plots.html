@@ -4,7 +4,7 @@
 <head>
     <title>Charts on flat data</title>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="css/dc.css"/>
 </head>
 
@@ -14,49 +14,67 @@
 <script type="text/javascript" src="header.js"></script>
 
 <div class="row">
-
-  <div id="val-chart" style="width:600px; height:300px">
-    <div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
-      <a href="javascript:valChart.filterAll();dc.redrawAll();">reset</a>
+    <div class="col-md-6">
+      <div id="val-chart" style="width:400px;height:200px">
+        <div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
+          <a href="javascript:valChart.filterAll();dc.redrawAll();">reset</a>
+        </div>
+      </div>
     </div>
-  </div>
-
-  <h4>
-      Select model
-  </h4>
-    <div id="model-chart" style="width:300px; height:300px">
-      <div class="reset" style="visibility: hidden;">range: <span class="filter"></span>
-        <a href="javascript:modelChart.filterAll();dc.redrawAll();">reset</a>
+    <div class="col-md-6">
+      <div id="train-chart" style="width:400px; height:200px">
+        <div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
+          <a href="javascript:trainChart.filterAll();dc.redrawAll();">reset</a>
+        </div>
       </div>
     </div>
 </div>
 
-<div class="row">
-    <div id="chart-modeltype" style="width:300px; height:300px">
-        <h4>
-            Nr of models
-        </h4>
-        <div class="reset" style="visibility: hidden;">range: <span class="filter"></span>
-            <a href="javascript:modeltypeChart.filterAll();dc.redrawAll();">reset</a>
-        </div>
-    </div>
-    <div id="chart-filters" style="width:300px; height:300px">
-        <h4>
-          Average accuracy per Nr of Conv layers
-        </h4>
-        <div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
-          <a href="javascript:filterChart.filterAll();dc.redrawAll();">reset</a>
-        </div>
-      </div>
-
-      <div id="heatmap" style="width:300px; height:300px">
+<div class="row" style="padding-top:20px">
+    <div class="col-md-3">
+        <div id="model-chart" style="width:200px; height:200px">
           <h4>
-            Learning rate and Regularization rate
+              Select model
           </h4>
-          <div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
-            <a href="javascript:heatmap.filterAll();dc.redrawAll();">reset</a>
+          <div class="reset" style="visibility: hidden;">range: <span class="filter"></span>
+            <a href="javascript:modelChart.filterAll();dc.redrawAll();">reset</a>
           </div>
         </div>
+    </div>
+
+
+
+    <div class="col-md-3">
+        <div id="chart-modeltype" style="width:200px; height:200px">
+            <h4>
+                Nr of models
+            </h4>
+            <div class="reset" style="visibility: hidden;">range: <span class="filter"></span>
+                <a href="javascript:modeltypeChart.filterAll();dc.redrawAll();">reset</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div id="chart-filters" style="width:200px; height:200px">
+            <h4>
+              Average accuracy per Nr of Conv layers
+            </h4>
+            <div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
+              <a href="javascript:filterChart.filterAll();dc.redrawAll();">reset</a>
+            </div>
+          </div>
+    </div>
+    <div class="col-md-3">
+          <div id="heatmap" style="width:200px; height:200px">
+              <h4>
+                Learning rate and Regularization rate
+              </h4>
+              <div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
+                <a href="javascript:heatmap.filterAll();dc.redrawAll();">reset</a>
+              </div>
+        </div>
+    </div>
  </div>
 
 <script type="text/javascript" src="js/d3.js"></script>
