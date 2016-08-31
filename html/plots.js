@@ -1,6 +1,5 @@
 
-var trainChart = dc.seriesChart("#train-chart"),
-    valChart = dc.seriesChart("#val-chart"),
+var valChart = dc.seriesChart("#val-chart"),
     modelChart = dc.rowChart("#model-chart"),
     modeltypeChart  = dc.rowChart("#chart-modeltype"),
     filterChart = dc.rowChart("#chart-filters"),
@@ -14,15 +13,12 @@ d3.json("data.json", function(error, data) {
 	var ndx = crossfilter(data);
 
     // First plot: iterations
-    var runDimension1 = ndx.dimension(function(d) {return [+d.model, +d.iteration]; });
-    var runDimension2 = ndx.dimension(function(d) {return [+d.model, +d.iteration]; });
-    //var runGroup = runDimension.group();
-    var runValAcc = runDimension1.group().reduceSum(function(d) { return +d.val_acc; });
-    var runTrainAcc = runDimension2.group().reduceSum(function(d) { return +d.train_acc; });
+    var runDimension = ndx.dimension(function(d) {return [+d.model, +d.iteration]; });
+    var runGroup = runDimension.group().reduceSum(function(d) { return +d.val_acc; });
 
     //Second plot: select model
     var modelDimension = ndx.dimension(function(d) {return +d.model; });
-    var modelAccGroup = reductio().max(function(d) {return +d.final_val_acc;})(modelDimension.group());
+    var modelAccGroup = reductio().max(function(d) {return +d.final_val_acc})(modelDimension.group());
 
     //Third plot: modeltype
     var modeltypeDim = ndx.dimension(function(d){return d.modeltype;});
@@ -33,7 +29,7 @@ d3.json("data.json", function(error, data) {
     //var accPerModeltype = modelTypeGroup.reduceSum(function(d) {return d.final_val_acc;});
 
     //Fourth plot: Nr of  conv layers
-    var nrconvlayersDim = ndx.dimension(function(d) {return +d.nr_convlayers;});
+    var nrconvlayersDim = ndx.dimension(function(d){return +d.nr_convlayers;});
     var convLayerGroup = nrconvlayersDim.group();
     var accPerConvlayer = reductio()
                             .exception(function(d) {return d.model;})
@@ -59,27 +55,12 @@ d3.json("data.json", function(error, data) {
       .xAxisLabel("Iteration")
       .colors(d3.scale.category20())
       .elasticX(true)
-      .dimension(runDimension1)
-      .group(runValAcc)
+      .dimension(runDimension)
+      .group(runGroup)
       .seriesAccessor(function(d) {return "Model " + d.key[0];})
       .keyAccessor(function(d) {return +d.key[1];})
       .valueAccessor(function(d) {return +d.value;})
       .controlsUseVisibility(true);
-
-  trainChart
-    .chart(dc.lineChart)
-    .x(d3.scale.linear())
-    .brushOn(false)
-    .yAxisLabel("Train accuracy")
-    .xAxisLabel("Iteration")
-    .colors(d3.scale.category20())
-    .elasticX(true)
-    .dimension(runDimension2)
-    .group(runTrainAcc)
-    .seriesAccessor(function(d) {return "Model " + d.key[0];})
-    .keyAccessor(function(d) {return +d.key[1];})
-    .valueAccessor(function(d) {return +d.value;})
-    .controlsUseVisibility(true);
 
   modelChart
     .margins({top: 0, left: 10, right: 10, bottom: 20})
@@ -103,7 +84,7 @@ d3.json("data.json", function(error, data) {
       .dimension(nrconvlayersDim)
       .group(accPerConvlayer)
       .valueAccessor(function(d) {
-          if(d.value.exceptionCount === 0){return 0;}
+          if(d.value.exceptionCount == 0){return 0;}
           else {return +(d.value.exceptionSum / d.value.exceptionCount);}
       })
       .label(function(d) {
@@ -139,8 +120,8 @@ d3.json("data.json", function(error, data) {
                 })
                 //.yAxisLabel("Regularization Rate")
                 //.xAxisLabel("Learning Rate")
-                .colsLabel(function(d){return "lr 10^" + d;})
-                .rowsLabel(function(d){return "rr 10^" + d;})
+                .colsLabel(function(d){return "10^" + d;})
+                .rowsLabel(function(d){return "10^" + d;})
                 .title(function(d) {
                     return " Learning Rate:   10^" + d.key[0] + "\n" +
                            "  Regularzation Tate:   10^" + d.key[1] + "\n" +
