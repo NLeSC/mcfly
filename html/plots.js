@@ -41,14 +41,29 @@ d3.json("data.json", function(error, data) {
                             .exceptionSum(function(d) {return d.final_val_acc;})
                             (nrconvlayersDim.group());
 
-    // Fifth plot: Learning rates/Regularization rate bubble chart
-    var lrRegDim = ndx.dimension(function(d){return [+Math.log(d.learning_rate)/Math.log(10), +Math.log(d.regularization_rate)/Math.log(10)];});
-    var lrRegGroup = lrRegDim.group(function(g){return [Math.round(g[0]), Math.round(g[1])];});
+    // Fifth plot: Learning rates/Regularization rate heat map
+    function roundLog10(x) { return Math.round(Math.log(x)/Math.log(10)); }
+    var lrRegDim = ndx.dimension(function(d){return [roundLog10(+d.learning_rate), roundLog10(+d.regularization_rate)];});
+    var lrRegGroup = lrRegDim.group();
+
     var avgAccHeatmap = reductio()
                             .exception(function(d) {return d.model;})
                             .exceptionCount(true)
                             .exceptionSum(function(d) {return d.final_val_acc;})
                             (lrRegGroup);
+    // Create 'fake' group
+    function remove_empty_bins(source_group) {
+        return {
+            all:function () {
+                return source_group.all().filter(function(d) {
+                    return d.value.exceptionCount > 0;
+                });
+            }
+        };
+    }
+    var avgAccHeatmapFiltered = remove_empty_bins(avgAccHeatmap);
+
+    console.log(lrRegGroup.size());
 
     //console.log(accPerConvlayer.all());
     valChart
@@ -121,32 +136,30 @@ d3.json("data.json", function(error, data) {
           else {
               return d3.scale.linear().domain([t,1]).range(["yellow", "green"])(d);
           }
-        return d3.scaleSequential(d3.interpolateInferno)(d);
       };
       heatColorMapping.domain = function() {
           return [0, 1];
       };
 
       lrRegChart
-                //.width(12 * 80 + 80)
-                //.height(27 * 10 + 40)
-                .dimension(lrRegDim)
-                .group(avgAccHeatmap)
-                .keyAccessor(function(d) { return +d.key[0]; })
-                .valueAccessor(function(d) { return +d.key[1]; })
-                .colorAccessor(function(d) {
-                    return +(d.value.exceptionSum / d.value.exceptionCount);
-                })
-                //.yAxisLabel("Regularization Rate")
-                //.xAxisLabel("Learning Rate")
-                .colsLabel(function(d){return "lr 10^" + d;})
-                .rowsLabel(function(d){return "rr 10^" + d;})
-                .title(function(d) {
-                    return " Learning Rate:   10^" + d.key[0] + "\n" +
-                           "  Regularzation Tate:   10^" + d.key[1] + "\n" +
-                           "  Avg acc:   " + (d.value.exceptionSum / d.value.exceptionCount);})
-                .colors(heatColorMapping)
-                .calculateColorDomain();
-
+      // unfortunately we cannot add xAxisLabel and yAxisLabel
+        .dimension(lrRegDim)
+        .group(avgAccHeatmapFiltered)
+        .keyAccessor(function(d) { return +d.key[0]; })
+        .valueAccessor(function(d) { return +d.key[1]; })
+        .colorAccessor(function(d) {
+            return +(d.value.exceptionSum / d.value.exceptionCount);
+        })
+        .colsLabel(function(d){return "10^" + d;})
+        .rowsLabel(function(d){return "10^" + d;})
+        .title(function(d) {
+            return " Learning Rate:   10^" + d.key[0] + "\n" +
+                   "  Regularzation Tate:   10^" + d.key[1] + "\n" +
+                   "  Avg acc:   " + (d.value.exceptionSum / d.value.exceptionCount);})
+        .colors(heatColorMapping)
+        .calculateColorDomain()
+        .yBorderRadius(20)
+        .controlsUseVisibility(true);
+    console.log(dc.chartRegistry.list());
 	dc.renderAll();
 });
