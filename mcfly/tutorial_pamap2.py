@@ -205,9 +205,9 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
         numpify_and_store(Xtrain, ytrain, 'X_train', 'y_train', outdatapath, \
             shuffle=True)
         numpify_and_store(Xval, yval, 'X_val', 'y_val', outdatapath, \
-            shuffle=True)
+            shuffle=False)
         numpify_and_store(Xtest, ytest, 'X_test', 'y_test', outdatapath, \
-            shuffle=True)
+            shuffle=False)
         print('Processed data succesfully stored in ' + outdatapath)
     return outdatapath
 
