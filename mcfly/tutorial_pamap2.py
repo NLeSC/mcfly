@@ -22,16 +22,16 @@ def split_activities(labels, X, borders=10*100):
     Returns lists with subdatasets
     """
     tot_len = len(labels)
-    startpoints = np.where([1] + [labels[i]!=labels[i-1] \
+    startpoints = np.where([1] + [labels[i] != labels[i-1] \
         for i in range(1, tot_len)])[0]
     endpoints = np.append(startpoints[1:]-1, tot_len-1)
     acts = [labels[s] for s,e in zip(startpoints, endpoints)]
     #Also split up the data, and only keep the non-zero activities
     Xysplit = [(X[s+borders:e-borders+1,:], a) \
-        for s,e,a in zip(startpoints, endpoints, acts) if a != 0]
-    Xysplit = [(X, y) for X,y in Xysplit if len(X)>0]
-    Xlist = [X for X,y in Xysplit]
-    ylist = [y for X,y in Xysplit]
+        for s, e, a in zip(startpoints, endpoints, acts) if a != 0]
+    Xysplit = [(X, y) for X, y in Xysplit if len(X)>0]
+    Xlist = [X for X, y in Xysplit]
+    ylist = [y for X, y in Xysplit]
     return Xlist, ylist
 
 def sliding_window(frame_length, step, Xsamples, ysamples, ysampleslist, \
@@ -134,19 +134,19 @@ def fetch_data(directory_to_extract_to):
             url = str('https://archive.ics.uci.edu/ml/' +
                 'machine-learning-databases/00231/PAMAP2_Dataset.zip')
             #retrieve data from url
-            local_fn, headers = urllib.request.urlretrieve(url, \
-                filename = path_to_zip_file)
-            print('Download complete and stored in: ' + path_to_zip_file )
+            local_fn, headers = urllib.request.urlretrieve(url,\
+                filename=path_to_zip_file)
+            print('Download complete and stored in: ' + path_to_zip_file)
         else:
             print('The data was previously downloaded and stored in ' +
-                path_to_zip_file )
+                path_to_zip_file)
         # unzip
         with zipfile.ZipFile(path_to_zip_file ,"r") as zip_ref:
             zip_ref.extractall(targetdir)
     return targetdir
 
 
-def fetch_and_preprocess(directory_to_extract_to, columns_to_use = None):
+def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
     """
     High level function to fetch_and_preprocess the PAMAP2 dataset
     directory_to_extract_to: the directory where the data will be stored
@@ -214,9 +214,9 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use = None):
 def load_data(outputpath):
     ext = '.npy'
     Xtrain = np.load(outputpath+'X_train'+ext)
-    ytrain_binary = np.load(outputpath+'y_train_binary'+ext)
+    ytrain_binary = np.load(outputpath+'y_train'+ext)
     Xval = np.load(outputpath+'X_val'+ext)
-    yval_binary = np.load(outputpath+'y_val_binary'+ext)
+    yval_binary = np.load(outputpath+'y_val'+ext)
     Xtest = np.load(outputpath+'X_test'+ext)
-    ytest_binary = np.load(outputpath+'y_test_binary'+ext)
-    return Xtrain, ytrain_binary, Xval, yval_binary, X_test, ytest_binary
+    ytest_binary = np.load(outputpath+'y_test'+ext)
+    return Xtrain, ytrain_binary, Xval, yval_binary, Xtest, ytest_binary
