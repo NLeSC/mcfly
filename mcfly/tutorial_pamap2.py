@@ -1,4 +1,9 @@
-#import required python modules
+"""
+ Summary:
+ Function fetch_and_preprocess from tutorial_pamap2.py helps to fetch and
+ preproces the data.
+ Example function calls in 'Tutorial mcfly on PAMAP2.ipynb'
+"""
 import numpy as np
 from numpy import genfromtxt
 import pandas as pd
@@ -17,17 +22,20 @@ def split_activities(labels, X, borders=10*100):
     Returns lists with subdatasets
     """
     tot_len = len(labels)
-    startpoints = np.where([1] + [labels[i]!=labels[i-1] for i in range(1, tot_len)])[0]
+    startpoints = np.where([1] + [labels[i]!=labels[i-1] \
+        for i in range(1, tot_len)])[0]
     endpoints = np.append(startpoints[1:]-1, tot_len-1)
     acts = [labels[s] for s,e in zip(startpoints, endpoints)]
     #Also split up the data, and only keep the non-zero activities
-    Xysplit = [(X[s+borders:e-borders+1,:], a) for s,e,a in zip(startpoints, endpoints, acts) if a != 0]
+    Xysplit = [(X[s+borders:e-borders+1,:], a) \
+        for s,e,a in zip(startpoints, endpoints, acts) if a != 0]
     Xysplit = [(X, y) for X,y in Xysplit if len(X)>0]
     Xlist = [X for X,y in Xysplit]
     ylist = [y for X,y in Xysplit]
     return Xlist, ylist
 
-def sliding_window(frame_length, step, Xsamples, ysamples,ysampleslist,Xsampleslist):
+def sliding_window(frame_length, step, Xsamples, ysamples, ysampleslist, \
+    Xsampleslist):
     """
     Splits time series in ysampleslist and Xsampleslist
     into segments by applying a sliding overlapping window
@@ -65,8 +73,10 @@ def addheader(datasets):
                     ['gyroscope_'+ i for i in axes] + \
                     ['magnometer_'+ i for i in axes] + \
                     ['orientation_' + str(i) for i in range(4)]
-    header = ["timestamp", "activityID", "heartrate"] + ["hand_"+s for s in IMUsensor_columns]\
-        + ["chest_"+s for s in IMUsensor_columns]+ ["ankle_"+s for s in IMUsensor_columns]
+    header = ["timestamp", "activityID", "heartrate"] + ["hand_"+s \
+        for s in IMUsensor_columns] \
+        + ["chest_"+s for s in IMUsensor_columns]+ ["ankle_"+s \
+            for s in IMUsensor_columns]
     for i in range(0,len(datasets)):
             datasets[i].columns = header
     return datasets
@@ -121,12 +131,15 @@ def fetch_data(directory_to_extract_to):
         path_to_zip_file = directory_to_extract_to + '/PAMAP2_Dataset.zip'
         test_file_exist = os.path.isfile(path_to_zip_file)
         if test_file_exist is False:
-            url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/00231/PAMAP2_Dataset.zip'
+            url = str('https://archive.ics.uci.edu/ml/' +
+                'machine-learning-databases/00231/PAMAP2_Dataset.zip')
             #retrieve data from url
-            local_fn, headers = urllib.request.urlretrieve(url,filename=path_to_zip_file)
+            local_fn, headers = urllib.request.urlretrieve(url, \
+                filename = path_to_zip_file)
             print('Download complete and stored in: ' + path_to_zip_file )
         else:
-            print('The data was previously downloaded and stored in ' + path_to_zip_file )
+            print('The data was previously downloaded and stored in ' +
+                path_to_zip_file )
         # unzip
         with zipfile.ZipFile(path_to_zip_file ,"r") as zip_ref:
             zip_ref.extractall(targetdir)
@@ -148,18 +161,21 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use = None):
     if not os.path.exists(outdatapath):
         os.makedirs(outdatapath)
     if os.path.isfile(outdatapath+'X_train.npy'):
-        print('Data previously pre-processed and np-files saved to ' + outdatapath)
+        print('Data previously pre-processed and np-files saved to ' +
+            outdatapath)
     else:
         datadir = targetdir + '/PAMAP2_Dataset/Protocol'
         filenames = listdir(datadir)
         print('Start pre-processing all ' + str(len(filenames)) + ' files...')
         # load the files and put them in a list of pandas dataframes:
-        datasets = [pd.read_csv(datadir+'/'+fn, header=None, sep=' ') for fn in filenames]
+        datasets = [pd.read_csv(datadir+'/'+fn, header=None, sep=' ') \
+            for fn in filenames]
         datasets = addheader(datasets) # add headers to the datasets
         #Interpolate dataset to get same sample rate between channels
         datasets_filled = [d.interpolate() for d in datasets]
         # Create mapping for class labels
-        ysetall = [set(np.array(data.activityID)) - set([0]) for data in datasets_filled]
+        ysetall = [set(np.array(data.activityID)) - set([0]) \
+            for data in datasets_filled]
         classlabels = list(set.union(*[set(y) for y in ysetall]))
         nr_classes = len(classlabels)
         mapclasses = {classlabels[i] : i for i in range(len(classlabels))}
@@ -170,7 +186,8 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use = None):
         Xlists, ylists = zip(*Xylists)
         ybinarylists = [transform_y(y, mapclasses, nr_classes) for y in ylists]
         # Split in train, test and val
-        Xtrainlist, Xvallist, Xtestlist, ytrainlist, yvallist, ytestlist = split_dataset(datasets_filled, Xlists, ybinarylists)
+        Xtrainlist, Xvallist, Xtestlist, ytrainlist, yvallist, ytestlist = \
+            split_dataset(datasets_filled, Xlists, ybinarylists)
         # Take sliding-window frames. Target is label of last time step
         # Data is 100 Hz
         frame_length = int(5.12 * 100)
@@ -181,12 +198,16 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use = None):
         yval = []
         Xtest = []
         ytest = []
-        sliding_window(frame_length, step, Xtrain, ytrain, ytrainlist, Xtrainlist)
+        sliding_window(frame_length, step, Xtrain, ytrain, ytrainlist, \
+            Xtrainlist)
         sliding_window(frame_length, step, Xval, yval, yvallist, Xvallist)
         sliding_window(frame_length, step, Xtest, ytest, ytestlist, Xtestlist)
-        numpify_and_store(Xtrain, ytrain, 'X_train', 'y_train', outdatapath, shuffle=True)
-        numpify_and_store(Xval, yval, 'X_val', 'y_val', outdatapath, shuffle=True)
-        numpify_and_store(Xtest, ytest, 'X_test', 'y_test', outdatapath, shuffle=True)
+        numpify_and_store(Xtrain, ytrain, 'X_train', 'y_train', outdatapath, \
+            shuffle=True)
+        numpify_and_store(Xval, yval, 'X_val', 'y_val', outdatapath, \
+            shuffle=True)
+        numpify_and_store(Xtest, ytest, 'X_test', 'y_test', outdatapath, \
+            shuffle=True)
         print('Processed data succesfully stored in ' + outdatapath)
     return outdatapath
 
