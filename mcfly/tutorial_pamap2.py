@@ -25,7 +25,7 @@ def split_activities(labels, X, borders=10*100):
     startpoints = np.where([1] + [labels[i] != labels[i-1] \
         for i in range(1, tot_len)])[0]
     endpoints = np.append(startpoints[1:]-1, tot_len-1)
-    acts = [labels[s] for s,e in zip(startpoints, endpoints)]
+    acts = [labels[s] for s, e in zip(startpoints, endpoints)]
     #Also split up the data, and only keep the non-zero activities
     xysplit = [(X[s+borders:e-borders+1, :], a) \
         for s, e, a in zip(startpoints, endpoints, acts) if a != 0]
@@ -34,8 +34,8 @@ def split_activities(labels, X, borders=10*100):
     ylist = [y for X, y in xysplit]
     return Xlist, ylist
 
-def sliding_window(frame_length, step, Xsamples, ysamples, ysampleslist, \
-    Xsampleslist):
+def sliding_window(frame_length, step, Xsamples,\
+    ysamples, ysampleslist, Xsampleslist):
     """
     Splits time series in ysampleslist and Xsampleslist
     into segments by applying a sliding overlapping window
@@ -52,7 +52,7 @@ def sliding_window(frame_length, step, Xsamples, ysamples, ysampleslist, \
             Xsamples.append(xsub)
             ysamples.append(ysub)
 
-def transform_y(y,mapclasses,nr_classes):
+def transform_y(y, mapclasses, nr_classes):
     """
     Transforms y, a tuple with sequences of class per time segment per sample,
     into a binary matrix per sample
@@ -77,18 +77,18 @@ def addheader(datasets):
         for s in IMUsensor_columns] \
         + ["chest_"+s for s in IMUsensor_columns]+ ["ankle_"+s \
             for s in IMUsensor_columns]
-    for i in range(0,len(datasets)):
+    for i in range(0, len(datasets)):
             datasets[i].columns = header
     return datasets
 
-def split_dataset(datasets_filled,Xlists,ybinarylists):
+def split_dataset(datasets_filled, Xlists, ybinarylists):
     """
     This function split xlists and ybinarylists into
     a train, test and val subset
     """
     train_range = slice(0, 6)
     val_range = 6
-    test_range = slice(7,len(datasets_filled))
+    test_range = slice(7, len(datasets_filled))
     x_trainlist = [x for xlist in Xlists[train_range] for x in Xlist]
     x_vallist = [x for x in Xlists[val_range]]
     x_testlist = [x for xlist in Xlists[test_range] for x in Xlist]
@@ -187,8 +187,9 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
         xlists, ylists = zip(*xylists)
         ybinarylists = [transform_y(y, mapclasses, nr_classes) for y in ylists]
         # Split in train, test and val
-        x_trainlist, x_vallist, x_testlist, y_trainlist, y_vallist, y_testlist =\
-            split_dataset(datasets_filled, xlists, ybinarylists)
+        x_trainlist, x_vallist, x_testlist, \
+            y_trainlist, y_vallist, y_testlist \
+            = split_dataset(datasets_filled, xlists, ybinarylists)
         # Take sliding-window frames. Target is label of last time step
         # Data is 100 Hz
         frame_length = int(5.12 * 100)
@@ -202,9 +203,10 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
         sliding_window(frame_length, step, x_train, y_train, y_trainlist, \
             x_trainlist)
         sliding_window(frame_length, step, x_val, y_val, y_vallist, x_vallist)
-        sliding_window(frame_length, step, x_test, y_test, y_testlist, x_testlist)
-        numpify_and_store(x_train, y_train, 'X_train', 'y_train', outdatapath, \
-            shuffle=True)
+        sliding_window(frame_length, step, x_test, y_test, \
+            y_testlist, x_testlist)
+        numpify_and_store(x_train, y_train, 'X_train', 'y_train', \
+        outdatapath, shuffle=True)
         numpify_and_store(x_val, y_val, 'X_val', 'y_val', outdatapath, \
             shuffle=False)
         numpify_and_store(x_test, y_test, 'X_test', 'y_test', outdatapath, \
