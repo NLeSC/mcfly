@@ -27,11 +27,11 @@ def split_activities(labels, X, borders=10*100):
     endpoints = np.append(startpoints[1:]-1, tot_len-1)
     acts = [labels[s] for s,e in zip(startpoints, endpoints)]
     #Also split up the data, and only keep the non-zero activities
-    Xysplit = [(X[s+borders:e-borders+1,:], a) \
+    xysplit = [(X[s+borders:e-borders+1,:], a) \
         for s, e, a in zip(startpoints, endpoints, acts) if a != 0]
-    Xysplit = [(X, y) for X, y in Xysplit if len(X)>0]
-    Xlist = [X for X, y in Xysplit]
-    ylist = [y for X, y in Xysplit]
+    xysplit = [(X, y) for X, y in xysplit if len(X)>0]
+    Xlist = [X for X, y in xysplit]
+    ylist = [y for X, y in xysplit]
     return Xlist, ylist
 
 def sliding_window(frame_length, step, Xsamples, ysamples, ysampleslist, \
@@ -44,12 +44,12 @@ def sliding_window(frame_length, step, Xsamples, ysamples, ysampleslist, \
     So, the participant distinction is not kept
     """
     for j in range(len(Xsampleslist)):
-        X = Xsampleslist[j]
+        x = Xsampleslist[j]
         ybinary = ysampleslist[j]
-        for i in range(0, X.shape[0]-frame_length, step):
-            Xsub = X[i:i+frame_length,:]
+        for i in range(0, x.shape[0]-frame_length, step):
+            xsub = x[i:i+frame_length,:]
             ysub = ybinary
-            Xsamples.append(Xsub)
+            Xsamples.append(xsub)
             ysamples.append(ysub)
 
 def transform_y(y,mapclasses,nr_classes):
@@ -83,36 +83,36 @@ def addheader(datasets):
 
 def split_dataset(datasets_filled,Xlists,ybinarylists):
     """
-    This function split Xlists and ybinarylists into
+    This function split xlists and ybinarylists into
     a train, test and val subset
     """
     train_range = slice(0, 6)
     val_range = 6
     test_range = slice(7,len(datasets_filled))
-    X_trainlist = [X for Xlist in Xlists[train_range] for X in Xlist]
-    X_vallist = [X for X in Xlists[val_range]]
-    X_testlist = [X for Xlist in Xlists[test_range] for X in Xlist]
+    x_trainlist = [x for xlist in Xlists[train_range] for x in Xlist]
+    x_vallist = [x for x in Xlists[val_range]]
+    x_testlist = [x for xlist in Xlists[test_range] for x in Xlist]
     y_trainlist = [y for ylist in ybinarylists[train_range] for y in ylist]
     y_vallist = [y for y in ybinarylists[val_range]]
     y_testlist = [y for ylist in ybinarylists[test_range] for y in ylist]
-    return X_trainlist, X_vallist, X_testlist, y_trainlist, y_vallist, y_testlist
+    return x_trainlist, x_vallist, x_testlist, y_trainlist, y_vallist, y_testlist
 
-def numpify_and_store(x,y,Xname,yname,outdatapath,shuffle=False):
+def numpify_and_store(X,y,xname,yname,outdatapath,shuffle=False):
     """
     Converts python lists x and y into numpy arrays
     and stores the numpy array in directory outdatapath
     shuffle is optional and shuffles the samples
     """
-    x = np.array(x)
+    X = np.array(X)
     y = np.array(y)
     #Shuffle around the train set
     if shuffle is True:
         np.random.seed(123)
-        neworder = np.random.permutation(x.shape[0])
-        x = x[neworder,:,:]
+        neworder = np.random.permutation(X.shape[0])
+        X = X[neworder,:,:]
         y = y[neworder,:]
     # Save binary file
-    np.save(outdatapath+ Xname, x)
+    np.save(outdatapath+ xname, X)
     np.save(outdatapath+ yname, y)
 
 
@@ -160,7 +160,7 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
     outdatapath = targetdir + '/PAMAP2_Dataset' + '/slidingwindow512cleaned/'
     if not os.path.exists(outdatapath):
         os.makedirs(outdatapath)
-    if os.path.isfile(outdatapath+'X_train.npy'):
+    if os.path.isfile(outdatapath+'x_train.npy'):
         print('Data previously pre-processed and np-files saved to ' +
             outdatapath)
     else:
@@ -179,44 +179,44 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
         classlabels = list(set.union(*[set(y) for y in ysetall]))
         nr_classes = len(classlabels)
         mapclasses = {classlabels[i] : i for i in range(len(classlabels))}
-        #Create input (X) and output (y) sets
-        Xall = [np.array(data[columns_to_use]) for data in datasets_filled]
+        #Create input (x) and output (y) sets
+        xall = [np.array(data[columns_to_use]) for data in datasets_filled]
         yall = [np.array(data.activityID) for data in datasets_filled]
-        Xylists = [split_activities(y, X) for X, y in zip(Xall, yall)]
-        Xlists, ylists = zip(*Xylists)
+        xylists = [split_activities(y, x) for x, y in zip(xall, yall)]
+        xlists, ylists = zip(*xylists)
         ybinarylists = [transform_y(y, mapclasses, nr_classes) for y in ylists]
         # Split in train, test and val
-        X_trainlist, X_vallist, X_testlist, y_trainlist, y_vallist, y_testlist =\
-            split_dataset(datasets_filled, Xlists, ybinarylists)
+        x_trainlist, x_vallist, x_testlist, y_trainlist, y_vallist, y_testlist =\
+            split_dataset(datasets_filled, xlists, ybinarylists)
         # Take sliding-window frames. Target is label of last time step
         # Data is 100 Hz
         frame_length = int(5.12 * 100)
         step = 1 * 100
-        X_train = []
+        x_train = []
         y_train = []
-        X_val = []
+        x_val = []
         y_val = []
-        X_test = []
+        x_test = []
         y_test = []
-        sliding_window(frame_length, step, X_train, y_train, y_trainlist, \
-            X_trainlist)
-        sliding_window(frame_length, step, X_val, y_val, y_vallist, X_vallist)
-        sliding_window(frame_length, step, X_test, y_test, y_testlist, X_testlist)
-        numpify_and_store(X_train, y_train, 'X_train', 'y_train', outdatapath, \
+        sliding_window(frame_length, step, x_train, y_train, y_trainlist, \
+            x_trainlist)
+        sliding_window(frame_length, step, x_val, y_val, y_vallist, x_vallist)
+        sliding_window(frame_length, step, x_test, y_test, y_testlist, x_testlist)
+        numpify_and_store(x_train, y_train, 'X_train', 'y_train', outdatapath, \
             shuffle=True)
-        numpify_and_store(X_val, y_val, 'X_val', 'y_val', outdatapath, \
+        numpify_and_store(x_val, y_val, 'X_val', 'y_val', outdatapath, \
             shuffle=False)
-        numpify_and_store(X_test, y_test, 'X_test', 'y_test', outdatapath, \
+        numpify_and_store(x_test, y_test, 'X_test', 'y_test', outdatapath, \
             shuffle=False)
         print('Processed data succesfully stored in ' + outdatapath)
     return outdatapath
 
 def load_data(outputpath):
     ext = '.npy'
-    X_train = np.load(outputpath+'X_train'+ext)
+    x_train = np.load(outputpath+'X_train'+ext)
     y_train_binary = np.load(outputpath+'y_train'+ext)
-    X_val = np.load(outputpath+'X_val'+ext)
+    x_val = np.load(outputpath+'X_val'+ext)
     y_val_binary = np.load(outputpath+'y_val'+ext)
-    X_test = np.load(outputpath+'X_test'+ext)
+    x_test = np.load(outputpath+'X_test'+ext)
     y_test_binary = np.load(outputpath+'y_test'+ext)
-    return X_train, y_train_binary, X_val, y_val_binary, X_test, y_test_binary
+    return x_train, y_train_binary, x_val, y_val_binary, x_test, y_test_binary
