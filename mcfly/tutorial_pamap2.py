@@ -27,9 +27,9 @@ def split_activities(labels, X, borders=10*100):
     endpoints = np.append(startpoints[1:]-1, tot_len-1)
     acts = [labels[s] for s,e in zip(startpoints, endpoints)]
     #Also split up the data, and only keep the non-zero activities
-    xysplit = [(X[s+borders:e-borders+1,:], a) \
+    xysplit = [(X[s+borders:e-borders+1, :], a) \
         for s, e, a in zip(startpoints, endpoints, acts) if a != 0]
-    xysplit = [(X, y) for X, y in xysplit if len(X)>0]
+    xysplit = [(X, y) for X, y in xysplit if len(X) > 0]
     Xlist = [X for X, y in xysplit]
     ylist = [y for X, y in xysplit]
     return Xlist, ylist
@@ -44,10 +44,10 @@ def sliding_window(frame_length, step, Xsamples, ysamples, ysampleslist, \
     So, the participant distinction is not kept
     """
     for j in range(len(Xsampleslist)):
-        x = Xsampleslist[j]
+        X = Xsampleslist[j]
         ybinary = ysampleslist[j]
         for i in range(0, x.shape[0]-frame_length, step):
-            xsub = x[i:i+frame_length,:]
+            xsub = X[i:i+frame_length, :]
             ysub = ybinary
             Xsamples.append(xsub)
             ysamples.append(ysub)
@@ -95,9 +95,10 @@ def split_dataset(datasets_filled,Xlists,ybinarylists):
     y_trainlist = [y for ylist in ybinarylists[train_range] for y in ylist]
     y_vallist = [y for y in ybinarylists[val_range]]
     y_testlist = [y for ylist in ybinarylists[test_range] for y in ylist]
-    return x_trainlist, x_vallist, x_testlist, y_trainlist, y_vallist, y_testlist
+    return x_trainlist, x_vallist, x_testlist, y_trainlist, \
+        y_vallist, y_testlist
 
-def numpify_and_store(X,y,xname,yname,outdatapath,shuffle=False):
+def numpify_and_store(X, y, xname, yname, outdatapath, shuffle=False):
     """
     Converts python lists x and y into numpy arrays
     and stores the numpy array in directory outdatapath
@@ -109,8 +110,8 @@ def numpify_and_store(X,y,xname,yname,outdatapath,shuffle=False):
     if shuffle is True:
         np.random.seed(123)
         neworder = np.random.permutation(X.shape[0])
-        X = X[neworder,:,:]
-        y = y[neworder,:]
+        X = X[neworder, :, :]
+        y = y[neworder, :]
     # Save binary file
     np.save(outdatapath+ xname, X)
     np.save(outdatapath+ yname, y)
