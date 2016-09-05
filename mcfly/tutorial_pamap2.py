@@ -89,13 +89,13 @@ def split_dataset(datasets_filled,Xlists,ybinarylists):
     train_range = slice(0, 6)
     val_range = 6
     test_range = slice(7,len(datasets_filled))
-    Xtrainlist = [X for Xlist in Xlists[train_range] for X in Xlist]
-    Xvallist = [X for X in Xlists[val_range]]
-    Xtestlist = [X for Xlist in Xlists[test_range] for X in Xlist]
-    ytrainlist = [y for ylist in ybinarylists[train_range] for y in ylist]
-    yvallist = [y for y in ybinarylists[val_range]]
-    ytestlist = [y for ylist in ybinarylists[test_range] for y in ylist]
-    return Xtrainlist, Xvallist, Xtestlist, ytrainlist, yvallist, ytestlist
+    X_trainlist = [X for Xlist in Xlists[train_range] for X in Xlist]
+    X_vallist = [X for X in Xlists[val_range]]
+    X_testlist = [X for Xlist in Xlists[test_range] for X in Xlist]
+    y_trainlist = [y for ylist in ybinarylists[train_range] for y in ylist]
+    y_vallist = [y for y in ybinarylists[val_range]]
+    y_testlist = [y for ylist in ybinarylists[test_range] for y in ylist]
+    return X_trainlist, X_vallist, X_testlist, y_trainlist, y_vallist, y_testlist
 
 def numpify_and_store(x,y,Xname,yname,outdatapath,shuffle=False):
     """
@@ -186,37 +186,37 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
         Xlists, ylists = zip(*Xylists)
         ybinarylists = [transform_y(y, mapclasses, nr_classes) for y in ylists]
         # Split in train, test and val
-        Xtrainlist, Xvallist, Xtestlist, ytrainlist, yvallist, ytestlist = \
+        X_trainlist, X_vallist, X_testlist, y_trainlist, y_vallist, y_testlist =\
             split_dataset(datasets_filled, Xlists, ybinarylists)
         # Take sliding-window frames. Target is label of last time step
         # Data is 100 Hz
         frame_length = int(5.12 * 100)
         step = 1 * 100
-        Xtrain = []
-        ytrain = []
-        Xval = []
-        yval = []
-        Xtest = []
-        ytest = []
-        sliding_window(frame_length, step, Xtrain, ytrain, ytrainlist, \
-            Xtrainlist)
-        sliding_window(frame_length, step, Xval, yval, yvallist, Xvallist)
-        sliding_window(frame_length, step, Xtest, ytest, ytestlist, Xtestlist)
-        numpify_and_store(Xtrain, ytrain, 'X_train', 'y_train', outdatapath, \
+        X_train = []
+        y_train = []
+        X_val = []
+        y_val = []
+        X_test = []
+        y_test = []
+        sliding_window(frame_length, step, X_train, y_train, y_trainlist, \
+            X_trainlist)
+        sliding_window(frame_length, step, X_val, y_val, y_vallist, X_vallist)
+        sliding_window(frame_length, step, X_test, y_test, y_testlist, X_testlist)
+        numpify_and_store(X_train, y_train, 'X_train', 'y_train', outdatapath, \
             shuffle=True)
-        numpify_and_store(Xval, yval, 'X_val', 'y_val', outdatapath, \
+        numpify_and_store(X_val, y_val, 'X_val', 'y_val', outdatapath, \
             shuffle=False)
-        numpify_and_store(Xtest, ytest, 'X_test', 'y_test', outdatapath, \
+        numpify_and_store(X_test, y_test, 'X_test', 'y_test', outdatapath, \
             shuffle=False)
         print('Processed data succesfully stored in ' + outdatapath)
     return outdatapath
 
 def load_data(outputpath):
     ext = '.npy'
-    Xtrain = np.load(outputpath+'X_train'+ext)
-    ytrain_binary = np.load(outputpath+'y_train'+ext)
-    Xval = np.load(outputpath+'X_val'+ext)
-    yval_binary = np.load(outputpath+'y_val'+ext)
-    Xtest = np.load(outputpath+'X_test'+ext)
-    ytest_binary = np.load(outputpath+'y_test'+ext)
-    return Xtrain, ytrain_binary, Xval, yval_binary, Xtest, ytest_binary
+    X_train = np.load(outputpath+'X_train'+ext)
+    y_train_binary = np.load(outputpath+'y_train'+ext)
+    X_val = np.load(outputpath+'X_val'+ext)
+    y_val_binary = np.load(outputpath+'y_val'+ext)
+    X_test = np.load(outputpath+'X_test'+ext)
+    y_test_binary = np.load(outputpath+'y_test'+ext)
+    return X_train, y_train_binary, X_val, y_val_binary, X_test, y_test_binary
