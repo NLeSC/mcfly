@@ -46,7 +46,7 @@ def sliding_window(frame_length, step, Xsamples,\
     for j in range(len(Xsampleslist)):
         X = Xsampleslist[j]
         ybinary = ysampleslist[j]
-        for i in range(0, x.shape[0]-frame_length, step):
+        for i in range(0, X.shape[0]-frame_length, step):
             xsub = X[i:i+frame_length, :]
             ysub = ybinary
             Xsamples.append(xsub)
@@ -80,23 +80,6 @@ def addheader(datasets):
     for i in range(0, len(datasets)):
             datasets[i].columns = header
     return datasets
-
-def split_dataset(datasets_filled, Xlists, ybinarylists):
-    """
-    This function split xlists and ybinarylists into
-    a train, test and val subset
-    """
-    train_range = slice(0, 6)
-    val_range = 6
-    test_range = slice(7, len(datasets_filled))
-    x_trainlist = [x for xlist in Xlists[train_range] for x in Xlist]
-    x_vallist = [x for x in Xlists[val_range]]
-    x_testlist = [x for xlist in Xlists[test_range] for x in Xlist]
-    y_trainlist = [y for ylist in ybinarylists[train_range] for y in ylist]
-    y_vallist = [y for y in ybinarylists[val_range]]
-    y_testlist = [y for ylist in ybinarylists[test_range] for y in ylist]
-    return x_trainlist, x_vallist, x_testlist, y_trainlist, \
-        y_vallist, y_testlist
 
 def numpify_and_store(X, y, xname, yname, outdatapath, shuffle=False):
     """
@@ -172,6 +155,9 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
         datasets = [pd.read_csv(datadir+'/'+fn, header=None, sep=' ') \
             for fn in filenames]
         datasets = addheader(datasets) # add headers to the datasets
+        #print(len(datasets))
+        print(datasets[0].shape)
+
         #Interpolate dataset to get same sample rate between channels
         datasets_filled = [d.interpolate() for d in datasets]
         # Create mapping for class labels
@@ -184,12 +170,19 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
         xall = [np.array(data[columns_to_use]) for data in datasets_filled]
         yall = [np.array(data.activityID) for data in datasets_filled]
         xylists = [split_activities(y, x) for x, y in zip(xall, yall)]
-        xlists, ylists = zip(*xylists)
+        Xlists, ylists = zip(*xylists)
         ybinarylists = [transform_y(y, mapclasses, nr_classes) for y in ylists]
         # Split in train, test and val
-        x_trainlist, x_vallist, x_testlist, \
-            y_trainlist, y_vallist, y_testlist \
-            = split_dataset(datasets_filled, xlists, ybinarylists)
+        train_range = slice(0, 6)
+        val_range = 6
+        test_range = slice(7, len(datasets_filled))
+        x_trainlist = [X for Xlist in Xlists[train_range] for X in Xlist]
+        x_vallist = [X for X in Xlists[val_range]]
+        x_testlist = [X for Xlist in Xlists[test_range] for X in Xlist]
+        y_trainlist = [y for ylist in ybinarylists[train_range] for y in ylist]
+        y_vallist = [y for y in ybinarylists[val_range]]
+        y_testlist = [y for ylist in ybinarylists[test_range] for y in ylist]
+
         # Take sliding-window frames. Target is label of last time step
         # Data is 100 Hz
         frame_length = int(5.12 * 100)
