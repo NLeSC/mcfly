@@ -83,7 +83,7 @@ def addheader(datasets):
         + ["chest_"+s for s in IMUsensor_columns]+ ["ankle_"+s \
             for s in IMUsensor_columns]
     for i in range(0, len(datasets)):
-            datasets[i].columns = header
+        datasets[i].columns = header
     return datasets
 
 def numpify_and_store(X, y, xname, yname, outdatapath, shuffle=False):
@@ -124,7 +124,7 @@ def fetch_data(directory_to_extract_to):
                 'machine-learning-databases/00231/PAMAP2_Dataset.zip')
             #retrieve data from url
             if sys.version_info <= (3,): #python2
-                local_fn, headers = urllib.urlretrieve(url,\
+                local_fn, headers = urllib.urlretrieve(url, \
                     filename=path_to_zip_file)
             else: #python3
                 local_fn, headers = urllib.request.urlretrieve(url,\
@@ -240,6 +240,9 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
     return outdatapath
 
 def load_data(outputpath):
+    """ Function to load the numpy data as stored in directory
+    outputpath.
+    """
     ext = '.npy'
     x_train = np.load(outputpath+'X_train'+ext)
     y_train_binary = np.load(outputpath+'y_train'+ext)
