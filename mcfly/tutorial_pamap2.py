@@ -169,6 +169,15 @@ def split_data(Xlists,ybinarylists,indices):
     return x_setlist, y_setlist
 
 def preprocess(targetdir,outdatapath):
+    """ Function to preprocess the PAMAP2 data after it is fetched
+    Arguments:
+    - targetdir: subdirectory of directory_to_extract_to, targetdir
+        is defined function fetch_data
+    - outdatapath: a subdirectory of directory_to_extract_to, outdatapath
+        is the direcotry where the Numpy output will be stored.
+    Value (output):
+    - None
+    """
     datadir = targetdir + '/PAMAP2_Dataset/Protocol'
     filenames = listdir(datadir)
     print('Start pre-processing all ' + str(len(filenames)) + ' files...')
@@ -209,10 +218,11 @@ def preprocess(targetdir,outdatapath):
 def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
     """
     High level function to fetch_and_preprocess the PAMAP2 dataset
-    directory_to_extract_to: the directory where the data will be stored
-    columns_to_use: the columns to use
-
-    The function will store the numpy output in directory outdatapath
+    Arguments:
+    - directory_to_extract_to: the directory where the data will be stored
+    - columns_to_use: the columns to use
+    Values (output):
+    - outdatapath: The directory in which the numpy files are stored
     """
     if columns_to_use is None:
         columns_to_use = ['hand_acc_16g_x', 'hand_acc_16g_y', 'hand_acc_16g_z',
