@@ -31,7 +31,7 @@ class TutorialPAMAP2Suite(unittest.TestCase):
         x_train = []
         y_train = []
         tutorial_pamap2.sliding_window(frame_length, step, x_train, \
-            y_train, y_trainlist, x_trainlist)
+            y_train, x_trainlist, y_trainlist)
         test = len(x_train) == 19266
         assert test
 

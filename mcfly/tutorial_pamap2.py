@@ -168,11 +168,51 @@ def split_data(Xlists,ybinarylists,indices):
         y_setlist = [y for y in ybinarylists[indices]]
     return x_setlist, y_setlist
 
+def preprocess(targetdir,outdatapath):
+    datadir = targetdir + '/PAMAP2_Dataset/Protocol'
+    filenames = listdir(datadir)
+    print('Start pre-processing all ' + str(len(filenames)) + ' files...')
+    # load the files and put them in a list of pandas dataframes:
+    datasets = [pd.read_csv(datadir+'/'+fn, header=None, sep=' ') \
+        for fn in filenames]
+    datasets = addheader(datasets) # add headers to the datasets
+    #Interpolate dataset to get same sample rate between channels
+    datasets_filled = [d.interpolate() for d in datasets]
+    # Create mapping for class labels
+    classlabels, nr_classes, mapclasses = map_clas(datasets_filled)
+    #Create input (x) and output (y) sets
+    xall = [np.array(data[columns_to_use]) for data in datasets_filled]
+    yall = [np.array(data.activityID) for data in datasets_filled]
+    xylists = [split_activities(y, x) for x, y in zip(xall, yall)]
+    Xlists, ylists = zip(*xylists)
+    ybinarylists = [transform_y(y, mapclasses, nr_classes) for y in ylists]
+    # Split in train, test and val
+    x_vallist, y_vallist = split_data(Xlists,ybinarylists,indices=6)
+    test_range = slice(7, len(datasets_filled))
+    x_testlist, y_testlist = split_data(Xlists,ybinarylists,test_range)
+    x_trainlist, y_trainlist = split_data(Xlists,ybinarylists,\
+        indices=slice(0, 6))
+    # Take sliding-window frames, target is label of last time step,
+    # and store as numpy file
+    slidingwindow_store(y_list=y_trainlist, x_list=x_trainlist, \
+                X_name='X_train', y_name='y_train', \
+                outdatapath=outdatapath,shuffle=True)
+    slidingwindow_store(y_list=y_vallist, x_list=x_vallist, \
+        X_name='X_val', y_name='y_val', \
+        outdatapath=outdatapath,shuffle=False)
+    slidingwindow_store(y_list=y_testlist, x_list=x_testlist, \
+            X_name='X_test', y_name='y_test', \
+            outdatapath=outdatapath,shuffle=False)
+    print('Processed data succesfully stored in ' + outdatapath)
+    return None
+
 def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
     """
     High level function to fetch_and_preprocess the PAMAP2 dataset
     directory_to_extract_to: the directory where the data will be stored
     columns_to_use: the columns to use
+
+    The function will store the numpy output in directory outdatapath
     """
     if columns_to_use is None:
         columns_to_use = ['hand_acc_16g_x', 'hand_acc_16g_y', 'hand_acc_16g_z',
@@ -186,42 +226,7 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
         print('Data previously pre-processed and np-files saved to ' +
             outdatapath)
     else:
-        datadir = targetdir + '/PAMAP2_Dataset/Protocol'
-        filenames = listdir(datadir)
-        print('Start pre-processing all ' + str(len(filenames)) + ' files...')
-        # load the files and put them in a list of pandas dataframes:
-        datasets = [pd.read_csv(datadir+'/'+fn, header=None, sep=' ') \
-            for fn in filenames]
-        datasets = addheader(datasets) # add headers to the datasets
-        #Interpolate dataset to get same sample rate between channels
-        datasets_filled = [d.interpolate() for d in datasets]
-        # Create mapping for class labels
-        classlabels, nr_classes, mapclasses = map_clas(datasets_filled)
-        #Create input (x) and output (y) sets
-        xall = [np.array(data[columns_to_use]) for data in datasets_filled]
-        yall = [np.array(data.activityID) for data in datasets_filled]
-        xylists = [split_activities(y, x) for x, y in zip(xall, yall)]
-        Xlists, ylists = zip(*xylists)
-        ybinarylists = [transform_y(y, mapclasses, nr_classes) for y in ylists]
-        # Split in train, test and val
-
-        x_vallist, y_vallist = split_data(Xlists,ybinarylists,indices=6)
-        test_range = slice(7, len(datasets_filled))
-        x_testlist, y_testlist = split_data(Xlists,ybinarylists,test_range)
-        x_trainlist, y_trainlist = split_data(Xlists,ybinarylists,\
-            indices=slice(0, 6))
-        # Take sliding-window frames, target is label of last time step,
-        # and store as numpy file
-        slidingwindow_store(y_list=y_trainlist, x_list=x_trainlist, \
-                    X_name='X_train', y_name='y_train', \
-                    outdatapath=outdatapath,shuffle=True)
-        slidingwindow_store(y_list=y_vallist, x_list=x_vallist, \
-            X_name='X_val', y_name='y_val', \
-            outdatapath=outdatapath,shuffle=False)
-        slidingwindow_store(y_list=y_testlist, x_list=x_testlist, \
-                X_name='X_test', y_name='y_test', \
-                outdatapath=outdatapath,shuffle=False)
-        print('Processed data succesfully stored in ' + outdatapath)
+        preprocess(targetdir,outdatapath)
     return outdatapath
 
 def load_data(outputpath):
