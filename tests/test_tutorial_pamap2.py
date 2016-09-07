@@ -63,7 +63,7 @@ class TutorialPAMAP2Suite(unittest.TestCase):
         y = [[0 for a in range(Ntimesteps)] for b in range(Nsamples)]
         xname = 'xname'
         yname = 'yname'
-        outputpath = os.getcwd()
+        outdatapath = os.getcwd()
         tutorial_pamap2.numpify_and_store(X, y, xname, yname, outdatapath, \
             shuffle=True)
         filename = outdatapath+ xname+ '.npy'
