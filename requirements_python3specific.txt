@@ -1,1 +1,1 @@
-yieldfrom.urllib.request>=3.5
+yieldfrom.urllib.request
