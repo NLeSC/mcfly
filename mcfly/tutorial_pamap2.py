@@ -158,7 +158,7 @@ def map_clas(datasets_filled):
     mapclasses = {classlabels[i] : i for i in range(len(classlabels))}
     return classlabels, nr_classes, mapclasses
 
-def split_data(Xlist,ylist,indices):
+def split_data(Xlists,ybinarylists,indices):
     """ Function takes subset from list given indices"""
     if str(type(indices)) == "<class 'slice'>":
         x_setlist = [X for Xlist in Xlists[indices] for X in Xlist]
@@ -166,7 +166,7 @@ def split_data(Xlist,ylist,indices):
     else:
         x_setlist = [X for X in Xlists[indices]]
         y_setlist = [y for y in ybinarylists[indices]]
-        return x_setlist, ysetlist
+    return x_setlist, y_setlist
 
 def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
     """
@@ -204,10 +204,12 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
         Xlists, ylists = zip(*xylists)
         ybinarylists = [transform_y(y, mapclasses, nr_classes) for y in ylists]
         # Split in train, test and val
-        x_trainlist, y_trainlist = split_data(Xlist,ylist,slice(0, 6))
-        x_vallist, y_vallist = split_data(Xlist,ylist,indices=6)
+
+        x_vallist, y_vallist = split_data(Xlists,ybinarylists,indices=6)
         test_range = slice(7, len(datasets_filled))
-        x_testlist, y_testlist = split_data(Xlist,ylist,test_range)
+        x_testlist, y_testlist = split_data(Xlists,ybinarylists,test_range)
+        x_trainlist, y_trainlist = split_data(Xlists,ybinarylists,\
+            indices=slice(0, 6))
         # Take sliding-window frames, target is label of last time step,
         # and store as numpy file
         slidingwindow_store(y_list=y_trainlist, x_list=x_trainlist, \
