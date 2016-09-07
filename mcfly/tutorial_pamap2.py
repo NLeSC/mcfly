@@ -39,7 +39,7 @@ def split_activities(labels, X, borders=10*100):
     return Xlist, ylist
 
 def sliding_window(frame_length, step, Xsamples,\
-    ysamples, ysampleslist, Xsampleslist):
+    ysamples, Xsampleslist, ysampleslist):
     """
     Splits time series in ysampleslist and Xsampleslist
     into segments by applying a sliding overlapping window
@@ -139,6 +139,35 @@ def fetch_data(directory_to_extract_to):
     return targetdir
 
 
+def slidingwindow_store(y_list, x_list,X_name, y_name, outdatapath, shuffle):
+    # Take sliding-window frames. Target is label of last time step
+    # Data is 100 Hz
+    frame_length = int(5.12 * 100)
+    step = 1 * 100
+    x_set = []
+    y_set = []
+    sliding_window(frame_length, step, x_set, y_set, x_list, y_list)
+    numpify_and_store(x_set, y_set, X_name, y_name, \
+        outdatapath, shuffle)
+
+def map_clas(datasets_filled):
+    ysetall = [set(np.array(data.activityID)) - set([0]) \
+        for data in datasets_filled]
+    classlabels = list(set.union(*[set(y) for y in ysetall]))
+    nr_classes = len(classlabels)
+    mapclasses = {classlabels[i] : i for i in range(len(classlabels))}
+    return classlabels, nr_classes, mapclasses
+
+def split_data(Xlist,ylist,indices):
+    """ Function takes subset from list given indices"""
+    if str(type(indices)) == "<class 'slice'>":
+        x_setlist = [X for Xlist in Xlists[indices] for X in Xlist]
+        y_setlist = [y for ylist in ybinarylists[indices] for y in ylist]
+    else:
+        x_setlist = [X for X in Xlists[indices]]
+        y_setlist = [y for y in ybinarylists[indices]]
+        return x_setlist, ysetlist
+
 def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
     """
     High level function to fetch_and_preprocess the PAMAP2 dataset
@@ -150,7 +179,7 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
                      'ankle_acc_16g_x', 'ankle_acc_16g_y', 'ankle_acc_16g_z',
                      'chest_acc_16g_x', 'chest_acc_16g_y', 'chest_acc_16g_z']
     targetdir = fetch_data(directory_to_extract_to)
-    outdatapath = targetdir + '/PAMAP2_Dataset' + '/slidingwindow512cleaned/'
+    outdatapath = targetdir + '/PAMAP2_Dataset/slidingwindow512cleaned/'
     if not os.path.exists(outdatapath):
         os.makedirs(outdatapath)
     if os.path.isfile(outdatapath+'x_train.npy'):
@@ -167,50 +196,29 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
         #Interpolate dataset to get same sample rate between channels
         datasets_filled = [d.interpolate() for d in datasets]
         # Create mapping for class labels
-        ysetall = [set(np.array(data.activityID)) - set([0]) \
-            for data in datasets_filled]
-        classlabels = list(set.union(*[set(y) for y in ysetall]))
-        nr_classes = len(classlabels)
-        mapclasses = {classlabels[i] : i for i in range(len(classlabels))}
+        classlabels, nr_classes, mapclasses = map_clas(datasets_filled)
         #Create input (x) and output (y) sets
         xall = [np.array(data[columns_to_use]) for data in datasets_filled]
         yall = [np.array(data.activityID) for data in datasets_filled]
-
         xylists = [split_activities(y, x) for x, y in zip(xall, yall)]
         Xlists, ylists = zip(*xylists)
         ybinarylists = [transform_y(y, mapclasses, nr_classes) for y in ylists]
         # Split in train, test and val
-        train_range = slice(0, 6)
-        val_range = 6
+        x_trainlist, y_trainlist = split_data(Xlist,ylist,slice(0, 6))
+        x_vallist, y_vallist = split_data(Xlist,ylist,indices=6)
         test_range = slice(7, len(datasets_filled))
-        x_trainlist = [X for Xlist in Xlists[train_range] for X in Xlist]
-        x_vallist = [X for X in Xlists[val_range]]
-        x_testlist = [X for Xlist in Xlists[test_range] for X in Xlist]
-        y_trainlist = [y for ylist in ybinarylists[train_range] for y in ylist]
-        y_vallist = [y for y in ybinarylists[val_range]]
-        y_testlist = [y for ylist in ybinarylists[test_range] for y in ylist]
-
-        # Take sliding-window frames. Target is label of last time step
-        # Data is 100 Hz
-        frame_length = int(5.12 * 100)
-        step = 1 * 100
-        x_train = []
-        y_train = []
-        x_val = []
-        y_val = []
-        x_test = []
-        y_test = []
-        sliding_window(frame_length, step, x_train, y_train, y_trainlist, \
-            x_trainlist)
-        sliding_window(frame_length, step, x_val, y_val, y_vallist, x_vallist)
-        sliding_window(frame_length, step, x_test, y_test, \
-            y_testlist, x_testlist)
-        numpify_and_store(x_train, y_train, 'X_train', 'y_train', \
-        outdatapath, shuffle=True)
-        numpify_and_store(x_val, y_val, 'X_val', 'y_val', outdatapath, \
-            shuffle=False)
-        numpify_and_store(x_test, y_test, 'X_test', 'y_test', outdatapath, \
-            shuffle=False)
+        x_testlist, y_testlist = split_data(Xlist,ylist,test_range)
+        # Take sliding-window frames, target is label of last time step,
+        # and store as numpy file
+        slidingwindow_store(y_list=y_trainlist, x_list=x_trainlist, \
+                    X_name='X_train', y_name='y_train', \
+                    outdatapath=outdatapath,shuffle=True)
+        slidingwindow_store(y_list=y_vallist, x_list=x_vallist, \
+            X_name='X_val', y_name='y_val', \
+            outdatapath=outdatapath,shuffle=False)
+        slidingwindow_store(y_list=y_testlist, x_list=x_testlist, \
+                X_name='X_test', y_name='y_test', \
+                outdatapath=outdatapath,shuffle=False)
         print('Processed data succesfully stored in ' + outdatapath)
     return outdatapath
 
