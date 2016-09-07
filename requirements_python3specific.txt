@@ -1,0 +1,1 @@
+urllib.request>=3.5
