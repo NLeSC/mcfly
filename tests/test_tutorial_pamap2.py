@@ -48,9 +48,9 @@ class TutorialPAMAP2Suite(unittest.TestCase):
     def test_addheader(self):
         """ Test whether function produces dataframe of same shape as input
         """
-        datasets = pd.DataFrame(index=range(100),columns=range(54))
+        datasets = [pd.DataFrame(index=range(100),columns=range(54)) for b in range(10)]
         datasetsnew = tutorial_pamap2.addheader(datasets)
-        test = datasetsnew.shape == datasets.shape
+        test = datasetsnew[0].shape == datasets[0].shape
         assert test
 
     def test_numpify_and_store(self):
