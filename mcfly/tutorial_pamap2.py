@@ -54,8 +54,9 @@ def sliding_window(frame_length, step, Xsamples,\
 
 def transform_y(y, mapclasses, nr_classes):
     """
-    Transforms y, a tuple with sequences of class per time segment per sample,
-    into a binary matrix per sample
+    Transforms y, a list with one sequence of A timesteps
+    and B unique classes into a binary Numpy matrix of
+    shape (A, B)
     """
     ymapped = np.array([mapclasses[c] for c in y], dtype='int')
     ybinary = to_categorical(ymapped, nr_classes)
@@ -83,7 +84,7 @@ def addheader(datasets):
 
 def numpify_and_store(X, y, xname, yname, outdatapath, shuffle=False):
     """
-    Converts python lists x and y into numpy arrays
+    Converts python lists x 3D and y 1D into numpy arrays
     and stores the numpy array in directory outdatapath
     shuffle is optional and shuffles the samples
     """
@@ -155,9 +156,6 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
         datasets = [pd.read_csv(datadir+'/'+fn, header=None, sep=' ') \
             for fn in filenames]
         datasets = addheader(datasets) # add headers to the datasets
-        #print(len(datasets))
-        print(datasets[0].shape)
-
         #Interpolate dataset to get same sample rate between channels
         datasets_filled = [d.interpolate() for d in datasets]
         # Create mapping for class labels

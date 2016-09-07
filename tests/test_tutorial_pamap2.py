@@ -33,6 +33,29 @@ class TutorialPAMAP2Suite(unittest.TestCase):
             os.remove(filename)
         assert test
 
+    def test_transform_y(self):
+        """ Test whether function produces Numpy array of expected size """
+        mapclasses = {1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6, \
+                        12: 7, 13: 8, 16: 9, 17: 10, 24: 11}
+        nr_classes = 12
+        y = list([1,2,5,7,13,16,24,1,2,5,7,13,16,24]) #14 values
+        transformedy = transform_y(y, mapclasses, nr_classes)
+        test = transformedy.shape is (14,12)
+        assert test
+
+    def test_sliding_window(self):
+        """ Test whether function correctly updates x_train to the
+         right size"""
+        frame_length = 512
+        step = 100
+        x_trainlist = [np.zeros((25187,9)) for b in range(78)]
+        y_trainlist = [np.zeros((12,9)) for b in range(78)]
+        x_train = []
+        y_train = []
+        sliding_window(frame_length, step, x_train, y_train, y_trainlist, \
+            x_trainlist)
+        test = len(x_train) is 19266
+        assert test
 
 if __name__ == '__main__':
     unittest.main()
