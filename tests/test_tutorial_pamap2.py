@@ -2,8 +2,10 @@ from mcfly import tutorial_pamap2
 import numpy as np
 import pandas as pd
 from nose.tools import assert_equal, assert_equals
-from os import getcwd, path, remove
+from os import listdir
+import os.path
 import unittest
+
 
 class TutorialPAMAP2Suite(unittest.TestCase):
     """Basic test cases."""
