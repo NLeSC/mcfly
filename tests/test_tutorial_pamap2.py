@@ -1,12 +1,12 @@
 from mcfly import tutorial_pamap2
 import numpy as np
+import pandas as pd
 from nose.tools import assert_equal, assert_equals
-
+from os import getcwd, path, remove
 import unittest
 
 class TutorialPAMAP2Suite(unittest.TestCase):
     """Basic test cases."""
-
 
     def test_split_activities(self):
         """
@@ -15,7 +15,7 @@ class TutorialPAMAP2Suite(unittest.TestCase):
         labels = np.ones(3000)
         labels[range(150)] = 2
         X = np.ones((3000,9))
-        splittedX = split_activities(labels,X)
+        splittedX = tutorial_pamap2.split_activities(labels,X)
         test = splittedX[0][0].shape == (1150, 9)
         assert test
 
@@ -28,8 +28,8 @@ class TutorialPAMAP2Suite(unittest.TestCase):
         y_trainlist = [np.zeros((12,9)) for b in range(78)]
         x_train = []
         y_train = []
-        sliding_window(frame_length, step, x_train, y_train, y_trainlist, \
-            x_trainlist)
+        tutorial_pamap2.sliding_window(frame_length, step, x_train, \
+            y_train, y_trainlist, x_trainlist)
         test = len(x_train) == 19266
         assert test
 
@@ -39,7 +39,7 @@ class TutorialPAMAP2Suite(unittest.TestCase):
                         12: 7, 13: 8, 16: 9, 17: 10, 24: 11}
         nr_classes = 12
         y = list([1,2,5,7,13,16,24,1,2,5,7,13,16,24]) #14 values
-        transformedy = transform_y(y, mapclasses, nr_classes)
+        transformedy = tutorial_pamap2.transform_y(y, mapclasses, nr_classes)
         test = transformedy.shape == (14,12)
         assert test
 
@@ -47,7 +47,7 @@ class TutorialPAMAP2Suite(unittest.TestCase):
         """ Test whether function produces dataframe of same shape as input
         """
         datasets = pd.DataFrame(index=range(100),columns=range(54))
-        datasetsnew = addheader(datasets)
+        datasetsnew = tutorial_pamap2.addheader(datasets)
         test = datasetsnew.shape == datasets.shape
         assert test
 
@@ -62,7 +62,8 @@ class TutorialPAMAP2Suite(unittest.TestCase):
         xname = 'xname'
         yname = 'yname'
         outputpath = os.getcwd()
-        numpify_and_store(X, y, xname, yname, outdatapath, shuffle=True)
+        tutorial_pamap2.numpify_and_store(X, y, xname, yname, outdatapath, \
+            shuffle=True)
         filename = outdatapath+ xname+ '.npy'
         test = os.path.isfile(filename)
         if test == True:
