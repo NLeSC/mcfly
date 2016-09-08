@@ -78,7 +78,8 @@ class TutorialPAMAP2Suite(unittest.TestCase):
         Xlists = tuple([[np.zeros((200,9)) for b in range(14)] for c in range(9)])
         ybinarylists = [np.zeros((14,12)) for c in range(9)]
         indices = slice(7, 9)
-        x_test, y_test = split_data(Xlists, ybinarylists, indices)
+        x_test, y_test = tutorial_pamap2.split_data(Xlists, ybinarylists, \
+            indices)
         test = y_test[0].shape == (12,) and x_test[0].shape == (200, 9)
         assert test
 

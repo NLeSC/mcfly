@@ -19,6 +19,7 @@ if sys.version_info <= (3,): #python2
 else: #python3
     import urllib.request
 
+
 def split_activities(labels, X, borders=10*100):
     """
     Splits up the data per activity and exclude activity=0.
@@ -181,7 +182,7 @@ def preprocess(targetdir, outdatapath, columns_to_use):
     """ Function to preprocess the PAMAP2 data after it is fetched
     Arguments:
     - targetdir: subdirectory of directory_to_extract_to, targetdir
-        is defined function fetch_data
+        is defined by function fetch_data
     - outdatapath: a subdirectory of directory_to_extract_to, outdatapath
         is the direcotry where the Numpy output will be stored.
     Value (output):
