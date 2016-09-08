@@ -170,7 +170,10 @@ def split_data(Xlists, ybinarylists, indices):
     - x_setlist: list (windows across samples) of numpy-arrays (time, variable)
     - y_setlist: list (windows across samples) of numpy-arrays (class, )
     """
-    if str(type(indices)) == "<class 'slice'>":
+    tty = str(type(indices))
+    # or statement in next line is to account for python2 and python3
+    # difference
+    if  tty == "<class 'slice'>" or tty == "<type 'slice'>":
         x_setlist = [X for Xlist in Xlists[indices] for X in Xlist]
         y_setlist = [y for ylist in ybinarylists[indices] for y in ylist]
     else:
