@@ -75,8 +75,8 @@ def addheader(datasets):
     IMUsensor_columns = ['temperature'] + \
                     ['acc_16g_' + i for i in axes] + \
                     ['acc_6g_' + i for i in axes] + \
-                    ['gyroscope_'+ i for i in axes] + \
-                    ['magnometer_'+ i for i in axes] + \
+                    ['gyroscope_' + i for i in axes] + \
+                    ['magnometer_' + i for i in axes] + \
                     ['orientation_' + str(i) for i in range(4)]
     header = ["timestamp", "activityID", "heartrate"] + ["hand_"+s \
         for s in IMUsensor_columns] \
@@ -134,12 +134,12 @@ def fetch_data(directory_to_extract_to):
             print('The data was previously downloaded and stored in ' +
                 path_to_zip_file)
         # unzip
-        with zipfile.ZipFile(path_to_zip_file ,"r") as zip_ref:
+        with zipfile.ZipFile(path_to_zip_file, "r") as zip_ref:
             zip_ref.extractall(targetdir)
     return targetdir
 
 
-def slidingwindow_store(y_list, x_list,X_name, y_name, outdatapath, shuffle):
+def slidingwindow_store(y_list, x_list, X_name, y_name, outdatapath, shuffle):
     # Take sliding-window frames. Target is label of last time step
     # Data is 100 Hz
     frame_length = int(5.12 * 100)
@@ -158,8 +158,17 @@ def map_clas(datasets_filled):
     mapclasses = {classlabels[i] : i for i in range(len(classlabels))}
     return classlabels, nr_classes, mapclasses
 
-def split_data(Xlists,ybinarylists,indices):
-    """ Function takes subset from list given indices"""
+def split_data(Xlists, ybinarylists, indices):
+    """ Function takes subset from list given indices
+    Arguments:
+    - Xlists: tuple (samples) of lists (windows)
+            of numpy-arrays (time, variable)
+    - ybinarylist: list (samples) of numpy-arrays (window, class)
+    - indices: indices of the slice of data (samples) to be taken
+    Value (output):
+    - x_setlist: list (windows across samples) of numpy-arrays (time, variable)
+    - y_setlist: list (windows across samples) of numpy-arrays (class, )
+    """
     if str(type(indices)) == "<class 'slice'>":
         x_setlist = [X for Xlist in Xlists[indices] for X in Xlist]
         y_setlist = [y for ylist in ybinarylists[indices] for y in ylist]
@@ -168,7 +177,7 @@ def split_data(Xlists,ybinarylists,indices):
         y_setlist = [y for y in ybinarylists[indices]]
     return x_setlist, y_setlist
 
-def preprocess(targetdir,outdatapath):
+def preprocess(targetdir, outdatapath, columns_to_use):
     """ Function to preprocess the PAMAP2 data after it is fetched
     Arguments:
     - targetdir: subdirectory of directory_to_extract_to, targetdir
@@ -196,22 +205,22 @@ def preprocess(targetdir,outdatapath):
     Xlists, ylists = zip(*xylists)
     ybinarylists = [transform_y(y, mapclasses, nr_classes) for y in ylists]
     # Split in train, test and val
-    x_vallist, y_vallist = split_data(Xlists,ybinarylists,indices=6)
+    x_vallist, y_vallist = split_data(Xlists, ybinarylists, indices=6)
     test_range = slice(7, len(datasets_filled))
-    x_testlist, y_testlist = split_data(Xlists,ybinarylists,test_range)
-    x_trainlist, y_trainlist = split_data(Xlists,ybinarylists,\
+    x_testlist, y_testlist = split_data(Xlists, ybinarylists, test_range)
+    x_trainlist, y_trainlist = split_data(Xlists, ybinarylists, \
         indices=slice(0, 6))
     # Take sliding-window frames, target is label of last time step,
     # and store as numpy file
     slidingwindow_store(y_list=y_trainlist, x_list=x_trainlist, \
                 X_name='X_train', y_name='y_train', \
-                outdatapath=outdatapath,shuffle=True)
+                outdatapath=outdatapath, shuffle=True)
     slidingwindow_store(y_list=y_vallist, x_list=x_vallist, \
         X_name='X_val', y_name='y_val', \
-        outdatapath=outdatapath,shuffle=False)
+        outdatapath=outdatapath, shuffle=False)
     slidingwindow_store(y_list=y_testlist, x_list=x_testlist, \
             X_name='X_test', y_name='y_test', \
-            outdatapath=outdatapath,shuffle=False)
+            outdatapath=outdatapath, shuffle=False)
     print('Processed data succesfully stored in ' + outdatapath)
     return None
 
@@ -236,7 +245,7 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
         print('Data previously pre-processed and np-files saved to ' +
             outdatapath)
     else:
-        preprocess(targetdir,outdatapath)
+        preprocess(targetdir, outdatapath, columns_to_use)
     return outdatapath
 
 def load_data(outputpath):

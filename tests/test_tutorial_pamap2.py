@@ -72,6 +72,16 @@ class TutorialPAMAP2Suite(unittest.TestCase):
             os.remove(filename)
         assert test
 
+    def test_split_data(self):
+        """ Test whether function produces numpy arrays
+        of the correct dimensions """
+        Xlists = tuple([[np.zeros((200,9)) for b in range(14)] for c in range(9)])
+        ybinarylists = [np.zeros((14,12)) for c in range(9)]
+        indices = slice(7, 9)
+        x_test, y_test = split_data(Xlists, ybinarylists, indices)
+        test = y_test[0].shape == (12,) and x_test[0].shape == (200, 9)
+        assert test
+
 
 if __name__ == '__main__':
     unittest.main()
