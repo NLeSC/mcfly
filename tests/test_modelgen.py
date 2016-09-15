@@ -29,6 +29,13 @@ class ModelGenerationSuite(unittest.TestCase):
         assert_equal(str(type(model.layers[0])), "<class 'keras.layers.normalization.BatchNormalization'>",
                      'Wrong layer type.')
 
+    def test_cnn_fc_nodes(self):
+        """ CNN model should have number of dense nodes defined by user. """
+        fc_hidden_nodes = 101
+        model = modelgen.generate_CNN_model((None, 20, 3), 2, [32, 32], fc_hidden_nodes)
+        dense_layer = [l for l in model.layers if 'Dense' in str(l)][0]
+        assert_equal(dense_layer.output_dim, fc_hidden_nodes, 'Wrong number of fc nodes.')
+
     def test_cnn_batchnorm_dim(self):
         "The output shape of the batchnorm should be (None, nr_timesteps, nr_filters)"
         model = modelgen.generate_CNN_model((None, 20, 3), 2, [32, 32], 100)
@@ -45,6 +52,11 @@ class ModelGenerationSuite(unittest.TestCase):
         """ Number of Conv layers from range [4, 4] should be 4. """
         hyperparams = modelgen.generate_CNN_hyperparameter_set(min_layers=4, max_layers=4)
         assert_equal(len(hyperparams.get('filters')), 4)
+
+    def test_CNN_hyperparameters_nrlayers(self):
+        """ Number of fc nodes from range [123, 123] should be 123. """
+        hyperparams = modelgen.generate_CNN_hyperparameter_set(min_fc_nodes=123, max_fc_nodes=123)
+        assert_equal(hyperparams.get('fc_hidden_nodes'), 123)
 
     def test_DeepConvLSTM_hyperparameters_nrconvlayers(self):
         """ Number of Conv layers from range [4, 4] should be 4. """
