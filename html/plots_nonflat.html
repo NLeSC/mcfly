@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Charts on nested data</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/dc.css"/>
+</head>
+<body>
+
+<div class="container">
+<script type="text/javascript" src="header.js"></script>
+  <div id="val-chart" style="width:600px; height:300px">
+    <div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
+      <a href="javascript:valChart.filterAll();dc.redrawAll();">reset</a>
+    </div>
+  </div>
+  <div id="chart-modeltype" style="width:300px; height:300px">
+    <div class="reset" style="visibility: hidden;">range: <span class="filter"></span>
+      <a href="javascript:modeltypeChart.filterAll();dc.redrawAll();">reset</a>
+    </div>
+  </div>
+  <div id="chart-filters" style="width:300px; height:300px">
+    <div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
+      <a href="javascript:spenderRowChart.filterAll();dc.redrawAll();">reset</a>
+    </div>
+  </div>
+
+<script type="text/javascript" src="js/d3.js"></script>
+<script type="text/javascript" src="js/crossfilter.js"></script>
+<script type="text/javascript" src="js/dc.js"></script>
+<script type="text/javascript" src="js/reductio.js"></script>
+<script type="text/javascript" src="customSeriesChart.js"></script>
+<script type="text/javascript">
+
+var valChart = customSeriesChart("#val-chart"),
+    modeltypeChart  = dc.rowChart("#chart-modeltype"),
+    filterChart = dc.rowChart("#chart-filters");
+
+var addAllTopOrderFunctions = function(group) {
+      group.all = function() {
+        var newObject = [];
+        for (var key in this) {
+          if (this.hasOwnProperty(key) && key !== 'all' && key !== 'top' && key !== 'order') {
+            newObject.push({
+              key: key,
+              value: this[key]
+            });
+          }
+        }
+        return newObject;
+      };
+      group.top = function(n) {
+        var newObject = this.all().sort(function(a, b) {
+          return b.value - a.value;
+        }).slice(0, n);
+
+        return newObject;
+      };
+      group.order = function(p) {
+        return p;
+      };
+    };
+
+
+d3.json("data.json", function(error, data) {
+    console.log(data); // this is your data
+
+    // Add some indices
+    for (var i=0; i<data.length; i++){
+        data[i].model = i;
+        var val_acc = {};
+        for (var j=0; j<data[i].val_acc.length; j++){
+            val_acc[j] = data[i].val_acc[j];
+        }
+        data[i].val_acc = val_acc;
+    }
+    console.log(data);
+	var ndx = crossfilter(data),
+        modelDimension = ndx.dimension(function(d) {return d.model;});
+    var iterationGroup = modelDimension.group().reduce(
+            //reduceAdd
+            function(a, d) {
+                if (a.key === undefined) {
+                    a.key = "Model "+d.model;
+                }
+                valuesList = []
+                for(var iteration in Object.keys(d.val_acc)){
+                    keyValuePair = {};
+                    keyValuePair.key = [+d.model, +iteration];
+                    keyValuePair.value = d.val_acc[iteration];
+                    valuesList.push(keyValuePair);
+                }
+                a.values = valuesList;
+
+                return a;
+            },
+            //reduceRemove
+            function(a, d) {
+                delete a.key;
+                delete a.values;
+                return a;
+            },
+            //reduceInit
+            function() {
+                return {};
+            }
+        );//.value();
+    // var iterationGroupNewList = [];
+    // for(var model in Object.keys(iterationGroup)) {
+    //     for(var iteration in Object.keys(iterationGroup[model].key)){
+    //         item = {};
+    //         item.key = [+model, +iteration];
+    //         item.value = iterationGroup[model].value[iteration];
+    //         iterationGroupNewList.push(item);
+    //     }
+    // }
+    //addAllTopOrderFunctions(iterationGroup);
+
+	var  runDimension = ndx.dimension(function(d) {return [+d.model, +d.iteration]; }),
+        runGroup = runDimension.group().reduceSum(function(d) { return +d.val_acc; }),
+        modeltypeDim = ndx.dimension(function(d){return d.modeltype;}),
+        nrconvlayersDim = ndx.dimension(function(d){return +d.nr_convlayers;}),
+        countPerModeltype = modeltypeDim.group().reduceCount(),
+        modelTypeGroup = modeltypeDim.group(),
+        convLayerGroup = nrconvlayersDim.group(),
+        accPerModeltype = modeltypeDim.group().reduceSum(function(d) {return d.final_val_acc;}),
+        //accPerConvlayer = convLayerGroup.reduceSum(function(d) {return d.final_val_acc;})
+        accPerConvlayer = reductio().avg(function(d){return +d.final_val_acc})(convLayerGroup)
+        ;
+    //accPerModeltype = reductio().avg(function(d){return +d.final_val_acc})(modelTypeGroup)
+    console.log(modelDimension.group());
+    console.log(iterationGroup);
+    console.log(iterationGroup.all());
+    //console.log(accPerModeltype.all());
+    //console.log(accPerConvlayer.all());
+    //console.log(accPerConvlayer);
+
+    //console.log(accPerConvlayer.all());
+    valChart
+      //.width(768)
+      //.height(480)
+      .chart(function(c) { return dc.lineChart(c); }) //.interpolate('basis')
+      .x(d3.scale.linear()) //.domain([0,15]))
+      .brushOn(false)
+      .yAxisLabel("Validation loss")
+      .xAxisLabel("Iteration")
+      .clipPadding(10)
+      .elasticY(true)
+      .elasticX(true)
+      .dimension(modelDimension)
+      .group(iterationGroup)
+      .mouseZoomable(true)
+      .seriesAccessor(function(d) {
+          return d.key[0];
+      })
+      .keyAccessor(function(d) {return +d.key[1];})
+      .valueAccessor(function(d) {return +d.value;})
+      .legend(dc.legend().x(350).y(350).itemHeight(13).gap(5).horizontal(1).legendWidth(140).itemWidth(70));
+
+    // dc.override(valChart, '_preprocessData', function () {
+    //         var keep = [];
+    //         var childrenChanged;
+    //         // var nester = d3.nest().key(valChart.seriesAccessor());
+    //         // if (_seriesSort) {
+    //         //     nester.sortKeys(_seriesSort);
+    //         // }
+    //         // if (_valueSort) {
+    //         //     nester.sortValues(_valueSort);
+    //         // }
+    //         var nesting = this.data();
+    //         this._charts = {};
+    //         var children =
+    //             nesting.map(function (sub, i) {
+    //                 var subChart = this._charts[sub.key] || this.chart.call(this, this, this.chartGroup, sub.key, i);
+    //                 if (!this._charts[sub.key]) {
+    //                     childrenChanged = true;
+    //                 }
+    //                 this._charts[sub.key] = subChart;
+    //                 //console.log(sub);
+    //                 keep.push(sub.key);
+    //                 return subChart
+    //                     .dimension(this.dimension())
+    //                     .group({all: d3.functor(sub.values)}, sub.key)
+    //                     .keyAccessor(this.keyAccessor())
+    //                     .valueAccessor(this.valueAccessor())
+    //                     .brushOn(this.brushOn());
+    //             }, this);
+    //         // this works around the fact compositeChart doesn't really
+    //         // have a removal interface
+    //         // Object.keys(this._charts)
+    //         //     .filter(function (c) {return keep.indexOf(c) === -1;})
+    //         //     .forEach(function (c) {
+    //         //         if (this._charts[c].g()) {
+    //         //             this._charts[c].g().remove();
+    //         //         }
+    //         //         delete this._charts[c];
+    //         //         childrenChanged = true;
+    //         //     }, this);
+    //         // this._compose(children);
+    //         // if (childrenChanged && this.legend()) {
+    //         //     this.legend().render();
+    //         // }
+    //     }
+    // );
+
+
+    modeltypeChart
+      .margins({top: 20, left: 10, right: 10, bottom: 20})
+        .dimension(modeltypeDim)
+        .group(countPerModeltype)
+        //.x(d3.scale.linear().domain([0,10]))
+        .elasticX(true)
+        .controlsUseVisibility(true);
+
+	filterChart
+    .margins({top: 20, left: 10, right: 10, bottom: 20})
+      .dimension(nrconvlayersDim)
+      .group(accPerConvlayer)
+      .valueAccessor(function(d) {return +d.value.avg;})
+      //.x(d3.scale.linear().domain([0,10]))
+      .elasticX(true)
+      .controlsUseVisibility(true);
+
+	dc.renderAll();
+});
+
+
+
+</script>
+
+</div>
+</body>
+</html>

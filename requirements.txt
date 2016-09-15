@@ -5,3 +5,4 @@ scipy>=0.11
 six==1.10.0
 Theano==0.8.2
 Keras==1.0.3
+pandas>=0.17.1

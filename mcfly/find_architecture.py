@@ -1,4 +1,4 @@
-'''
+"""
  Summary:
  Function generate_models from modelgen.py generates and compiles models
  Function train_models_on_samples trains those models
@@ -6,16 +6,19 @@
  Function find_best_architecture is wrapper function that combines
  these steps
  Example function calls in 'EvaluateDifferentModels.ipynb'
-'''
+"""
 import numpy as np
 from matplotlib import pyplot as plt
 from . import modelgen
 from sklearn import neighbors, metrics
 import warnings
+import json
+import os
 
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
-                            nr_epochs=5, subset_size=100, verbose=True):
+                            nr_epochs=5, subset_size=100, verbose=True,
+                            outputfile=None):
     """
     Given a list of compiled models, this function trains
     them all on a subset of the train data. If the given size of the subset is
@@ -37,9 +40,11 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     subset_size :
         The number of samples used from the complete train set
     subsize_set : int, optional
-        number of samples to use from the training set for training these models
+        number of samples to use from the training set for training the models
     verbose : bool, optional
         flag for displaying verbose output
+    outputfile : str, optional
+        File location to store the model results
 
     Returns
     ----------
@@ -51,13 +56,15 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         validation losses of the models
     """
     # if subset_size is smaller then X_train, this will work fine
-    X_train_sub = X_train[:subset_size, :, :]
-    y_train_sub = y_train[:subset_size, :]
+    X_train_sub = X_train[:subset_size,:,:]
+    y_train_sub = y_train[:subset_size,:]
 
     histories = []
     val_accuracies = []
     val_losses = []
-    for model, params, model_types in models:
+    for i, (model, params, model_types) in enumerate(models):
+        if verbose:
+            print('Training model %d'%i, model_types)
         history = model.fit(X_train_sub, y_train_sub,
                             nb_epoch=nr_epochs, batch_size=20,
                             # see comment on subsize_set
@@ -66,8 +73,45 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         histories.append(history)
         val_accuracies.append(history.history['val_acc'][-1])
         val_losses.append(history.history['val_loss'][-1])
-
+        if outputfile is not None:
+            storetrainhist2json(params, model_types,
+                                history.history, outputfile)
     return histories, val_accuracies, val_losses
+
+
+def storetrainhist2json(params, model_type, history, outputfile):
+    """
+    This function stores the model parameters, the loss and accuracy history
+    of one model in a JSON file. It appends the model information to the
+    existing models in the file.
+
+    Parameters
+    ----------
+    params : dictionary with parameters for one model
+    model_type : Keras model object for one model
+    history : dictionary with training history from one model
+    outputfile : str of path where the json file needs to be stored
+
+    """
+    jsondata = params.copy()
+    for k in jsondata.keys():
+        if isinstance(jsondata[k], np.ndarray):
+            jsondata[k] = jsondata[k].tolist()
+    jsondata['train_acc'] = history['acc']
+    jsondata['train_loss'] = history['loss']
+    jsondata['val_acc'] = history['val_acc']
+    jsondata['val_loss'] = history['val_loss']
+    jsondata['modeltype'] = model_type
+    jsondata['modeltype'] = model_type
+    if os.path.isfile(outputfile):
+        with open(outputfile, 'r') as outfile:
+            previousdata = json.load(outfile)
+    else:
+        previousdata = []
+    previousdata.append(jsondata)
+    with open(outputfile, 'w') as outfile:
+        json.dump(previousdata, outfile, sort_keys = True,
+                  indent = 4, ensure_ascii=False)
 
 
 def plotTrainingProcess(history, name='Model', ax=None):
@@ -103,7 +147,7 @@ def plotTrainingProcess(history, name='Model', ax=None):
 
 def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                            number_of_models=5, nr_epochs=5, subset_size=100,
-                           **kwargs
+                           outputpath=None, **kwargs
                            ):
     """
     Tries out a number of models on a subsample of the data,
@@ -126,9 +170,11 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
     nr_epochs : int
         The number of epochs that each model is trained
     subset_size : int
-        The size of the subset of the data that is used for finding the optimal architecture
+        The size of the subset of the data that is used for finding
+        the optimal architecture
     **kwargs: key-value parameters
-        parameters for generating the models (see docstring for modelgen.generate_models)
+        parameters for generating the models
+        (see docstring for modelgen.generate_models)
 
     Returns
     ----------
@@ -151,13 +197,14 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                                                                     models,
                                                                     nr_epochs,
                                                                     subset_size=subset_size,
-                                                                    verbose=verbose)
+                                                                    verbose=verbose,
+                                                                    outputfile=outputpath)
     best_model_index = np.argmax(val_accuracies)
     best_model, best_params, best_model_type = models[best_model_index]
     knn_acc = kNN_accuracy(
-        X_train[:subset_size, :, :], y_train[:subset_size, :], X_val, y_val)
+        X_train[:subset_size,:,:], y_train[:subset_size,:], X_val, y_val)
     if verbose:
-        for i in range(len(models)):  # <= now one plot per model, ultimately we
+        for i in range(len(models)):  # now one plot per model, ultimately we
             # may want all models in one plot to allow for direct comparison
             name = str(models[i][1])
             plotTrainingProcess(histories[i], name)
