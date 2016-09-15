@@ -26,7 +26,8 @@ class ModelGenerationSuite(unittest.TestCase):
     def test_cnn_starts_with_batchnorm(self):
         """ CNN models should always start with a batch normalization layer. """
         model = modelgen.generate_CNN_model((None, 20, 3), 2, [32, 32], 100)
-        assert_equal(str(type(model.layers[0])), "<class 'keras.layers.normalization.BatchNormalization'>", 'Wrong layer type.')
+        assert_equal(str(type(model.layers[0])), "<class 'keras.layers.normalization.BatchNormalization'>",
+                     'Wrong layer type.')
 
     def test_cnn_batchnorm_dim(self):
         "The output shape of the batchnorm should be (None, nr_timesteps, nr_filters)"
