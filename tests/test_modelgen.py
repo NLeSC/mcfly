@@ -37,16 +37,30 @@ class ModelGenerationSuite(unittest.TestCase):
         assert_equal(dense_layer.output_dim, fc_hidden_nodes, 'Wrong number of fc nodes.')
 
     def test_cnn_batchnorm_dim(self):
-        "The output shape of the batchnorm should be (None, nr_timesteps, nr_filters)"
+        """"The output shape of the batchnorm should be (None, nr_timesteps, nr_filters)"""
         model = modelgen.generate_CNN_model((None, 20, 3), 2, [32, 32], 100)
         batchnormlay = model.layers[2]
         assert_equal(batchnormlay.output_shape, (None, 20, 32))
 
     def test_deepconvlstm_batchnorm_dim(self):
-        "The output shape of the batchnorm should be (None, nr_filters, nr_timesteps, nr_channels)"
+        """The output shape of the batchnorm should be (None, nr_filters, nr_timesteps, nr_channels)"""
         model = modelgen.generate_DeepConvLSTM_model((None, 20, 3), 2, [32, 32], [32, 32])
         batchnormlay = model.layers[3]
         assert_equal(batchnormlay.output_shape, (None, 32, 20, 3))
+
+    def test_deepconvlstm_enough_batchnorm(self):
+        """LSTM model should contain as many batch norm layers as it has activations layers"""
+        model = modelgen.generate_DeepConvLSTM_model((None, 20, 3), 2, [32, 32, 32], [32, 32, 32])
+        batch_norm_layers = len([l for l in model.layers if 'BatchNormalization' in str(l)])
+        activation_layers = len([l for l in model.layers if 'Activation' in str(l)])
+        assert_equal(batch_norm_layers, activation_layers)
+
+    def test_cnn_enough_batchnorm(self):
+        """CNN model should contain as many batch norm layers as it has activations layers"""
+        model = modelgen.generate_CNN_model((None, 20, 3), 2, [32, 32], 100)
+        batch_norm_layers = len([l for l in model.layers if 'BatchNormalization' in str(l)])
+        activation_layers = len([l for l in model.layers if 'Activation' in str(l)])
+        assert_equal(batch_norm_layers, activation_layers)
 
     def test_CNN_hyperparameters_nrlayers(self):
         """ Number of Conv layers from range [4, 4] should be 4. """
