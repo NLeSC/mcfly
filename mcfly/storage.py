@@ -10,32 +10,38 @@ import json
 import pickle
 import numpy as np
 
-def savemodel(model,filepath,modelname):
+
+def savemodel(model, filepath, modelname):
     """ Save model + weights + params TO json + npy + pkl file, respectively
     Input:
     - model (Keras object)
     - filepath: directory where the data will be stored
     - modelname: name of the model to be used in the filename
     """
-    json_string = model.to_json() # save architecture to json string
+    json_string = model.to_json()  # save architecture to json string
     with open(filepath + modelname + '_architecture.json', 'w') as outfile:
-        json.dump(json_string, outfile, sort_keys = True, indent = 4, ensure_ascii=False)
-    wweights = model.get_weights() #get weight from model
-    np.save(filepath+modelname+'_weights',wweights) #save weights in npy file
+        json.dump(json_string, outfile, sort_keys=True, indent=4,
+                  ensure_ascii=False)
+    wweights = model.get_weights()  # get weight from model
+    np.save(filepath + modelname + '_weights',
+            wweights)  # save weights in npy file
     return None
 
-def loadmodel(filepath,modelname):
+
+def loadmodel(filepath, modelname):
     """ Load model + weights FROM json + npy file, respectively
     Input:
     - filepath: directory where the data will be stored
     - modelname: name of the model to be used in the filename
     """
     with open(filepath + modelname + '_architecture.json', 'r') as outfile:
-         json_string_loaded = json.load(outfile)
+        json_string_loaded = json.load(outfile)
     model_repro = model_from_json(json_string_loaded)
-    wweights2 = model_repro.get_weights() # extracting the weights would give us the untrained/default weights
-    wweights_recovered =np.load(filepath+modelname+'_weights.npy') #load the original weights
-    model_repro.set_weights(wweights_recovered) # now set the weights
+    # wweights2 = model_repro.get_weights()
+    #  extracting the weights would give us the untrained/default weights
+    wweights_recovered = np.load(
+        filepath + modelname + '_weights.npy')  # load the original weights
+    model_repro.set_weights(wweights_recovered)  # now set the weights
     return model_repro
 
 # If we would use standard Keras function, which stores model and weights

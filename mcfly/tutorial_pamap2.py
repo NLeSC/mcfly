@@ -14,9 +14,9 @@ import zipfile
 import keras
 from keras.utils.np_utils import to_categorical
 import sys
-if sys.version_info <= (3,): #python2
+if sys.version_info <= (3,): # python2
     import urllib
-else: #python3
+else: # python3
     import urllib.request
 
 
@@ -95,7 +95,7 @@ def numpify_and_store(X, y, xname, yname, outdatapath, shuffle=False):
     """
     X = np.array(X)
     y = np.array(y)
-    #Shuffle around the train set
+    # Shuffle the train set
     if shuffle is True:
         np.random.seed(123)
         neworder = np.random.permutation(X.shape[0])
@@ -117,7 +117,7 @@ def fetch_data(directory_to_extract_to):
         print('Data previously downloaded and stored in ' + targetdir)
     else:
         os.makedirs(targetdir) # create target directory
-        #download the PAMAP2 data, this is 688 Mb
+        # Download the PAMAP2 data, this is 688 Mb
         path_to_zip_file = directory_to_extract_to + '/PAMAP2_Dataset.zip'
         test_file_exist = os.path.isfile(path_to_zip_file)
         if test_file_exist is False:
