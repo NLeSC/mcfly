@@ -1,14 +1,24 @@
-#import required python modules
+"""
+ Summary:
+ Function fetch_and_preprocess from tutorial_pamap2.py helps to fetch and
+ preproces the data.
+ Example function calls in 'Tutorial mcfly on PAMAP2.ipynb'
+"""
 import numpy as np
 from numpy import genfromtxt
 import pandas as pd
 import matplotlib.pyplot as plt
 from os import listdir
 import os.path
-import urllib.request
 import zipfile
 import keras
 from keras.utils.np_utils import to_categorical
+import sys
+if sys.version_info <= (3,): #python2
+    import urllib
+else: #python3
+    import urllib.request
+
 
 def split_activities(labels, X, borders=10*100):
     """
@@ -17,148 +27,240 @@ def split_activities(labels, X, borders=10*100):
     Returns lists with subdatasets
     """
     tot_len = len(labels)
-    startpoints = np.where([1] + [labels[i]!=labels[i-1] for i in range(1, tot_len)])[0]
+    startpoints = np.where([1] + [labels[i] != labels[i-1] \
+        for i in range(1, tot_len)])[0]
     endpoints = np.append(startpoints[1:]-1, tot_len-1)
-    acts = [labels[s] for s,e in zip(startpoints, endpoints)]
+    acts = [labels[s] for s, e in zip(startpoints, endpoints)]
     #Also split up the data, and only keep the non-zero activities
-    Xy_split = [(X[s+borders:e-borders+1,:], a) for s,e,a in zip(startpoints, endpoints, acts) if a != 0]
-    Xy_split = [(X, y) for X,y in Xy_split if len(X)>0]
-    X_list = [X for X,y in Xy_split]
-    y_list = [y for X,y in Xy_split]
-    return X_list, y_list
+    xysplit = [(X[s+borders:e-borders+1, :], a) \
+        for s, e, a in zip(startpoints, endpoints, acts) if a != 0]
+    xysplit = [(X, y) for X, y in xysplit if len(X) > 0]
+    Xlist = [X for X, y in xysplit]
+    ylist = [y for X, y in xysplit]
+    return Xlist, ylist
+
+def sliding_window(frame_length, step, Xsamples,\
+    ysamples, Xsampleslist, ysampleslist):
+    """
+    Splits time series in ysampleslist and Xsampleslist
+    into segments by applying a sliding overlapping window
+    of size equal to frame_length with steps equal to step
+    it does this for all the samples and appends all the output together.
+    So, the participant distinction is not kept
+    """
+    for j in range(len(Xsampleslist)):
+        X = Xsampleslist[j]
+        ybinary = ysampleslist[j]
+        for i in range(0, X.shape[0]-frame_length, step):
+            xsub = X[i:i+frame_length, :]
+            ysub = ybinary
+            Xsamples.append(xsub)
+            ysamples.append(ysub)
+
+def transform_y(y, mapclasses, nr_classes):
+    """
+    Transforms y, a list with one sequence of A timesteps
+    and B unique classes into a binary Numpy matrix of
+    shape (A, B)
+    """
+    ymapped = np.array([mapclasses[c] for c in y], dtype='int')
+    ybinary = to_categorical(ymapped, nr_classes)
+    return ybinary
+
+def addheader(datasets):
+    """
+    The columns of the pandas data frame are numbers
+    this function adds the column labels
+    """
+    axes = ['x', 'y', 'z']
+    IMUsensor_columns = ['temperature'] + \
+                    ['acc_16g_' + i for i in axes] + \
+                    ['acc_6g_' + i for i in axes] + \
+                    ['gyroscope_' + i for i in axes] + \
+                    ['magnometer_' + i for i in axes] + \
+                    ['orientation_' + str(i) for i in range(4)]
+    header = ["timestamp", "activityID", "heartrate"] + ["hand_"+s \
+        for s in IMUsensor_columns] \
+        + ["chest_"+s for s in IMUsensor_columns]+ ["ankle_"+s \
+            for s in IMUsensor_columns]
+    for i in range(0, len(datasets)):
+        datasets[i].columns = header
+    return datasets
+
+def numpify_and_store(X, y, xname, yname, outdatapath, shuffle=False):
+    """
+    Converts python lists x 3D and y 1D into numpy arrays
+    and stores the numpy array in directory outdatapath
+    shuffle is optional and shuffles the samples
+    """
+    X = np.array(X)
+    y = np.array(y)
+    #Shuffle around the train set
+    if shuffle is True:
+        np.random.seed(123)
+        neworder = np.random.permutation(X.shape[0])
+        X = X[neworder, :, :]
+        y = y[neworder, :]
+    # Save binary file
+    np.save(outdatapath+ xname, X)
+    np.save(outdatapath+ yname, y)
 
 
-
-def sliding_window(X, y_binary, frame_length, step, X_samples, y_samples):
-    for i in range(0, X.shape[0]-frame_length, step):
-        X_sub = X[i:i+frame_length,:]
-        y_sub = y_binary
-        X_samples.append(X_sub)
-        y_samples.append(y_sub)
-
-def fetch_and_preprocess(directory_to_extract_to,columns_to_use):
+def fetch_data(directory_to_extract_to):
+    """
+    Fetch the data and extract the contents of the zip file
+    to the directory_to_extract_to.
+    First check whether this was done before, if yes, then skip
+    """
     targetdir = directory_to_extract_to + '/PAMAP2'
     if os.path.exists(targetdir):
         print('Data previously downloaded and stored in ' + targetdir)
     else:
+        os.makedirs(targetdir) # create target directory
         #download the PAMAP2 data, this is 688 Mb
         path_to_zip_file = directory_to_extract_to + '/PAMAP2_Dataset.zip'
         test_file_exist = os.path.isfile(path_to_zip_file)
         if test_file_exist is False:
-            url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/00231/PAMAP2_Dataset.zip'
-            local_fn, headers = urllib.request.urlretrieve(url,filename=path_to_zip_file) #retrieve data from url
-            print('Download complete and stored in: ' + path_to_zip_file )
+            url = str('https://archive.ics.uci.edu/ml/' +
+                'machine-learning-databases/00231/PAMAP2_Dataset.zip')
+            #retrieve data from url
+            if sys.version_info <= (3,): #python2
+                local_fn, headers = urllib.urlretrieve(url, \
+                    filename=path_to_zip_file)
+            else: #python3
+                local_fn, headers = urllib.request.urlretrieve(url,\
+                    filename=path_to_zip_file)
+            print('Download complete and stored in: ' + path_to_zip_file)
         else:
-            print('The data was previously downloaded and stored in ' + path_to_zip_file )
+            print('The data was previously downloaded and stored in ' +
+                path_to_zip_file)
         # unzip
-        os.makedirs(targetdir) # create target directory
-        with zipfile.ZipFile(path_to_zip_file ,"r") as zip_ref:
+        with zipfile.ZipFile(path_to_zip_file, "r") as zip_ref:
             zip_ref.extractall(targetdir)
-    outdatapath = targetdir + '/PAMAP2_Dataset' + '/slidingwindow512cleaned/'
+    return targetdir
+
+
+def slidingwindow_store(y_list, x_list, X_name, y_name, outdatapath, shuffle):
+    # Take sliding-window frames. Target is label of last time step
+    # Data is 100 Hz
+    frame_length = int(5.12 * 100)
+    step = 1 * 100
+    x_set = []
+    y_set = []
+    sliding_window(frame_length, step, x_set, y_set, x_list, y_list)
+    numpify_and_store(x_set, y_set, X_name, y_name, \
+        outdatapath, shuffle)
+
+def map_clas(datasets_filled):
+    ysetall = [set(np.array(data.activityID)) - set([0]) \
+        for data in datasets_filled]
+    classlabels = list(set.union(*[set(y) for y in ysetall]))
+    nr_classes = len(classlabels)
+    mapclasses = {classlabels[i] : i for i in range(len(classlabels))}
+    return classlabels, nr_classes, mapclasses
+
+def split_data(Xlists, ybinarylists, indices):
+    """ Function takes subset from list given indices
+    Arguments:
+    - Xlists: tuple (samples) of lists (windows)
+            of numpy-arrays (time, variable)
+    - ybinarylist: list (samples) of numpy-arrays (window, class)
+    - indices: indices of the slice of data (samples) to be taken
+    Value (output):
+    - x_setlist: list (windows across samples) of numpy-arrays (time, variable)
+    - y_setlist: list (windows across samples) of numpy-arrays (class, )
+    """
+    tty = str(type(indices))
+    # or statement in next line is to account for python2 and python3
+    # difference
+    if  tty == "<class 'slice'>" or tty == "<type 'slice'>":
+        x_setlist = [X for Xlist in Xlists[indices] for X in Xlist]
+        y_setlist = [y for ylist in ybinarylists[indices] for y in ylist]
+    else:
+        x_setlist = [X for X in Xlists[indices]]
+        y_setlist = [y for y in ybinarylists[indices]]
+    return x_setlist, y_setlist
+
+def preprocess(targetdir, outdatapath, columns_to_use):
+    """ Function to preprocess the PAMAP2 data after it is fetched
+    Arguments:
+    - targetdir: subdirectory of directory_to_extract_to, targetdir
+        is defined by function fetch_data
+    - outdatapath: a subdirectory of directory_to_extract_to, outdatapath
+        is the direcotry where the Numpy output will be stored.
+    Value (output):
+    - None
+    """
+    datadir = targetdir + '/PAMAP2_Dataset/Protocol'
+    filenames = listdir(datadir)
+    print('Start pre-processing all ' + str(len(filenames)) + ' files...')
+    # load the files and put them in a list of pandas dataframes:
+    datasets = [pd.read_csv(datadir+'/'+fn, header=None, sep=' ') \
+        for fn in filenames]
+    datasets = addheader(datasets) # add headers to the datasets
+    #Interpolate dataset to get same sample rate between channels
+    datasets_filled = [d.interpolate() for d in datasets]
+    # Create mapping for class labels
+    classlabels, nr_classes, mapclasses = map_clas(datasets_filled)
+    #Create input (x) and output (y) sets
+    xall = [np.array(data[columns_to_use]) for data in datasets_filled]
+    yall = [np.array(data.activityID) for data in datasets_filled]
+    xylists = [split_activities(y, x) for x, y in zip(xall, yall)]
+    Xlists, ylists = zip(*xylists)
+    ybinarylists = [transform_y(y, mapclasses, nr_classes) for y in ylists]
+    # Split in train, test and val
+    x_vallist, y_vallist = split_data(Xlists, ybinarylists, indices=6)
+    test_range = slice(7, len(datasets_filled))
+    x_testlist, y_testlist = split_data(Xlists, ybinarylists, test_range)
+    x_trainlist, y_trainlist = split_data(Xlists, ybinarylists, \
+        indices=slice(0, 6))
+    # Take sliding-window frames, target is label of last time step,
+    # and store as numpy file
+    slidingwindow_store(y_list=y_trainlist, x_list=x_trainlist, \
+                X_name='X_train', y_name='y_train', \
+                outdatapath=outdatapath, shuffle=True)
+    slidingwindow_store(y_list=y_vallist, x_list=x_vallist, \
+        X_name='X_val', y_name='y_val', \
+        outdatapath=outdatapath, shuffle=False)
+    slidingwindow_store(y_list=y_testlist, x_list=x_testlist, \
+            X_name='X_test', y_name='y_test', \
+            outdatapath=outdatapath, shuffle=False)
+    print('Processed data succesfully stored in ' + outdatapath)
+    return None
+
+def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
+    """
+    High level function to fetch_and_preprocess the PAMAP2 dataset
+    Arguments:
+    - directory_to_extract_to: the directory where the data will be stored
+    - columns_to_use: the columns to use
+    Values (output):
+    - outdatapath: The directory in which the numpy files are stored
+    """
+    if columns_to_use is None:
+        columns_to_use = ['hand_acc_16g_x', 'hand_acc_16g_y', 'hand_acc_16g_z',
+                     'ankle_acc_16g_x', 'ankle_acc_16g_y', 'ankle_acc_16g_z',
+                     'chest_acc_16g_x', 'chest_acc_16g_y', 'chest_acc_16g_z']
+    targetdir = fetch_data(directory_to_extract_to)
+    outdatapath = targetdir + '/PAMAP2_Dataset/slidingwindow512cleaned/'
     if not os.path.exists(outdatapath):
         os.makedirs(outdatapath)
-    if os.path.isfile(outdatapath+'X_train.npy'):
-        print('Data previously pre-processed and np-files saved to ' + outdatapath)
+    if os.path.isfile(outdatapath+'x_train.npy'):
+        print('Data previously pre-processed and np-files saved to ' +
+            outdatapath)
     else:
-        datadir = targetdir + '/PAMAP2_Dataset/Protocol'
-        filenames = listdir(datadir)
-        print('Start pre-processing all ' + str(len(filenames)) + ' files...')
-        # load the files and put them in a list of pandas dataframes:
-        datasets = [pd.read_csv(datadir+'/'+fn, header=None, sep=' ') for fn in filenames]
-        # The columns are numbers, which is not very practical. Let's add column labels to the pandas dataframe:
-        axes = ['x', 'y', 'z']
-        IMUsensor_columns = ['temperature'] + \
-                        ['acc_16g_' + i for i in axes] + \
-                        ['acc_6g_' + i for i in axes] + \
-                        ['gyroscope_'+ i for i in axes] + \
-                        ['magnometer_'+ i for i in axes] + \
-                        ['orientation_' + str(i) for i in range(4)]
-        header = ["timestamp", "activityID", "heartrate"] + ["hand_"+s for s in IMUsensor_columns]\
-            + ["chest_"+s for s in IMUsensor_columns]+ ["ankle_"+s for s in IMUsensor_columns]
-        for i in range(0,len(datasets)):
-                datasets[i].columns = header
-        #Interpolate dataset to get same sample rate between channels
-        datasets_filled = [d.interpolate() for d in datasets]
-        # Create mapping for class labels
-        y_set_all = [set(np.array(data.activityID)) - set([0]) for data in datasets_filled]
-        classlabels = list(set.union(*[set(y) for y in y_set_all]))
-        nr_classes = len(classlabels)
-        mapclasses = {classlabels[i] : i for i in range(len(classlabels))}
-        def transform_y(y):
-            y_mapped = np.array([mapclasses[c] for c in y], dtype='int')
-            y_binary = to_categorical(y_mapped, nr_classes)
-            return y_binary
-        #Create input (X) and output (y) sets
-        X_all = [np.array(data[columns_to_use]) for data in datasets_filled]
-        y_all = [np.array(data.activityID) for data in datasets_filled]
-        Xy_lists = [split_activities(y, X) for X,y in zip(X_all, y_all)]
-        X_lists, y_lists = zip(*Xy_lists)
-        y_binary_lists = [transform_y(y) for y in y_lists]
-        # Split in train, test and val
-        train_range = slice(0, 6)
-        val_range = 6
-        test_range = slice(7,len(datasets_filled))
-        X_train_list = [X for X_list in X_lists[train_range] for X in X_list]
-        X_val_list = [X for X in X_lists[val_range]]
-        X_test_list = [X for X_list in X_lists[test_range] for X in X_list]
-
-        y_train_list = [y for y_list in y_binary_lists[train_range] for y in y_list]
-        y_val_list = [y for y in y_binary_lists[val_range]]
-        y_test_list = [y for y_list in y_binary_lists[test_range] for y in y_list]
-
-        # Take sliding-window frames. Target is label of last time step
-        # Data is 100 Hz
-        frame_length = int(5.12 * 100)
-        step = 1 * 100
-
-        X_train = []
-        y_train = []
-        X_val = []
-        y_val = []
-        X_test = []
-        y_test = []
-        for j in range(len(X_train_list)):
-            X = X_train_list[j]
-            y_binary = y_train_list[j]
-            sliding_window(X, y_binary, frame_length, step, X_train, y_train)
-        for j in range(len(X_val_list)):
-            X = X_val_list[j]
-            y_binary = y_val_list[j]
-            sliding_window(X, y_binary, frame_length, step, X_val, y_val)
-        for j in range(len(X_test_list)):
-            X = X_test_list[j]
-            y_binary = y_test_list[j]
-            sliding_window(X, y_binary, frame_length, step, X_test, y_test)
-
-        X_train = np.array(X_train)
-        y_train = np.array(y_train)
-        X_val = np.array(X_val)
-        y_val = np.array(y_val)
-        X_test = np.array(X_test)
-        y_test = np.array(y_test)
-
-        #Shuffle around the train set
-        np.random.seed(123)
-        neworder = np.random.permutation(X_train.shape[0])
-        X_train = X_train[neworder,:,:]
-        y_train = y_train[neworder,:]
-
-        # Save binary file
-        np.save(outdatapath+'X_train', X_train)
-        np.save(outdatapath+'y_train_binary', y_train)
-        np.save(outdatapath+'X_val', X_val)
-        np.save(outdatapath+'y_val_binary', y_val)
-        np.save(outdatapath+'X_test', X_test)
-        np.save(outdatapath+'y_test_binary', y_test)
-        print('Processed data succesfully stored in ' + outdatapath)
+        preprocess(targetdir, outdatapath, columns_to_use)
     return outdatapath
 
 def load_data(outputpath):
+    """ Function to load the numpy data as stored in directory
+    outputpath.
+    """
     ext = '.npy'
-    X_train = np.load(outputpath+'X_train'+ext)
-    y_train_binary = np.load(outputpath+'y_train_binary'+ext)
-    X_val = np.load(outputpath+'X_val'+ext)
-    y_val_binary = np.load(outputpath+'y_val_binary'+ext)
-    X_test = np.load(outputpath+'X_test'+ext)
-    y_test_binary = np.load(outputpath+'y_test_binary'+ext)
-    return X_train, y_train_binary, X_val, y_val_binary, X_test, y_test_binary
+    x_train = np.load(outputpath+'X_train'+ext)
+    y_train_binary = np.load(outputpath+'y_train'+ext)
+    x_val = np.load(outputpath+'X_val'+ext)
+    y_val_binary = np.load(outputpath+'y_val'+ext)
+    x_test = np.load(outputpath+'X_test'+ext)
+    y_test_binary = np.load(outputpath+'y_test'+ext)
+    return x_train, y_train_binary, x_val, y_val_binary, x_test, y_test_binary
