@@ -7,32 +7,54 @@
 """
 from keras.models import model_from_json
 import json
-import pickle
 import numpy as np
 
 
 def savemodel(model, filepath, modelname):
-    """ Save model + weights + params TO json + npy + pkl file, respectively
-    Input:
-    - model (Keras object)
-    - filepath: directory where the data will be stored
-    - modelname: name of the model to be used in the filename
+    """ Save model  to json file and weights to npy file
+
+    Parameters
+    ----------
+    model : Keras object
+        model to save
+    filepath : str
+        directory where the data will be stored
+    modelname : str
+        name of the model to be used in the filename
+
+    Returns
+    ----------
+    json_path : str
+        Path to json file with architecture
+    numpy_path : str
+        Path to npy file with weights
     """
     json_string = model.to_json()  # save architecture to json string
-    with open(filepath + modelname + '_architecture.json', 'w') as outfile:
+    json_path = filepath + modelname + '_architecture.json'
+    with open(json_path, 'w') as outfile:
         json.dump(json_string, outfile, sort_keys=True, indent=4,
                   ensure_ascii=False)
     wweights = model.get_weights()  # get weight from model
-    np.save(filepath + modelname + '_weights',
+    numpy_path = filepath + modelname + '_weights'
+    np.save(numpy_path,
             wweights)  # save weights in npy file
-    return None
+    return json_path, numpy_path
 
 
 def loadmodel(filepath, modelname):
     """ Load model + weights FROM json + npy file, respectively
-    Input:
-    - filepath: directory where the data will be stored
-    - modelname: name of the model to be used in the filename
+
+    Parameters
+    ----------
+    filepath : str
+        directory where the data will be stored
+    modelname : str
+        name of the model to be used in the filename
+
+    Returns
+    ----------
+    model_repro : Keras object
+        reproduced model
     """
     with open(filepath + modelname + '_architecture.json', 'r') as outfile:
         json_string_loaded = json.load(outfile)
