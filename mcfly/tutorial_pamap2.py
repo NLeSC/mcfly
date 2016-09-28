@@ -14,10 +14,7 @@ import zipfile
 import keras
 from keras.utils.np_utils import to_categorical
 import sys
-if sys.version_info <= (3,): # python2
-    import urllib
-else: # python3
-    import urllib.request
+import six.moves.urllib as urllib
 
 
 def split_activities(labels, X, borders=10*100):
@@ -124,11 +121,7 @@ def fetch_data(directory_to_extract_to):
             url = str('https://archive.ics.uci.edu/ml/' +
                 'machine-learning-databases/00231/PAMAP2_Dataset.zip')
             #retrieve data from url
-            if sys.version_info <= (3,): #python2
-                local_fn, headers = urllib.urlretrieve(url, \
-                    filename=path_to_zip_file)
-            else: #python3
-                local_fn, headers = urllib.request.urlretrieve(url,\
+            local_fn, headers = urllib.request.urlretrieve(url,\
                     filename=path_to_zip_file)
             print('Download complete and stored in: ' + path_to_zip_file)
         else:
