@@ -4,14 +4,37 @@ var trainChart = dc.seriesChart("#train-chart"),
     modelChart = dc.rowChart("#model-chart"),
     modeltypeChart  = dc.rowChart("#chart-modeltype"),
     filterChart = dc.rowChart("#chart-filters"),
-    lrRegChart = dc.heatMap("#heatmap");
+    lrRegChart = dc.heatMap("#heatmap"),
+    ndx,
+    data;
 
 
-d3.json("data.json", function(error, data) {
-    console.log(data); // this is your data
+//If new data is read, replace the data in the crossfilter
+var onNewDataEvent = function(e) {
+    var filetxt = e.target.result;
+    data = flattenModels(JSON.parse(filetxt));
+    ndx.remove();
+    ndx.add(data);
+    dc.filterAll();
+    dc.redrawAll();
+};
+
+var loadData = function(){
+    console.log('Loading data...');
+    if(document.getElementById("json-file")) {
+        var jsonfile = document.getElementById("json-file").files[0];
+        var fileReader = new FileReader();
+        fileReader.onload = onNewDataEvent;
+        fileReader.readAsText(jsonfile);
+
+    }
+};
+
+
+d3.json("data.json", function(error, data) { // this is your data
     data = flattenModels(data);
     console.log(data);
-	var ndx = crossfilter(data);
+	ndx = crossfilter(data);
 
     // First plot: iterations
     var runDimension1 = ndx.dimension(function(d) {return [+d.model, +d.iteration]; });
