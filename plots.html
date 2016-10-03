@@ -13,6 +13,10 @@
 <div class="container">
 <script type="text/javascript" src="header.js"></script>
 
+<form enctype="multipart/form-data" method="post">
+    <input id="json-file" type="file" onchange="loadData()"/>
+</form>
+
 <div class="row">	
     <div class="col-md-6">	  
       <div id="val-chart" >
@@ -48,8 +52,6 @@
         </div>
     </div>
 
-
-
     <div class="col-md-6">
         <div id="chart-modeltype" >
             <h4>
@@ -77,7 +79,7 @@
                 Learning rate and regularization rate
               </h4>
               <div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
-                <a href="javascript:heatmap.filterAll();dc.redrawAll();">reset</a>
+                <a href="javascript:lrRegChart.filterAll();dc.redrawAll();">reset</a>
               </div>
         </div>
     </div>
@@ -88,7 +90,7 @@
 <script type="text/javascript" src="js/dc.js"></script>
 <script type="text/javascript" src="js/reductio.js"></script>
 <script type="text/javascript" src="flattenJson.js"></script>
-<script type="text/javascript" src ="plots.js"></script>
+<script type="text/javascript" src="plots.js"></script>
 
 </div>
 </body>
