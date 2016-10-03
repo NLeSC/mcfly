@@ -13,16 +13,22 @@
 <div class="container">
 <script type="text/javascript" src="header.js"></script>
 
-<div class="row">
-    <div class="col-md-6">
-      <div id="val-chart" style="width:400px;height:200px">
+<div class="row">	
+    <div class="col-md-6">	  
+      <div id="val-chart" >
+		<h4>
+     	  Accuracy on validity set
+		</h4>
         <div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
           <a href="javascript:valChart.filterAll();dc.redrawAll();">reset</a>
         </div>
       </div>
     </div>
     <div class="col-md-6">
-      <div id="train-chart" style="width:400px; height:200px">
+      <div id="train-chart" >
+        <h4>
+		  Accuracy on train set
+	    </h4>	  
         <div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
           <a href="javascript:trainChart.filterAll();dc.redrawAll();">reset</a>
         </div>
@@ -31,8 +37,8 @@
 </div>
 
 <div class="row" style="padding-top:20px">
-    <div class="col-md-3">
-        <div id="model-chart" style="width:200px; height:200px">
+    <div class="col-md-6">
+        <div id="model-chart" >
           <h4>
               Select model
           </h4>
@@ -44,8 +50,8 @@
 
 
 
-    <div class="col-md-3">
-        <div id="chart-modeltype" style="width:200px; height:200px">
+    <div class="col-md-6">
+        <div id="chart-modeltype" >
             <h4>
                 Nr of models
             </h4>
@@ -55,8 +61,8 @@
         </div>
     </div>
 
-    <div class="col-md-3">
-        <div id="chart-filters" style="width:200px; height:200px">
+    <div class="col-md-6">
+        <div id="chart-filters" >
             <h4>
               Average accuracy per Nr of Conv layers
             </h4>
@@ -65,10 +71,10 @@
             </div>
           </div>
     </div>
-    <div class="col-md-3">
-          <div id="heatmap" style="width:200px; height:200px">
+    <div class="col-md-6">
+          <div id="heatmap" >
               <h4>
-                Learning rate and Regularization rate
+                Learning rate and regularization rate
               </h4>
               <div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
                 <a href="javascript:heatmap.filterAll();dc.redrawAll();">reset</a>
