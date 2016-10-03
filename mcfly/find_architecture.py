@@ -172,6 +172,8 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
     subset_size : int
         The size of the subset of the data that is used for finding
         the optimal architecture
+    outputpath : str, optional
+        File location to store the model results
     **kwargs: key-value parameters
         parameters for generating the models
         (see docstring for modelgen.generate_models)
