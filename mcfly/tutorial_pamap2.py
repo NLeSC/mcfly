@@ -14,10 +14,7 @@ import zipfile
 import keras
 from keras.utils.np_utils import to_categorical
 import sys
-if sys.version_info <= (3,): #python2
-    import urllib
-else: #python3
-    import urllib.request
+import six.moves.urllib as urllib
 
 
 def split_activities(labels, X, borders=10*100):
@@ -95,7 +92,7 @@ def numpify_and_store(X, y, xname, yname, outdatapath, shuffle=False):
     """
     X = np.array(X)
     y = np.array(y)
-    #Shuffle around the train set
+    # Shuffle the train set
     if shuffle is True:
         np.random.seed(123)
         neworder = np.random.permutation(X.shape[0])
@@ -117,18 +114,14 @@ def fetch_data(directory_to_extract_to):
         print('Data previously downloaded and stored in ' + targetdir)
     else:
         os.makedirs(targetdir) # create target directory
-        #download the PAMAP2 data, this is 688 Mb
+        # Download the PAMAP2 data, this is 688 Mb
         path_to_zip_file = directory_to_extract_to + '/PAMAP2_Dataset.zip'
         test_file_exist = os.path.isfile(path_to_zip_file)
         if test_file_exist is False:
             url = str('https://archive.ics.uci.edu/ml/' +
                 'machine-learning-databases/00231/PAMAP2_Dataset.zip')
             #retrieve data from url
-            if sys.version_info <= (3,): #python2
-                local_fn, headers = urllib.urlretrieve(url, \
-                    filename=path_to_zip_file)
-            else: #python3
-                local_fn, headers = urllib.request.urlretrieve(url,\
+            local_fn, headers = urllib.request.urlretrieve(url,\
                     filename=path_to_zip_file)
             print('Download complete and stored in: ' + path_to_zip_file)
         else:

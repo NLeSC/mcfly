@@ -13,15 +13,11 @@ before_install:
 - bash miniconda.sh -b -p $HOME/miniconda
 - export PATH="$HOME/miniconda/bin:$PATH"
 - conda config --set always_yes yes 
-- conda install -q pip openblas
+- conda install -q pip openblas numpy scipy
 - "pip install -q nose"
 - "pip install 'coverage<4'"  # After 4, there is some issue when using python 3.2
 - "pip install -qr requirements.txt"
-- if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then       
-    pip install -qr requirements_python2specific.txt;
-  else
-    pip install -qr requirements_python3specific.txt;
-  fi
+
 
 install:
 - "echo done"
