@@ -1,6 +1,6 @@
 # mcfly
 
-eSTeP project on deep learning for time series data
+eSTeP project on deep learning for time series data.
 
 
 [![Build Status](https://travis-ci.org/NLeSC/mcfly.svg?branch=master)](https://travis-ci.org/NLeSC/mcfly)
