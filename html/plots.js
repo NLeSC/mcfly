@@ -128,8 +128,8 @@ d3.json("data.json", function(error, data) {
       };
 
       lrRegChart
-                //.width(12 * 80 + 80)
-                //.height(27 * 10 + 40)
+                .width(400)
+                .height(300)
                 .dimension(lrRegDim)
                 .group(avgAccHeatmap)
                 .keyAccessor(function(d) { return +d.key[0]; })
@@ -137,13 +137,11 @@ d3.json("data.json", function(error, data) {
                 .colorAccessor(function(d) {
                     return +(d.value.exceptionSum / d.value.exceptionCount);
                 })
-                //.yAxisLabel("Regularization Rate")
-                //.xAxisLabel("Learning Rate")
-                .colsLabel(function(d){return "lr 10^" + d;})
-                .rowsLabel(function(d){return "rr 10^" + d;})
+                .colsLabel(function(d){return "10^" + d;})
+                .rowsLabel(function(d){return "10^" + d;})
                 .title(function(d) {
-                    return " Learning Rate:   10^" + d.key[0] + "\n" +
-                           "  Regularzation Tate:   10^" + d.key[1] + "\n" +
+                    return " Learning rate:   10^" + d.key[0] + "\n" +
+                           "  Regularzation rate:   10^" + d.key[1] + "\n" +
                            "  Avg acc:   " + (d.value.exceptionSum / d.value.exceptionCount);})
                 .colors(heatColorMapping)
                 .calculateColorDomain();
