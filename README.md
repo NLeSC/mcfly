@@ -29,3 +29,8 @@ Navigate to `http://localhost:8888/html/plots.html` in your browser to open the 
 * [Technical Documentation](https://github.com/NLeSC/mcfly/wiki/Technical-documentation)
 * [Information on Data preprocessing](https://github.com/NLeSC/mcfly/wiki/Data-preprocessing)
 
+## Contributing
+You are welcome to contribute to the code via pull requests. Please have a look at the [NLeSC guide](https://nlesc.gitbooks.io/guide/content/software/software_overview.html) for guidelines about software development.
+
+We use numpy-style docstrings for code documentation.
+
