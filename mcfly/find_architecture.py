@@ -39,8 +39,6 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         nr of epochs to use for training one model
     subset_size :
         The number of samples used from the complete train set
-    subsize_set : int, optional
-        number of samples to use from the training set for training the models
     verbose : bool, optional
         flag for displaying verbose output
     outputfile : str, optional
@@ -87,11 +85,14 @@ def storetrainhist2json(params, model_type, history, outputfile):
 
     Parameters
     ----------
-    params : dictionary with parameters for one model
-    model_type : Keras model object for one model
-    history : dictionary with training history from one model
-    outputfile : str of path where the json file needs to be stored
-
+    params : dict
+        parameters for one model
+    model_type : Keras model object
+        Keras model object for one model
+    history : dict
+        training history from one model
+    outputfile : str
+        path where the json file needs to be stored
     """
     jsondata = params.copy()
     for k in jsondata.keys():
@@ -121,8 +122,12 @@ def plotTrainingProcess(history, name='Model', ax=None):
 
     Parameters
     ----------
-    history : keras History object for one model
+    history : keras History object
         The history object of the training process corresponding to one model
+    name : str
+        Name of the model, to display in the title
+    ax : Axis, optional
+        Specific axis to plot on
 
     """
     if ax is None:

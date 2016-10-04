@@ -130,7 +130,9 @@ def generate_DeepConvLSTM_model(
     lstm_dims : list of ints
         number of hidden nodes for each LSTM layer
     learning_rate : float
+        learning rate
     regularization_rate : float
+        regularization rate
 
     Returns
     -------
@@ -198,7 +200,9 @@ def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes,
     fc_hidden_nodes : int
         number of hidden nodes for the hidden dense layer
     learning_rate : float
+        learning rate
     regularization_rate : float
+        regularization rate
 
     Returns
     -------
