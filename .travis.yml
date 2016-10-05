@@ -17,6 +17,17 @@ before_install:
 
 - "pip install -q sphinx"
 - "export PATH=$HOME/.local/bin:$PATH"
+- pwd
+- cd docs
+- make html
+- pwd
+- cd -
+- pwd
+- cd ..
+- git clone -b gh-pages https://github.com/NLeSC/mcfly.git
+- cd -
+
+
 
 - "pip install -q nose"
 - "pip install 'coverage<4'"  # After 4, there is some issue when using python 3.2
@@ -35,9 +46,4 @@ after_script:
 - "pip install scrutinizer-ocular"
 - "ocular"
 - sphinx-apidoc mcfly/ -o docs
-- pwd
-- cd docs
-- make html
-- pwd
-- cd ../..
-- git clone https://github.com/NLeSC/mcfly.git
+ 
