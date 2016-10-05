@@ -7,6 +7,7 @@ eSTeP project on deep learning for time series data.
 [![Code quality](https://scrutinizer-ci.com/g/NLeSC/mcfly/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/NLeSC/mcfly/)
 [![Coverage](https://scrutinizer-ci.com/g/NLeSC/mcfly/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/NLeSC/mcfly/statistics/)
 <a href="https://zenhub.io"><img src="https://raw.githubusercontent.com/ZenHubIO/support/master/zenhub-badge.png"></a>
+[![Documentation Status](https://readthedocs.org/projects/mcfly/badge/?version=latest)](http://mcfly.readthedocs.io/en/latest/?badge=latest)
 
 ## Installation
 Prerequisites:
@@ -26,6 +27,7 @@ Navigate to `http://localhost:8888/html/plots.html` in your browser to open the 
 
 ## User documentation
 * [User manual](https://github.com/NLeSC/mcfly/wiki/User-manual)
+* [Code documentation](http://mcfly.readthedocs.io/en/latest/)
 * [Technical Documentation](https://github.com/NLeSC/mcfly/wiki/Technical-documentation)
 * [Information on Data preprocessing](https://github.com/NLeSC/mcfly/wiki/Data-preprocessing)
 
