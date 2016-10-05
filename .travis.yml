@@ -25,7 +25,14 @@ before_install:
 - cd -
 - pwd
 - cd ..
-- git clone -b gh-pages https://$GH_TOKEN@github.com/NLeSC/mcfly.git
+- git clone -b gh-pages https://$GH_TOKEN@github.com/NLeSC/mcfly.git pages
+- cd -
+- cd ../pages
+- rm -rf *
+- cp -r ../mcfly/docs/_build/html/* .
+- git add .
+- git commit -m "automatic doc update by travis-ci"
+- git push
 - cd -
 
 
