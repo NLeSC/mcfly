@@ -1,6 +1,9 @@
 import os
 from setuptools import setup
 
+with open(os.path.join(dist_dir, 'mcfly/_version.py')) as versionpy:
+    exec(versionpy.read())
+
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
@@ -9,7 +12,7 @@ with open('requirements.txt') as f:
 
 setup(
     name = "mcfly",
-    version = "0.0.1",
+    version = "__version__",
     description = ("Deep learning for time series data"),
     license = "Apache 2.0",
     keywords = "Python",
