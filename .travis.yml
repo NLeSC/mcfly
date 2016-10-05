@@ -14,9 +14,14 @@ before_install:
 - export PATH="$HOME/miniconda/bin:$PATH"
 - conda config --set always_yes yes 
 - conda install -q pip openblas numpy scipy
+
+- "pip install -q sphinx"
+- "export PATH=$HOME/.local/bin:$PATH"
+
 - "pip install -q nose"
 - "pip install 'coverage<4'"  # After 4, there is some issue when using python 3.2
 - "pip install -qr requirements.txt"
+
 
 
 install:
@@ -25,10 +30,14 @@ install:
 # command to run tests, e.g. python setup.py test
 script: 
 - nosetests --with-coverage --cover-package=mcfly
-- sphinx-apidoc mcfly/ -o docs
-- cd docs
-- make html
 
 after_script:
 - "pip install scrutinizer-ocular"
 - "ocular"
+- sphinx-apidoc mcfly/ -o docs
+- pwd
+- cd docs
+- make html
+- pwd
+- cd ../..
+- git clone https://github.com/NLeSC/mcfly.git
