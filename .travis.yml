@@ -25,6 +25,8 @@ before_install:
 - cd -
 - pwd
 - cd ..
+- git config --global user.email "you@example.com"
+- git config --global user.name "Your Name"
 - git clone -b gh-pages https://$GH_TOKEN@github.com/NLeSC/mcfly.git pages
 - cd -
 - cd ../pages
