@@ -17,6 +17,7 @@ before_install:
 
 - "pip install -q sphinx"
 - "export PATH=$HOME/.local/bin:$PATH"
+- sphinx-apidoc mcfly/ -o docs
 - pwd
 - cd docs
 - make html
@@ -24,7 +25,7 @@ before_install:
 - cd -
 - pwd
 - cd ..
-- git clone -b gh-pages https://github.com/NLeSC/mcfly.git
+- git clone -b gh-pages https://$GH_TOKEN@github.com/NLeSC/mcfly.git
 - cd -
 
 
@@ -45,5 +46,4 @@ script:
 after_script:
 - "pip install scrutinizer-ocular"
 - "ocular"
-- sphinx-apidoc mcfly/ -o docs
  
