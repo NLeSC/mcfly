@@ -18,7 +18,7 @@ To install the package, run in the project directory:
 `pip install .`
 
 ## Visualization
-To run the  model visualization, cd to the project directory and start up a python web server:
+We build a tool to visualize the configuration and performance of the models. To run the  model visualization, cd to the project directory and start up a python web server:
 
 `python -m http.server 8888 &`
 
