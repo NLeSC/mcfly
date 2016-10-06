@@ -1,11 +1,14 @@
 """
  Summary:
- Function generate_models from modelgen.py generates and compiles models
- Function train_models_on_samples trains those models
- Function plotTrainingProcess plots the training process
+ This module provides the main functionality of mcfly: searching for an
+ optimal model architecture. The work flow is as follows:
+ Function generate_models from modelgen.py generates and compiles models.
+ Function train_models_on_samples trains those models.
+ Function plotTrainingProcess plots the training process.
  Function find_best_architecture is wrapper function that combines
- these steps
- Example function calls in 'EvaluateDifferentModels.ipynb'
+ these steps.
+ Example function calls can be found in the tutorial notebook
+ 'EvaluateDifferentModels.ipynb'.
 """
 import numpy as np
 from matplotlib import pyplot as plt
@@ -160,21 +163,25 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
 
     Parameters
     ----------
-    X_train : numpy array of shape (num_samples, num_timesteps, num_channels)
-        The input dataset for training
-    y_train : numpy array of shape (num_samples, num_classes)
-        The output classes for the train data, in binary format
-    X_val : numpy array of shape (num_samples_val, num_timesteps, num_channels)
-        The input dataset for validation
-    y_val : numpy array of shape (num_samples_val, num_classes)
-        The output classes for the validation data, in binary format
+    X_train : numpy array
+        The input dataset for training of shape
+        (num_samples, num_timesteps, num_channels)
+    y_train : numpy array
+        The output classes for the train data, in binary format of shape
+        (num_samples, num_classes)
+    X_val : numpy array
+        The input dataset for validation of shape
+        (num_samples_val, num_timesteps, num_channels)
+    y_val : numpy array
+        The output classes for the validation data, in binary format of shape
+        (num_samples_val, num_classes)
     verbose : bool, optional
         flag for displaying verbose output
-    number_of_models : int
+    number_of_models : int, optiona
         The number of models to generate and test
-    nr_epochs : int
+    nr_epochs : int, optional
         The number of epochs that each model is trained
-    subset_size : int
+    subset_size : int, optional
         The size of the subset of the data that is used for finding
         the optimal architecture
     outputpath : str, optional

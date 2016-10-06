@@ -34,7 +34,8 @@ def split_activities(labels, X, borders=10 * 100):
 
     Returns
     -------
-    X_list, y_list
+    X_list
+    y_list
     """
     tot_len = len(labels)
     startpoints = np.where([1] + [labels[i] != labels[i - 1]
@@ -257,9 +258,9 @@ def split_data(Xlists, ybinarylists, indices):
 
     Returns
     -------
-    x_setlist :
+    x_setlist : list
         list (windows across samples) of numpy-arrays (time, variable)
-    y_setlist:
+    y_setlist: list
         list (windows across samples) of numpy-arrays (class, )
     """
     tty = str(type(indices))
@@ -343,7 +344,8 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
 
     Returns
     -------
-    outdatapath: The directory in which the numpy files are stored
+    outdatapath: str
+        The directory in which the numpy files are stored
     """
     if columns_to_use is None:
         columns_to_use = ['hand_acc_16g_x', 'hand_acc_16g_y', 'hand_acc_16g_z',
@@ -369,6 +371,15 @@ def load_data(outputpath):
     ----------
     outputpath : str
         directory where the numpy files are stored
+
+    Returns
+    -------
+    x_train
+    y_train_binary
+    x_val
+    y_val_binary
+    x_test
+    y_test_binary
     """
     ext = '.npy'
     x_train = np.load(outputpath + 'X_train' + ext)
