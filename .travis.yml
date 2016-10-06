@@ -18,13 +18,14 @@ before_install:
 - "pip install 'coverage<4'"  # After 4, there is some issue when using python 3.2
 - "pip install -qr requirements.txt"
 
-
 install:
 - "echo done"
 
 # command to run tests, e.g. python setup.py test
-script: nosetests --with-coverage --cover-package=mcfly
+script: 
+- nosetests --with-coverage --cover-package=mcfly
 
 after_script:
 - "pip install scrutinizer-ocular"
 - "ocular"
+ 

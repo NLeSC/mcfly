@@ -26,6 +26,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     Given a list of compiled models, this function trains
     them all on a subset of the train data. If the given size of the subset is
     smaller then the size of the data, the complete data set is used.
+
     Parameters
     ----------
     X_train : numpy array of shape (num_samples, num_timesteps, num_channels)
