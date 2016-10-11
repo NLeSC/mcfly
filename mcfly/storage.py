@@ -42,7 +42,7 @@ def savemodel(model, filepath, modelname):
 
 
 def loadmodel(filepath, modelname):
-    """ Load model + weights FROM json + npy file, respectively
+    """ Load model + weights from json + npy file, respectively
 
     Parameters
     ----------

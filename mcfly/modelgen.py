@@ -23,13 +23,13 @@ def generate_models(
 
     Parameters
     ----------
-    x_shape
+    x_shape : tuple
         Shape of the input dataset: (num_samples, num_timesteps, num_channels)
-    number_of_classes
+    number_of_classes : int
         Number of classes for classification task
-    number_of_models
+    number_of_models : int
         Number of models to generate
-    model_type : str (optional)
+    model_type : str, optional
         Type of model to build: 'CNN' or 'DeepConvLSTM'.
         Default option None generates both models.
     cnn_min_layers : int
@@ -75,7 +75,8 @@ def generate_models(
 
     Returns
     -------
-    List of compiled models
+    models : list
+        List of compiled models
     """
     models = []
     for _ in range(0, number_of_models):
@@ -136,7 +137,8 @@ def generate_DeepConvLSTM_model(
 
     Returns
     -------
-    The compiled Keras model
+    model : Keras model
+        The compiled Keras model
     """
     dim_length = x_shape[1]  # number of samples in a time series
     dim_channels = x_shape[2]  # number of channels
@@ -206,7 +208,8 @@ def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes,
 
     Returns
     -------
-    The compiled Keras model
+    model : Keras model
+        The compiled Keras model
     """
     dim_length = x_shape[1]  # number of samples in a time series
     dim_channels = x_shape[2]  # number of channels
@@ -393,6 +396,11 @@ def get_learning_rate(low=1, high=4):
         low bound
     high : float
         high bound
+
+    Returns
+    -------
+    learning_rate : float
+        learning rate
     """
     result = 10 ** (-np.random.uniform(low, high))
     return result
@@ -408,5 +416,10 @@ def get_regularization(low=1, high=4):
         low bound
     high : float
         high bound
+
+    Returns
+    -------
+    regularization_rate : float
+        regularization rate
     """
     return 10 ** (-np.random.uniform(low, high))
