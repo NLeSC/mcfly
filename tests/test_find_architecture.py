@@ -73,7 +73,7 @@ class FindArchitectureSuite(unittest.TestCase):
                    'val_loss': [1, 1], 'val_acc': [0, 0]}
         model_type = 'ABC'
         filename = os.getcwd() + '/modelshistory.json'  # get current working directory
-        find_architecture.storetrainhist2json(params, model_type, history, filename)
+        find_architecture.store_train_hist_as_json(params, model_type, history, filename)
         test = os.path.isfile(filename)
         if test is True:
             os.remove(filename)
