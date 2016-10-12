@@ -179,8 +179,8 @@ d3.json("data.json", function(error, data) { // this is your data
                 .rowsLabel(function(d){return "10^" + d;})
                 .title(function(d) {
                     return " Learning rate:   10^" + d.key[0] + "\n" +
-                           "  Regularzation rate:   10^" + d.key[1] + "\n" +
-                           "  Avg acc:   " + (d.value.exceptionSum / d.value.exceptionCount);})
+                           " Regularization rate:   10^" + d.key[1] + "\n" +
+                           " Avg acc:   " + (d.value.exceptionSum / d.value.exceptionCount);})
                 .colors(heatColorMapping)
                 .calculateColorDomain()
                 .yBorderRadius(20)
