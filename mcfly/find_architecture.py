@@ -76,12 +76,12 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         val_accuracies.append(history.history['val_acc'][-1])
         val_losses.append(history.history['val_loss'][-1])
         if outputfile is not None:
-            storetrainhist2json(params, model_types,
-                                history.history, outputfile)
+            store_train_hist_as_json(params, model_types,
+                                     history.history, outputfile)
     return histories, val_accuracies, val_losses
 
 
-def storetrainhist2json(params, model_type, history, outputfile):
+def store_train_hist_as_json(params, model_type, history, outputfile):
     """
     This function stores the model parameters, the loss and accuracy history
     of one model in a JSON file. It appends the model information to the
