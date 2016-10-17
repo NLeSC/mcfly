@@ -331,7 +331,7 @@ def preprocess(targetdir, outdatapath, columns_to_use):
     return None
 
 
-def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
+def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None, output_dir='slidingwindow512cleaned'):
     """
     High level function to fetch_and_preprocess the PAMAP2 dataset
 
@@ -341,6 +341,8 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
         the directory where the data will be stored
     columns_to_use : list
         the columns to use
+    ouptput_dir : str
+        name of the directory to write the outputdata to
 
     Returns
     -------
@@ -352,7 +354,7 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None):
                           'ankle_acc_16g_x', 'ankle_acc_16g_y', 'ankle_acc_16g_z',
                           'chest_acc_16g_x', 'chest_acc_16g_y', 'chest_acc_16g_z']
     targetdir = fetch_data(directory_to_extract_to)
-    outdatapath = targetdir + '/PAMAP2_Dataset/slidingwindow512cleaned/'
+    outdatapath = targetdir + os.path.join('/PAMAP2_Dataset/', output_dir)
     if not os.path.exists(outdatapath):
         os.makedirs(outdatapath)
     if os.path.isfile(outdatapath + 'x_train.npy'):
