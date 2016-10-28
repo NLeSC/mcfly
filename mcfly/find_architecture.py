@@ -17,11 +17,11 @@ from sklearn import neighbors, metrics
 import warnings
 import json
 import os
-
+from keras.callbacks import EarlyStopping
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             nr_epochs=5, subset_size=100, verbose=True,
-                            outputfile=None):
+                            outputfile=None, early_stopping=False):
     """
     Given a list of compiled models, this function trains
     them all on a subset of the train data. If the given size of the subset is
@@ -47,6 +47,8 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         flag for displaying verbose output
     outputfile : str, optional
         File location to store the model results
+    early_stopping: bool
+        Stop when validation loss does not decrease
 
     Returns
     ----------
@@ -67,11 +69,16 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     for i, (model, params, model_types) in enumerate(models):
         if verbose:
             print('Training model %d' % i, model_types)
+        if early_stopping:
+            callbacks = [EarlyStopping(monitor='val_loss', patience=0, verbose=verbose, mode='auto')]
+        else:
+            callbacks = []
         history = model.fit(X_train_sub, y_train_sub,
                             nb_epoch=nr_epochs, batch_size=20,
                             # see comment on subsize_set
                             validation_data=(X_val, y_val),
-                            verbose=verbose)
+                            verbose=verbose,
+                            callbacks=callbacks)
         histories.append(history)
         val_accuracies.append(history.history['val_acc'][-1])
         val_losses.append(history.history['val_loss'][-1])
