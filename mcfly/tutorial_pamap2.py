@@ -17,7 +17,7 @@ import sys
 import six.moves.urllib as urllib
 
 
-def split_activities(labels, X, borders=10 * 100):
+def split_activities(labels, X, exclude_activities, borders=10 * 100):
     """
     Splits up the data per activity and exclude activity=0.
     Also remove borders for each activity.
@@ -31,6 +31,8 @@ def split_activities(labels, X, borders=10 * 100):
         Data points
     borders : int
         Nr of timesteps to remove from the borders of an activity
+    exclude_activities : list or tuple
+        activities to exclude from the
 
     Returns
     -------
@@ -44,7 +46,8 @@ def split_activities(labels, X, borders=10 * 100):
     acts = [labels[s] for s, e in zip(startpoints, endpoints)]
     # Also split up the data, and only keep the non-zero activities
     xysplit = [(X[s + borders:e - borders + 1, :], a)
-               for s, e, a in zip(startpoints, endpoints, acts) if a != 0]
+               for s, e, a in zip(startpoints, endpoints, acts)
+               if a not in exclude_activities]
     xysplit = [(X, y) for X, y in xysplit if len(X) > 0]
     Xlist = [X for X, y in xysplit]
     ylist = [y for X, y in xysplit]
@@ -105,17 +108,7 @@ def transform_y(y, mapclasses, nr_classes):
     ybinary = to_categorical(ymapped, nr_classes)
     return ybinary
 
-
-def addheader(datasets):
-    """
-    The columns of the pandas data frame are numbers
-    this function adds the column labels
-
-    Parameters
-    ----------
-    datasets : list
-        List of pandas dataframes
-    """
+def get_header():
     axes = ['x', 'y', 'z']
     IMUsensor_columns = ['temperature'] + \
         ['acc_16g_' + i for i in axes] + \
@@ -127,6 +120,19 @@ def addheader(datasets):
                                                          for s in IMUsensor_columns] \
         + ["chest_" + s for s in IMUsensor_columns] + ["ankle_" + s
                                                        for s in IMUsensor_columns]
+    return header
+
+def addheader(datasets):
+    """
+    The columns of the pandas data frame are numbers
+    this function adds the column labels
+
+    Parameters
+    ----------
+    datasets : list
+        List of pandas dataframes
+    """
+    header = get_header()
     for i in range(0, len(datasets)):
         datasets[i].columns = header
     return datasets
@@ -162,8 +168,11 @@ def numpify_and_store(X, y, xname, yname, outdatapath, shuffle=False):
         X = X[neworder, :, :]
         y = y[neworder, :]
     # Save binary file
-    np.save(outdatapath + xname, X)
-    np.save(outdatapath + yname, y)
+    xpath = os.path.join(outdatapath, xname)
+    ypath = os.path.join(outdatapath, yname)
+    np.save(xpath, X)
+    np.save(ypath, y)
+    print('Stored '+ xpath, yname)
 
 
 def fetch_data(directory_to_extract_to):
@@ -182,7 +191,7 @@ def fetch_data(directory_to_extract_to):
     targetdir: str
         directory where the data is extracted
     """
-    targetdir = directory_to_extract_to + '/PAMAP2'
+    targetdir = os.path.join(directory_to_extract_to, 'PAMAP2/')
     if os.path.exists(targetdir):
         print('Data previously downloaded and stored in ' + targetdir)
     else:
@@ -275,7 +284,7 @@ def split_data(Xlists, ybinarylists, indices):
     return x_setlist, y_setlist
 
 
-def preprocess(targetdir, outdatapath, columns_to_use):
+def preprocess(targetdir, outdatapath, columns_to_use, exclude_activities, fold):
     """ Function to preprocess the PAMAP2 data after it is fetched
 
     Parameters
@@ -288,6 +297,11 @@ def preprocess(targetdir, outdatapath, columns_to_use):
         is the direcotry where the Numpy output will be stored.
     columns_to_use : list
         list of column names to use
+    exclude_activities : list or tuple
+        activities to exclude from the
+    fold : boolean
+        Whether to store each fold seperately ('False' creates
+        Train, Test and Validation sets)
 
     Returns
     -------
@@ -307,31 +321,41 @@ def preprocess(targetdir, outdatapath, columns_to_use):
     # Create input (x) and output (y) sets
     xall = [np.array(data[columns_to_use]) for data in datasets_filled]
     yall = [np.array(data.activityID) for data in datasets_filled]
-    xylists = [split_activities(y, x) for x, y in zip(xall, yall)]
+    xylists = [split_activities(y, x, exclude_activities) for x, y in zip(xall, yall)]
     Xlists, ylists = zip(*xylists)
     ybinarylists = [transform_y(y, mapclasses, nr_classes) for y in ylists]
-    # Split in train, test and val
-    x_vallist, y_vallist = split_data(Xlists, ybinarylists, indices=6)
-    test_range = slice(7, len(datasets_filled))
-    x_testlist, y_testlist = split_data(Xlists, ybinarylists, test_range)
-    x_trainlist, y_trainlist = split_data(Xlists, ybinarylists,
-                                          indices=slice(0, 6))
-    # Take sliding-window frames, target is label of last time step,
-    # and store as numpy file
-    slidingwindow_store(y_list=y_trainlist, x_list=x_trainlist,
-                        X_name='X_train', y_name='y_train',
-                        outdatapath=outdatapath, shuffle=True)
-    slidingwindow_store(y_list=y_vallist, x_list=x_vallist,
-                        X_name='X_val', y_name='y_val',
-                        outdatapath=outdatapath, shuffle=False)
-    slidingwindow_store(y_list=y_testlist, x_list=x_testlist,
-                        X_name='X_test', y_name='y_test',
-                        outdatapath=outdatapath, shuffle=False)
+
+    if not fold:
+        # Split in train, test and val
+        x_vallist, y_vallist = split_data(Xlists, ybinarylists, indices=6)
+        test_range = slice(7, len(datasets_filled))
+        x_testlist, y_testlist = split_data(Xlists, ybinarylists, test_range)
+        x_trainlist, y_trainlist = split_data(Xlists, ybinarylists,
+                                              indices=slice(0, 6))
+        # Take sliding-window frames, target is label of last time step,
+        # and store as numpy file
+        slidingwindow_store(y_list=y_trainlist, x_list=x_trainlist,
+                            X_name='X_train', y_name='y_train',
+                            outdatapath=outdatapath, shuffle=True)
+        slidingwindow_store(y_list=y_vallist, x_list=x_vallist,
+                            X_name='X_val', y_name='y_val',
+                            outdatapath=outdatapath, shuffle=False)
+        slidingwindow_store(y_list=y_testlist, x_list=x_testlist,
+                            X_name='X_test', y_name='y_test',
+                            outdatapath=outdatapath, shuffle=False)
+    else :
+        for i in range(len(Xlists)):
+            X_i, y_i = split_data(Xlists, ybinarylists, i)
+            slidingwindow_store(y_list=y_i, x_list=X_i,
+                            X_name='X_'+str(i), y_name='y_'+str(i),
+                            outdatapath=outdatapath, shuffle=True)
+
+
     print('Processed data succesfully stored in ' + outdatapath)
     return None
 
 
-def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None, output_dir='slidingwindow512cleaned'):
+def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None, output_dir='slidingwindow512cleaned', exclude_activities=[0], fold=False):
     """
     High level function to fetch_and_preprocess the PAMAP2 dataset
 
@@ -343,6 +367,11 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None, output_di
         the columns to use
     ouptput_dir : str
         name of the directory to write the outputdata to
+    exclude_activities : list or tuple
+        activities to exclude from the
+    fold : boolean
+        Whether to store each fold seperately ('False' creates
+        Train, Test and Validation sets)
 
     Returns
     -------
@@ -354,14 +383,14 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None, output_di
                           'ankle_acc_16g_x', 'ankle_acc_16g_y', 'ankle_acc_16g_z',
                           'chest_acc_16g_x', 'chest_acc_16g_y', 'chest_acc_16g_z']
     targetdir = fetch_data(directory_to_extract_to)
-    outdatapath = targetdir + os.path.join('/PAMAP2_Dataset/', output_dir)
+    outdatapath = os.path.join(targetdir, 'PAMAP2_Dataset/', output_dir)
     if not os.path.exists(outdatapath):
         os.makedirs(outdatapath)
-    if os.path.isfile(outdatapath + 'x_train.npy'):
-        print('Data previously pre-processed and np-files saved to ' +
-              outdatapath)
-    else:
-        preprocess(targetdir, outdatapath, columns_to_use)
+    # if os.path.isfile(outdatapath + 'x_train.npy'):
+    #     print('Data previously pre-processed and np-files saved to ' +
+    #           outdatapath)
+    # else:
+    preprocess(targetdir, outdatapath, columns_to_use, exclude_activities, fold)
     return outdatapath
 
 
@@ -384,10 +413,10 @@ def load_data(outputpath):
     y_test_binary
     """
     ext = '.npy'
-    x_train = np.load(outputpath + 'X_train' + ext)
-    y_train_binary = np.load(outputpath + 'y_train' + ext)
-    x_val = np.load(outputpath + 'X_val' + ext)
-    y_val_binary = np.load(outputpath + 'y_val' + ext)
-    x_test = np.load(outputpath + 'X_test' + ext)
-    y_test_binary = np.load(outputpath + 'y_test' + ext)
+    x_train = np.load(os.path.join(outputpath, 'X_train' + ext))
+    y_train_binary = np.load(os.path.join(outputpath, 'y_train' + ext))
+    x_val = np.load(os.path.join(outputpath, 'X_val' + ext))
+    y_val_binary = np.load(os.path.join(outputpath,  'y_val' + ext))
+    x_test = np.load(os.path.join(outputpath, 'X_test' + ext))
+    y_test_binary = np.load(os.path.join(outputpath,  'y_test' + ext))
     return x_train, y_train_binary, x_val, y_val_binary, x_test, y_test_binary
