@@ -12,17 +12,17 @@ class TutorialPAMAP2Suite(unittest.TestCase):
 
     def test_split_activities(self):
         """
-        Test whether function produces a Numpy array
+        Test whether split_activities produces a Numpy array
         """
         labels = np.ones(3000)
         labels[range(150)] = 2
         X = np.ones((3000,9))
-        splittedX = tutorial_pamap2.split_activities(labels,X)
+        splittedX = tutorial_pamap2.split_activities(labels,X,[0])
         test = splittedX[0][0].shape == (1150, 9)
         assert test
 
     def test_sliding_window(self):
-        """ Test whether function correctly updates x_train to the
+        """ Test whether sliding_window correctly updates x_train to the
          right size"""
         frame_length = 512
         step = 100
@@ -46,7 +46,7 @@ class TutorialPAMAP2Suite(unittest.TestCase):
         assert test
 
     def test_addheader(self):
-        """ Test whether function produces dataframe of same shape as input
+        """ Test whether addheader produces dataframe of same shape as input
         """
         datasets = [pd.DataFrame(index=range(100),columns=range(54)) for b in range(10)]
         datasetsnew = tutorial_pamap2.addheader(datasets)
@@ -54,7 +54,7 @@ class TutorialPAMAP2Suite(unittest.TestCase):
         assert test
 
     def test_numpify_and_store(self):
-        """ Test whether function produces npy-file """
+        """ Test whether numpify_and_store produces npy-file """
         Nsamples = 9
         Ntimesteps = 10
         Ncolumns = 3
@@ -66,10 +66,11 @@ class TutorialPAMAP2Suite(unittest.TestCase):
         outdatapath = os.getcwd()
         tutorial_pamap2.numpify_and_store(X, y, xname, yname, outdatapath, \
             shuffle=True)
-        filename = outdatapath+ xname+ '.npy'
+        filename = os.path.join(outdatapath, xname+ '.npy')
         test = os.path.isfile(filename)
         if test == True:
             os.remove(filename)
+            os.remove(os.path.join(outdatapath, yname + '.npy'))
         assert test
 
     def test_split_data(self):
