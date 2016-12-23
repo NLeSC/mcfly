@@ -8,7 +8,7 @@
 
 # mcfly
 
-This repository is to ease using deep learning technology for time series classification. The advantages of deep learning algorithms is that it can handle raw data directly with no need to compute signal features, it does not require a expert domain knowledge about the data, and it has been shown to be competitive with conventional machine learning techniques. The notebook [Tutorial mcfly on PAMAP2](https://github.com/NLeSC/mcfly/blob/master/notebooks/Tutorial%20mcfly%20on%20PAMAP2.ipynb) shows how mcfly can be used on accelerometer time series data.
+This repository is to ease using deep learning technology for time series classification. The advantages of deep learning algorithms is that it can handle raw data directly with no need to compute signal features, it does not require a expert domain knowledge about the data, and it has been shown to be competitive with conventional machine learning techniques. The notebook [Tutorial mcfly on PAMAP2](https://github.com/NLeSC/mcfly/blob/master/notebooks/tutorial/Tutorial%20mcfly%20on%20PAMAP2.ipynb) shows how mcfly can be used on accelerometer time series data.
 
 ## Installation
 Prerequisites:
