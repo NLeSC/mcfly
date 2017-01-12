@@ -83,13 +83,6 @@ class ModelGenerationSuite(unittest.TestCase):
         assert_equal(str(type(model.layers[0])), "<class 'keras.layers.normalization.BatchNormalization'>",
                      'Wrong layer type.')
 
-    def test_deepconvlstm_with_specific_params(self):
-        """ DeepConvLSTM models should always start with a batch normalization layer. """
-        model = modelgen.generate_DeepConvLSTM_model((12497, 512, 9), 12, [89, 28, 93], [15])
-        assert_equal(str(type(model.layers[0])), "<class 'keras.layers.normalization.BatchNormalization'>",
-                     'Wrong layer type.')
-
-
     def setUp(self):
         np.random.seed(1234)
 
