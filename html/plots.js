@@ -16,7 +16,7 @@ var onNewDataEvent = function(e) {
     ndx.remove();
     ndx.add(data);
     dc.filterAll();
-    dc.redrawAll();
+    dc.renderAll();
 };
 
 var loadData = function(){
@@ -33,7 +33,6 @@ var loadData = function(){
 
 d3.json("data.json", function(error, data) { // this is your data
     data = flattenModels(data);
-    console.log(data);
 	ndx = crossfilter(data);
 
     // First plot: iterations
@@ -86,9 +85,6 @@ d3.json("data.json", function(error, data) { // this is your data
     }
     var avgAccHeatmapFiltered = remove_empty_bins(avgAccHeatmap);
 
-    console.log(lrRegGroup.size());
-
-    //console.log(accPerConvlayer.all());
     valChart
       .chart(dc.lineChart)
       .x(d3.scale.linear())
@@ -180,11 +176,13 @@ d3.json("data.json", function(error, data) { // this is your data
                 .title(function(d) {
                     return " Learning rate:   10^" + d.key[0] + "\n" +
                            " Regularization rate:   10^" + d.key[1] + "\n" +
+                        " Sum:  " + d.value.exceptionSum + "\n" +
+                        " Count:  " + d.value.exceptionCount + "\n" +
                            " Avg acc:   " + (d.value.exceptionSum / d.value.exceptionCount);})
                 .colors(heatColorMapping)
                 .calculateColorDomain()
                 .yBorderRadius(20)
         .controlsUseVisibility(true);
-    console.log(dc.chartRegistry.list());
+
 	dc.renderAll();
 });
