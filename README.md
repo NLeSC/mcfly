@@ -13,7 +13,7 @@ This repository is to ease using deep learning technology for time series classi
 
 ## Installation
 Prerequisites:
-- Python 2.7 or 3
+- Python 2.7 or 3 (The tutorial is only tested in Python 3)
 - pip
 
 To install the package, run in the project directory:
