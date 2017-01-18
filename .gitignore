@@ -2,3 +2,4 @@ notebooks/.ipynb_checkpoints
 *.pyc
 *.egg-info
 docs/_build/
+notebooks/tutorial/data
