@@ -28,10 +28,7 @@ class TutorialPAMAP2Suite(unittest.TestCase):
         step = 100
         x_trainlist = [np.zeros((25187,9)) for b in range(78)]
         y_trainlist = [np.zeros((12,9)) for b in range(78)]
-        x_train = []
-        y_train = []
-        tutorial_pamap2.sliding_window(frame_length, step, x_train, \
-            y_train, x_trainlist, y_trainlist)
+        x_train, y_train = tutorial_pamap2.sliding_window(frame_length, step, x_trainlist, y_trainlist)
         test = len(x_train) == 19266
         assert test
 

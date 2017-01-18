@@ -54,8 +54,7 @@ def split_activities(labels, X, exclude_activities, borders=10 * 100):
     return Xlist, ylist
 
 
-def sliding_window(frame_length, step, Xsamples,
-                   ysamples, Xsampleslist, ysampleslist):
+def sliding_window(frame_length, step, Xsampleslist, ysampleslist):
     """
     Splits time series in ysampleslist and Xsampleslist
     into segments by applying a sliding overlapping window
@@ -79,6 +78,8 @@ def sliding_window(frame_length, step, Xsamples,
         Samples to take sliding windows from
 
     """
+    Xsamples = []
+    ysamples = []
     for j in range(len(Xsampleslist)):
         X = Xsampleslist[j]
         ybinary = ysampleslist[j]
@@ -87,6 +88,7 @@ def sliding_window(frame_length, step, Xsamples,
             ysub = ybinary
             Xsamples.append(xsub)
             ysamples.append(ysub)
+    return Xsamples, ysamples
 
 
 def transform_y(y, mapclasses, nr_classes):
@@ -138,7 +140,7 @@ def addheader(datasets):
     return datasets
 
 
-def numpify_and_store(X, y, xname, yname, outdatapath, shuffle=False):
+def numpify_and_store(X, y, X_name, y_name, outdatapath, shuffle=False):
     """
     Converts python lists x 3D and y 1D into numpy arrays
     and stores the numpy array in directory outdatapath
@@ -150,9 +152,9 @@ def numpify_and_store(X, y, xname, yname, outdatapath, shuffle=False):
         list with data
     y : list
         list with data
-    xname : str
+    X_name : str
         name to store the x arrays
-    yname : str
+    y_name : str
         name to store the y arrays
     outdatapath : str
         path to the directory to store the data
@@ -168,11 +170,11 @@ def numpify_and_store(X, y, xname, yname, outdatapath, shuffle=False):
         X = X[neworder, :, :]
         y = y[neworder, :]
     # Save binary file
-    xpath = os.path.join(outdatapath, xname)
-    ypath = os.path.join(outdatapath, yname)
+    xpath = os.path.join(outdatapath, X_name)
+    ypath = os.path.join(outdatapath, y_name)
     np.save(xpath, X)
     np.save(ypath, y)
-    print('Stored '+ xpath, yname)
+    print('Stored ' + xpath, y_name)
 
 
 def fetch_data(directory_to_extract_to):
@@ -215,35 +217,6 @@ def fetch_data(directory_to_extract_to):
     return targetdir
 
 
-def slidingwindow_store(y_list, x_list, X_name, y_name, outdatapath, shuffle):
-    """
-    Take sliding-window frames. Target is label of last time step
-    Data is 100 Hz
-
-    Parameters
-    ----------
-    y_list : list
-        list of arrays with classes
-    x_list : list
-        list of numpy arrays with data
-    X_name : str
-        Name for X file
-    y_name : str
-        Name for y file
-    outdatapath : str
-        directory to store the data
-    shuffle : bool
-        whether to shuffle the data
-    """
-    frame_length = int(5.12 * 100)
-    step = 1 * 100
-    x_set = []
-    y_set = []
-    sliding_window(frame_length, step, x_set, y_set, x_list, y_list)
-    numpify_and_store(x_set, y_set, X_name, y_name,
-                      outdatapath, shuffle)
-
-
 def map_class(datasets_filled):
     ysetall = [set(np.array(data.activityID)) - set([0])
                for data in datasets_filled]
@@ -283,8 +256,22 @@ def split_data(Xlists, ybinarylists, indices):
         y_setlist = [y for y in ybinarylists[indices]]
     return x_setlist, y_setlist
 
+def split_data_random(X, y, val_size, test_size):
+    X = np.array(X)
+    y = np.array(y)
+    size = len(X)
+    train_size = size - val_size - test_size
+    indices = np.random.permutation(size)
+    X_train = X[indices[:train_size]]
+    y_train = y[indices[:train_size]]
+    X_val = X[indices[train_size:train_size+val_size]]
+    y_val = y[indices[train_size:train_size+val_size]]
+    X_test = X[indices[train_size+val_size:]]
+    y_test = y[indices[train_size+val_size:]]
+    return X_train, y_train, X_val, y_val, X_test, y_test
 
-def preprocess(targetdir, outdatapath, columns_to_use, exclude_activities, fold):
+def preprocess(targetdir, outdatapath, columns_to_use, exclude_activities, fold,
+               val_test_size=None):
     """ Function to preprocess the PAMAP2 data after it is fetched
 
     Parameters
@@ -309,6 +296,7 @@ def preprocess(targetdir, outdatapath, columns_to_use, exclude_activities, fold)
     """
     datadir = targetdir + '/PAMAP2_Dataset/Protocol'
     filenames = listdir(datadir)
+    filenames.sort()
     print('Start pre-processing all ' + str(len(filenames)) + ' files...')
     # load the files and put them in a list of pandas dataframes:
     datasets = [pd.read_csv(datadir + '/' + fn, header=None, sep=' ')
@@ -324,30 +312,46 @@ def preprocess(targetdir, outdatapath, columns_to_use, exclude_activities, fold)
     xylists = [split_activities(y, x, exclude_activities) for x, y in zip(xall, yall)]
     Xlists, ylists = zip(*xylists)
     ybinarylists = [transform_y(y, mapclasses, nr_classes) for y in ylists]
-
+    frame_length = int(5.12 * 100)
+    step = 1 * 100
     if not fold:
-        # Split in train, test and val
-        x_vallist, y_vallist = split_data(Xlists, ybinarylists, indices=6)
-        test_range = slice(7, len(datasets_filled))
-        x_testlist, y_testlist = split_data(Xlists, ybinarylists, test_range)
-        x_trainlist, y_trainlist = split_data(Xlists, ybinarylists,
-                                              indices=slice(0, 6))
-        # Take sliding-window frames, target is label of last time step,
-        # and store as numpy file
-        slidingwindow_store(y_list=y_trainlist, x_list=x_trainlist,
-                            X_name='X_train', y_name='y_train',
+        if val_test_size is None:
+            # Split in train, test and val
+            x_vallist, y_vallist = split_data(Xlists, ybinarylists, indices=6)
+            test_range = slice(7, len(datasets_filled))
+            x_testlist, y_testlist = split_data(Xlists, ybinarylists, test_range)
+            x_trainlist, y_trainlist = split_data(Xlists, ybinarylists,
+                                                  indices=slice(0, 6))
+            # Take sliding-window frames, target is label of last time step,
+            # and store as numpy file
+            x_train, y_train = sliding_window(frame_length, step, x_trainlist,
+                                              y_trainlist)
+            x_val, y_val = sliding_window(frame_length, step, x_vallist,
+                                              y_vallist)
+            x_test, y_test = sliding_window(frame_length, step, x_testlist,
+                                              y_testlist)
+
+        else:
+            val_size, test_size = val_test_size
+            X_list, y_list = split_data(Xlists, ybinarylists,
+                                        slice(0, len(datasets_filled)))
+            X, y = sliding_window(frame_length, step, X_list,
+                                  y_list)
+            x_train, y_train, x_val, y_val, x_test, y_test = split_data_random(X, y, val_size, test_size)
+
+
+        numpify_and_store(x_train, y_train, X_name='X_train', y_name='y_train',
                             outdatapath=outdatapath, shuffle=True)
-        slidingwindow_store(y_list=y_vallist, x_list=x_vallist,
-                            X_name='X_val', y_name='y_val',
+        numpify_and_store(x_val, y_val, X_name='X_val', y_name='y_val',
                             outdatapath=outdatapath, shuffle=False)
-        slidingwindow_store(y_list=y_testlist, x_list=x_testlist,
-                            X_name='X_test', y_name='y_test',
+        numpify_and_store(x_test, y_test, X_name='X_test', y_name='y_test',
                             outdatapath=outdatapath, shuffle=False)
     else :
         for i in range(len(Xlists)):
             X_i, y_i = split_data(Xlists, ybinarylists, i)
-            slidingwindow_store(y_list=y_i, x_list=X_i,
-                            X_name='X_'+str(i), y_name='y_'+str(i),
+            X, y = sliding_window(frame_length, step, X_i,
+                                              y_i)
+            numpify_and_store(X, y, X_name='X_'+str(i), y_name='y_'+str(i),
                             outdatapath=outdatapath, shuffle=True)
 
 
@@ -355,7 +359,8 @@ def preprocess(targetdir, outdatapath, columns_to_use, exclude_activities, fold)
     return None
 
 
-def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None, output_dir='slidingwindow512cleaned', exclude_activities=[0], fold=False):
+def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None, output_dir='slidingwindow512cleaned', exclude_activities=[0], fold=False,
+                         val_test_size=None):
     """
     High level function to fetch_and_preprocess the PAMAP2 dataset
 
@@ -390,7 +395,7 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None, output_di
     #     print('Data previously pre-processed and np-files saved to ' +
     #           outdatapath)
     # else:
-    preprocess(targetdir, outdatapath, columns_to_use, exclude_activities, fold)
+    preprocess(targetdir, outdatapath, columns_to_use, exclude_activities, fold, val_test_size)
     return outdatapath
 
 
