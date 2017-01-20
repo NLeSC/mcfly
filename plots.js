@@ -61,7 +61,7 @@ d3.json("data.json", function(error, data) { // this is your data
                             .exception(function(d) {return d.model;})
                             .exceptionCount(true)
                             .exceptionSum(function(d) {return d.final_val_acc;})
-                            (nrconvlayersDim.group());
+                            (convLayerGroup);
 
     // Fifth plot: Learning rates/Regularization rate heat map
     function roundLog10(x) { return Math.round(Math.log(x)/Math.log(10)); }
@@ -144,7 +144,7 @@ d3.json("data.json", function(error, data) { // this is your data
           if(d.key == 1) { return d.key + " layer";}
           else { return d.key + " layers"; }
       })
-      .elasticX(false)
+      .elasticX(true)
       .controlsUseVisibility(true);
 
       var heatColorMapping = function(d) {
