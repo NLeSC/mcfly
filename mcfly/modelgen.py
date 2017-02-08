@@ -344,11 +344,11 @@ def generate_DeepConvLSTM_hyperparameter_set(
     number_of_conv_layers = np.random.randint(
         min_conv_layers, max_conv_layers + 1)
     hyperparameters['filters'] = np.random.randint(
-        min_conv_filters, max_conv_filters + 1, number_of_conv_layers)
+        min_conv_filters, max_conv_filters + 1, number_of_conv_layers).tolist()
     number_of_lstm_layers = np.random.randint(
         min_lstm_layers, max_lstm_layers + 1)
     hyperparameters['lstm_dims'] = np.random.randint(
-        min_lstm_dims, max_lstm_dims + 1, number_of_lstm_layers)
+        min_lstm_dims, max_lstm_dims + 1, number_of_lstm_layers).tolist()
     return hyperparameters
 
 
