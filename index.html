@@ -13,8 +13,14 @@
 
 
 <div id="data-selection" class="container">
-	<div class="row">	
+	<div class="row">
 		<div class="alert alert-info">
+			<h5>
+				Data selection
+			</h5>
+			<p>
+			Select a model history file. This file is written by mcfly when models are trained.
+			</p>
 			<form enctype="multipart/form-data" method="post">
 				<input id="json-file" type="file" onchange="loadData()"/>
 			</form>
@@ -99,8 +105,8 @@
 <script type="text/javascript" src="js/crossfilter.js"></script>
 <script type="text/javascript" src="js/dc.js"></script>
 <script type="text/javascript" src="js/reductio.js"></script>
-<script type="text/javascript" src="flattenJson.js"></script>
-<script type="text/javascript" src="plots.js"></script>
+<script type="text/javascript" src="js/flattenJson.js"></script>
+<script type="text/javascript" src="js/plots.js"></script>
 
 </body>
 </html>
