@@ -40,8 +40,13 @@ var getValidModels = function(data){
 //If new data is read, replace the data in the crossfilter
 var onNewDataEvent = function(e) {
     var filetxt = e.target.result;
-    var models = getValidModels(JSON.parse(filetxt.replace(/\bNaN\b/g, '"NaN"')));
-    var data = flattenModels(models);	
+	var allModels = JSON.parse(filetxt.replace(/\bNaN\b/g, '"NaN"'));
+    var validModels = getValidModels(allModels);
+		
+	d3.select("#missing-models-warning")
+	.classed("hidden", allModels.length != validModels.length;);
+	
+    var data = flattenModels(validModels);	
     ndx.remove();
     ndx.add(data);
     dc.filterAll();
