@@ -44,7 +44,7 @@ var onNewDataEvent = function(e) {
     var validModels = getValidModels(allModels);
 		
 	d3.select("#missing-models-warning")
-	.classed("hidden", allModels.length != validModels.length;);
+	.classed("hidden", allModels.length == validModels.length);
 	
     var data = flattenModels(validModels);	
     ndx.remove();
