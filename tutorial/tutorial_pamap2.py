@@ -391,11 +391,11 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None, output_di
     outdatapath = os.path.join(targetdir, 'PAMAP2_Dataset/', output_dir)
     if not os.path.exists(outdatapath):
         os.makedirs(outdatapath)
-    # if os.path.isfile(outdatapath + 'x_train.npy'):
-    #     print('Data previously pre-processed and np-files saved to ' +
-    #           outdatapath)
-    # else:
-    preprocess(targetdir, outdatapath, columns_to_use, exclude_activities, fold, val_test_size)
+    if os.path.isfile(os.path.join(outdatapath, 'X_train.npy')):
+        print('Data previously pre-processed and np-files saved to ' +
+              outdatapath)
+    else:
+        preprocess(targetdir, outdatapath, columns_to_use, exclude_activities, fold, val_test_size)
     return outdatapath
 
 
