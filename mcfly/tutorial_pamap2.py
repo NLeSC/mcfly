@@ -199,7 +199,7 @@ def fetch_data(directory_to_extract_to):
     else:
         os.makedirs(targetdir)  # create target directory
         # Download the PAMAP2 data, this is 688 Mb
-        path_to_zip_file = directory_to_extract_to + '/PAMAP2_Dataset.zip'
+        path_to_zip_file = os.path.join(directory_to_extract_to, '/PAMAP2_Dataset.zip')
         test_file_exist = os.path.isfile(path_to_zip_file)
         if test_file_exist is False:
             url = str('https://archive.ics.uci.edu/ml/' +
@@ -294,12 +294,12 @@ def preprocess(targetdir, outdatapath, columns_to_use, exclude_activities, fold,
     -------
     None
     """
-    datadir = targetdir + '/PAMAP2_Dataset/Protocol'
+    datadir = os.path.join(targetdir, 'PAMAP2_Dataset/Protocol')
     filenames = listdir(datadir)
     filenames.sort()
     print('Start pre-processing all ' + str(len(filenames)) + ' files...')
     # load the files and put them in a list of pandas dataframes:
-    datasets = [pd.read_csv(datadir + '/' + fn, header=None, sep=' ')
+    datasets = [pd.read_csv(os.path.join(datadir, fn), header=None, sep=' ')
                 for fn in filenames]
     datasets = addheader(datasets)  # add headers to the datasets
     # Interpolate dataset to get same sample rate between channels
