@@ -2,7 +2,6 @@
 [![Code quality](https://scrutinizer-ci.com/g/NLeSC/mcfly/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/NLeSC/mcfly/)
 [![Coverage](https://scrutinizer-ci.com/g/NLeSC/mcfly/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/NLeSC/mcfly/statistics/)
 <a href="https://zenhub.io"><img src="https://raw.githubusercontent.com/ZenHubIO/support/master/zenhub-badge.png"></a>
-[![Documentation Status](https://readthedocs.org/projects/mcfly/badge/?version=latest)](http://mcfly.readthedocs.io/en/latest/?badge=latest)
 [![DOI](https://zenodo.org/badge/59207352.svg)](https://zenodo.org/badge/latestdoi/59207352)
 [![Binder](http://mybinder.org/badge.svg)](http://mybinder.org:/repo/nlesc/mcfly)
 
