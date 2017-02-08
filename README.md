@@ -9,7 +9,7 @@
 
 # mcfly
 
-This repository is to ease using deep learning technology for time series classification. The advantages of deep learning algorithms is that it can handle raw data directly with no need to compute signal features, it does not require a expert domain knowledge about the data, and it has been shown to be competitive with conventional machine learning techniques. The notebook [Tutorial mcfly on PAMAP2](https://github.com/NLeSC/mcfly/blob/master/notebooks/tutorial/Tutorial%20mcfly%20on%20PAMAP2.ipynb) shows how mcfly can be used on accelerometer time series data.
+The goal of mcfly is to ease using deep learning technology for time series classification. The advantages of deep learning algorithms is that it can handle raw data directly with no need to compute signal features, it does not require a expert domain knowledge about the data, and it has been shown to be competitive with conventional machine learning techniques. As an example, you can apply mcfly on ,accelerometer data for activity classification, as shown in [the tutorial](https://github.com/NLeSC/mcfly/tree/master/notebooks/tutorial).
 
 ## Installation
 Prerequisites:
@@ -37,6 +37,7 @@ Navigate to `http://localhost:8888/` in your browser to open the visualization. 
 
 
 ## User documentation
+* [Wiki page](https://github.com/NLeSC/mcfly/wiki/Home---mcfly)
 * [User manual](https://github.com/NLeSC/mcfly/wiki/User-manual)
 * [Code documentation](http://mcfly.readthedocs.io/en/latest/)
 * [Technical Documentation](https://github.com/NLeSC/mcfly/wiki/Technical-documentation)
