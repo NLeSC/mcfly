@@ -193,13 +193,13 @@ def fetch_data(directory_to_extract_to):
     targetdir: str
         directory where the data is extracted
     """
-    targetdir = os.path.join(directory_to_extract_to, 'PAMAP2/')
+    targetdir = os.path.join(directory_to_extract_to, "PAMAP2")
     if os.path.exists(targetdir):
         print('Data previously downloaded and stored in ' + targetdir)
     else:
         os.makedirs(targetdir)  # create target directory
         # Download the PAMAP2 data, this is 688 Mb
-        path_to_zip_file = os.path.join(directory_to_extract_to, '/PAMAP2_Dataset.zip')
+        path_to_zip_file = os.path.join(directory_to_extract_to, 'PAMAP2_Dataset.zip')
         test_file_exist = os.path.isfile(path_to_zip_file)
         if test_file_exist is False:
             url = str('https://archive.ics.uci.edu/ml/' +
@@ -212,8 +212,10 @@ def fetch_data(directory_to_extract_to):
             print('The data was previously downloaded and stored in ' +
                   path_to_zip_file)
         # unzip
+
         with zipfile.ZipFile(path_to_zip_file, "r") as zip_ref:
             zip_ref.extractall(targetdir)
+        os.remove(path_to_zip_file)
     return targetdir
 
 
@@ -294,7 +296,7 @@ def preprocess(targetdir, outdatapath, columns_to_use, exclude_activities, fold,
     -------
     None
     """
-    datadir = os.path.join(targetdir, 'PAMAP2_Dataset/Protocol')
+    datadir = os.path.join(targetdir, 'PAMAP2_Dataset', 'Protocol')
     filenames = listdir(datadir)
     filenames.sort()
     print('Start pre-processing all ' + str(len(filenames)) + ' files...')
@@ -359,7 +361,7 @@ def preprocess(targetdir, outdatapath, columns_to_use, exclude_activities, fold,
     return None
 
 
-def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None, output_dir='slidingwindow512cleaned', exclude_activities=[0], fold=False,
+def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None, output_dir='preprocessed', exclude_activities=[0], fold=False,
                          val_test_size=None):
     """
     High level function to fetch_and_preprocess the PAMAP2 dataset
@@ -388,7 +390,7 @@ def fetch_and_preprocess(directory_to_extract_to, columns_to_use=None, output_di
                           'ankle_acc_16g_x', 'ankle_acc_16g_y', 'ankle_acc_16g_z',
                           'chest_acc_16g_x', 'chest_acc_16g_y', 'chest_acc_16g_z']
     targetdir = fetch_data(directory_to_extract_to)
-    outdatapath = os.path.join(targetdir, 'PAMAP2_Dataset/', output_dir)
+    outdatapath = os.path.join(targetdir, output_dir)
     if not os.path.exists(outdatapath):
         os.makedirs(outdatapath)
     if os.path.isfile(os.path.join(outdatapath, 'X_train.npy')):
