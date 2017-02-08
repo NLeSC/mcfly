@@ -1,4 +1,4 @@
-from mcfly import tutorial_pamap2
+from tutorial import tutorial_pamap2
 import numpy as np
 import pandas as pd
 from nose.tools import assert_equal, assert_equals
