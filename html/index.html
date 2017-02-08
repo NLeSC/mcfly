@@ -6,17 +6,20 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="css/dc.css"/>
+    <link rel="stylesheet" type="text/css" href="css/mcfly.css"/>
 </head>
 
 <body>
 
 <div class="container">
-<script type="text/javascript" src="header.js"></script>
 
 <form enctype="multipart/form-data" method="post">
     <input id="json-file" type="file" onchange="loadData()"/>
 </form>
-
+<div id="missing-models-warning" class="alert alert-warning hidden">
+	<strong>Warning!</strong>
+	One or more models are not visualized. Models are not visualized when they contain NaN (not a number) values in their learning history. The presence of such values indicate that hyper parameters of the model are not optimal. The result can be an invalid model.
+</div>
 <div class="row">	
     <div class="col-md-6">	  
       <div id="val-chart" >

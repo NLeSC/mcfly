@@ -9,10 +9,42 @@ var trainChart = dc.seriesChart("#train-chart"),
     data;
 
 
+var isModelValid = function(model){
+	/// Returns true when a model is valid, and false otherwise. Checks can be added
+	/// later. They include at least checkin for the presence of NaN or null values 
+	/// in loss or accuracy arrays.
+    var floatArrayKeys = ["train_acc", "train_loss", "val_acc", "val_loss"];    
+    for (var key of floatArrayKeys){
+        var floatArray = model[key];
+        for (var float of floatArray){
+            if (float == null || float == "NaN"){                
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+var getValidModels = function(data){
+    validModels = [];    
+    for (model of data){
+        if(isModelValid(model)){
+            validModels.push(model);
+        }
+    }
+    return validModels;
+}
+
 //If new data is read, replace the data in the crossfilter
 var onNewDataEvent = function(e) {
     var filetxt = e.target.result;
-    data = flattenModels(JSON.parse(filetxt));
+	var allModels = JSON.parse(filetxt.replace(/\bNaN\b/g, '"NaN"'));
+    var validModels = getValidModels(allModels);
+		
+	d3.select("#missing-models-warning")
+	.classed("hidden", allModels.length == validModels.length);
+	
+    var data = flattenModels(validModels);	
     ndx.remove();
     ndx.add(data);
     dc.filterAll();
@@ -26,7 +58,6 @@ var loadData = function(){
         var fileReader = new FileReader();
         fileReader.onload = onNewDataEvent;
         fileReader.readAsText(jsonfile);
-
     }
 };
 
