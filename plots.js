@@ -22,8 +22,6 @@ var isModelValid = function(model){
             }
         }
     }
-    
-    console.log('valid');
     return true;
 }
 
@@ -60,7 +58,6 @@ var loadData = function(){
         var fileReader = new FileReader();
         fileReader.onload = onNewDataEvent;
         fileReader.readAsText(jsonfile);
-
     }
 };
 
