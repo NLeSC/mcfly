@@ -117,23 +117,29 @@ var createVisualizations = function(data){
     }
     var avgAccHeatmapFiltered = remove_empty_bins(avgAccHeatmap);
 
-    valChart
-      .chart(dc.lineChart)
-      .x(d3.scale.linear())
-      .brushOn(false)
-      .yAxisLabel("Validation accuracy")
-      .xAxisLabel("Iteration")
-      .colors(d3.scale.category20())
-      .elasticX(true)
-      .dimension(runDimension1)
-      .group(runValAcc)
-      .seriesAccessor(function(d) {return "Model " + d.key[0];})
-      .keyAccessor(function(d) {return +d.key[1];})
-      .valueAccessor(function(d) {return +d.value;})
-      .controlsUseVisibility(true);
+	var curveMargin = {top: 10, left: 50, right: 10, bottom: 30};
+	
+	valChart
+	.margins(curveMargin)
+	.chart(dc.lineChart)
+	.width("300")
+	.x(d3.scale.linear())
+	.brushOn(false)
+	.yAxisLabel("Validation accuracy")
+	.xAxisLabel("Iteration")
+	.colors(d3.scale.category20())
+	.elasticX(true)
+	.dimension(runDimension1)
+	.group(runValAcc)
+	.seriesAccessor(function(d) {return "Model " + d.key[0];})
+	.keyAccessor(function(d) {return +d.key[1];})
+	.valueAccessor(function(d) {return +d.value;})
+	.controlsUseVisibility(true);
 
-  trainChart
+	trainChart
     .chart(dc.lineChart)
+	.margins(curveMargin)
+	.width("300")
     .x(d3.scale.linear())
     .brushOn(false)
     .yAxisLabel("Train accuracy")
