@@ -45,14 +45,14 @@ var onNewDataEvent = function(e) {
 	.classed("hidden", allModels.length == validModels.length);
 	
     var data = flattenModels(validModels);	
+	createVisualizations(data);
     ndx.remove();
     ndx.add(data);
     dc.filterAll();
     dc.renderAll();
 };
 
-var loadData = function(){
-    console.log('Loading data...');
+var loadData = function(){    
     if(document.getElementById("json-file")) {
         var jsonfile = document.getElementById("json-file").files[0];
         var fileReader = new FileReader();
@@ -61,9 +61,10 @@ var loadData = function(){
     }
 };
 
-
-d3.json("data.json", function(error, data) { // this is your data
-    data = flattenModels(data);
+var createVisualizations = function(data){	
+	d3.select("#visualizations").classed("hidden", false);
+	d3.select("#data-selection").classed("hidden", true);
+	
 	ndx = crossfilter(data);
 
     // First plot: iterations
@@ -216,4 +217,4 @@ d3.json("data.json", function(error, data) { // this is your data
         .controlsUseVisibility(true);
 
 	dc.renderAll();
-});
+}
