@@ -1,12 +1,13 @@
+<p align="left">
+  <img src="mcflylogo.png" width="200"/>
+</p>
+
 [![Build Status](https://travis-ci.org/NLeSC/mcfly.svg?branch=master)](https://travis-ci.org/NLeSC/mcfly)
 [![Code quality](https://scrutinizer-ci.com/g/NLeSC/mcfly/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/NLeSC/mcfly/)
 [![Coverage](https://scrutinizer-ci.com/g/NLeSC/mcfly/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/NLeSC/mcfly/statistics/)
 <a href="https://zenhub.io"><img src="https://raw.githubusercontent.com/ZenHubIO/support/master/zenhub-badge.png"></a>
 [![DOI](https://zenodo.org/badge/59207352.svg)](https://zenodo.org/badge/latestdoi/59207352)
 [![Binder](http://mybinder.org/badge.svg)](http://mybinder.org:/repo/nlesc/mcfly)
-
-
-# mcfly
 
 The goal of mcfly is to ease using deep learning technology for time series classification. The advantages of deep learning algorithms is that it can handle raw data directly with no need to compute signal features, it does not require a expert domain knowledge about the data, and it has been shown to be competitive with conventional machine learning techniques. As an example, you can apply mcfly on ,accelerometer data for activity classification, as shown in [the tutorial](https://github.com/NLeSC/mcfly/tree/master/notebooks/tutorial).
 
