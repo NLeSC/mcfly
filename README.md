@@ -16,6 +16,14 @@ Prerequisites:
 - Python 2.7 or 3.5 (The tutorial is only tested in Python 3.5)
 - pip
 
+Installing all dependencies in sparate conda environment:
+```sh
+conda env create -f environment.yml
+
+# activate this new environment
+source activate mcfly
+```
+
 To install the package, run in the project directory:
 
 `pip install .`
