@@ -1,4 +1,7 @@
 name: mcfly
+channels:
+- conda-forge
+- bioconda
 dependencies:
 - python-dateutil=2.3=py27_0
 - keras=1.0.7=py27_0
