@@ -427,3 +427,30 @@ def load_data(outputpath):
     x_test = np.load(os.path.join(outputpath, 'X_test' + ext))
     y_test_binary = np.load(os.path.join(outputpath,  'y_test' + ext))
     return x_train, y_train_binary, x_val, y_val_binary, x_test, y_test_binary
+
+
+def download_preprocessed_data(directory_to_extract_to):
+    data_path = os.path.join(directory_to_extract_to,
+                             'data/PAMAP2/preprocessed')
+
+    if not os.path.isdir(data_path):
+        path_to_zip_file = os.path.join(directory_to_extract_to, 'data.zip')
+
+        # Download zip file with data
+        if not os.path.isfile(path_to_zip_file):
+            print("Downloading data...")
+            local_fn, headers = urllib.request.urlretrieve(
+                'https://zenodo.org/record/345082/files/data.zip',
+                filename=path_to_zip_file)
+        else:
+            print("Data already downloaded")
+
+        # Extract the zip file
+        with zipfile.ZipFile(path_to_zip_file, "r") as zip_ref:
+            print("Extracting data...")
+            zip_ref.extractall(directory_to_extract_to)
+        print("Done")
+    else:
+        print("Data already downloaded and extracted.")
+
+    return data_path
