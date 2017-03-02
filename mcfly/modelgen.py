@@ -19,7 +19,7 @@ def generate_models(
         low_lr=1, high_lr=4, low_reg=1, high_reg=4
 ):
     """
-    Generate one or multiple Keras models with random hyperparameters.
+    Generate one or multiple untrained Keras models with random hyperparameters.
 
     Parameters
     ----------
