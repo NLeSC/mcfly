@@ -1,13 +1,14 @@
 # mcfly Cheatsheet
 
-For detailed documentation see:
-https://github.com/NLeSC/mcfly/wiki/Home---mcfly
-For tutorials see:https://github.com/NLeSC/mcfly-tutorial
+Detailed documentation can be found in the mcfly [wiki](https://github.com/NLeSC/mcfly/wiki/Home---mcfly).
+
+Notebook tutorials can be found in the mcfly-tutorial [repository](https://github.com/NLeSC/mcfly-tutorial)
+
 
 ### Input data:
 *X_train* =>  N samples X N timesteps X  N channels
 
-*y_train* => N samples X N classes
+*y_train_binary* => N samples X N classes
 
 ### Generate models:
 
