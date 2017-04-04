@@ -149,15 +149,14 @@ def generate_DeepConvLSTM_model(
     # reshape a 2 dimensional array per file/person/object into a
     # 3 dimensional array
     model.add(
-        Reshape(target_shape=(1, dim_length, dim_channels)))
+        Reshape(target_shape=(dim_length, dim_channels, 1)))
     for filt in filters:
         # filt: number of filters used in a layer
         # filters: vector of filt values
         model.add(
-            Convolution2D(filt, nb_row=3, nb_col=1, border_mode='same',
-                          W_regularizer=l2(regularization_rate),
-                          init=weightinit,
-                          dim_ordering='th'))
+            Convolution2D(filt, kernel_size=(3,1), padding='same',
+                          kernel_regularizer=l2(regularization_rate),
+                          kernel_initializer=weightinit))
         model.add(BatchNormalization())
         model.add(Activation('relu'))
     # reshape 3 dimensional array back into a 2 dimensional array,
@@ -165,7 +164,7 @@ def generate_DeepConvLSTM_model(
     model.add(Reshape(target_shape=(dim_length, filters[-1] * dim_channels)))
 
     for lstm_dim in lstm_dims:
-        model.add(LSTM(output_dim=lstm_dim, return_sequences=True,
+        model.add(LSTM(units=lstm_dim, return_sequences=True,
                        activation='tanh'))
 
     model.add(Dropout(0.5))  # dropout before the dense layer
@@ -173,7 +172,7 @@ def generate_DeepConvLSTM_model(
     # classification
     model.add(
         TimeDistributed(
-            Dense(output_dim, W_regularizer=l2(regularization_rate))))
+            Dense(units=output_dim, kernel_regularizer=l2(regularization_rate))))
     model.add(Activation("softmax"))
     # Final classification layer - per timestep
     model.add(Lambda(lambda x: x[:, -1, :], output_shape=[output_dim]))
@@ -221,21 +220,19 @@ def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes,
         BatchNormalization(
             input_shape=(
                 dim_length,
-                dim_channels),
-            mode=0,
-            axis=2))
+                dim_channels)))
     for filter_number in filters:
-        model.add(Convolution1D(filter_number, 3, border_mode='same',
-                                W_regularizer=l2(regularization_rate),
-                                init=weightinit))
+        model.add(Convolution1D(filter_number, kernel_size=3, padding='same',
+                                kernel_regularizer=l2(regularization_rate),
+                                kernel_initializer=weightinit))
         model.add(BatchNormalization())
         model.add(Activation('relu'))
     model.add(Flatten())
-    model.add(Dense(output_dim=fc_hidden_nodes,
-                    W_regularizer=l2(regularization_rate),
-                    init=weightinit))  # Fully connected layer
+    model.add(Dense(units=fc_hidden_nodes,
+                    kernel_regularizer=l2(regularization_rate),
+                    kernel_initializer=weightinit))  # Fully connected layer
     model.add(Activation('relu'))  # Relu activation
-    model.add(Dense(output_dim=outputdim, init=weightinit))
+    model.add(Dense(units=outputdim, kernel_initializer=weightinit))
     model.add(BatchNormalization())
     model.add(Activation("softmax"))  # Final classification layer
 

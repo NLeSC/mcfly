@@ -34,7 +34,7 @@ class ModelGenerationSuite(unittest.TestCase):
         fc_hidden_nodes = 101
         model = modelgen.generate_CNN_model((None, 20, 3), 2, [32, 32], fc_hidden_nodes)
         dense_layer = [l for l in model.layers if 'Dense' in str(l)][0]
-        assert_equal(dense_layer.output_dim, fc_hidden_nodes, 'Wrong number of fc nodes.')
+        assert_equal(dense_layer.output_shape[1], fc_hidden_nodes, 'Wrong number of fc nodes.')
 
     def test_cnn_batchnorm_dim(self):
         """"The output shape of the batchnorm should be (None, nr_timesteps, nr_filters)"""
@@ -43,10 +43,10 @@ class ModelGenerationSuite(unittest.TestCase):
         assert_equal(batchnormlay.output_shape, (None, 20, 32))
 
     def test_deepconvlstm_batchnorm_dim(self):
-        """The output shape of the batchnorm should be (None, nr_filters, nr_timesteps, nr_channels)"""
+        """The output shape of the batchnorm should be (None, nr_timesteps, nr_channels, nr_filters)"""
         model = modelgen.generate_DeepConvLSTM_model((None, 20, 3), 2, [32, 32], [32, 32])
         batchnormlay = model.layers[3]
-        assert_equal(batchnormlay.output_shape, (None, 32, 20, 3))
+        assert_equal(batchnormlay.output_shape, (None, 20, 3, 32))
 
     def test_deepconvlstm_enough_batchnorm(self):
         """LSTM model should contain as many batch norm layers as it has activations layers"""
