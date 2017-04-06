@@ -74,7 +74,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         else:
             callbacks = []
         history = model.fit(X_train_sub, y_train_sub,
-                            nb_epoch=nr_epochs, batch_size=20,
+                            epochs=nr_epochs, batch_size=20,
                             # see comment on subsize_set
                             validation_data=(X_val, y_val),
                             verbose=verbose,
