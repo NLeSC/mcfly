@@ -11,7 +11,6 @@
  'EvaluateDifferentModels.ipynb'.
 """
 import numpy as np
-from matplotlib import pyplot as plt
 from . import modelgen
 from sklearn import neighbors, metrics
 import warnings
@@ -126,41 +125,6 @@ def store_train_hist_as_json(params, model_type, history, outputfile):
                   indent=4, ensure_ascii=False)
 
 
-def plotTrainingProcess(history, name='Model', ax=None):
-    """
-    This function plots the loss and accuracy on the train and validation set,
-    for each epoch in the history of one model.
-
-    Parameters
-    ----------
-    history : keras History object
-        The history object of the training process corresponding to one model
-    name : str
-        Name of the model, to display in the title
-    ax : Axis, optional
-        Specific axis to plot on
-
-    """
-    if ax is None:
-        fig, ax = plt.subplots()
-    ax2 = ax.twinx()
-    LN = len(history.history['val_loss'])
-    val_loss, = ax.plot(range(LN), history.history['val_loss'], 'g--',
-                        label='validation loss')
-    train_loss, = ax.plot(range(LN), history.history['loss'], 'g-',
-                          label='train loss')
-    val_acc, = ax2.plot(range(LN), history.history['val_acc'], 'b--',
-                        label='validation accuracy')
-    train_acc, = ax2.plot(range(LN), history.history['acc'], 'b-',
-                          label='train accuracy')
-    ax.set_xlabel('epoch')
-    ax.set_ylabel('loss', color='g')
-    ax2.set_ylabel('accuracy', color='b')
-    plt.legend(handles=[val_loss, train_loss, val_acc, train_acc],
-               loc=2, bbox_to_anchor=(1.1, 1))
-    plt.title(name)
-
-
 def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                            number_of_models=5, nr_epochs=5, subset_size=100,
                            outputpath=None, **kwargs
@@ -226,10 +190,6 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
     knn_acc = kNN_accuracy(
         X_train[:subset_size, :, :], y_train[:subset_size, :], X_val, y_val)
     if verbose:
-        for i in range(len(models)):  # now one plot per model, ultimately we
-            # may want all models in one plot to allow for direct comparison
-            name = str(models[i][1])
-            plotTrainingProcess(histories[i], name)
         print('Best model: model ', best_model_index)
         print('Model type: ', best_model_type)
         print('Hyperparameters: ', best_params)
