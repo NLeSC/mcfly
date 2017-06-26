@@ -62,6 +62,13 @@ class ModelGenerationSuite(unittest.TestCase):
         activation_layers = len([l for l in model.layers if 'Activation' in str(l)])
         assert_equal(batch_norm_layers, activation_layers)
 
+    def test_cnn_metrics(self):
+        """CNN model should be compiled with the metrics that we give it"""
+        metrics = ['accuracy', 'mae']
+        model = modelgen.generate_CNN_model((None, 20, 3), 2, [32, 32],
+                                            100, metrics=metrics)
+        assert_equal(model.metrics, metrics)
+
     def test_CNN_hyperparameters_nrlayers(self):
         """ Number of Conv layers from range [4, 4] should be 4. """
         hyperparams = modelgen.generate_CNN_hyperparameter_set(min_layers=4, max_layers=4)
@@ -82,6 +89,11 @@ class ModelGenerationSuite(unittest.TestCase):
         model = modelgen.generate_DeepConvLSTM_model((None, 20, 3), 2, [32, 32], [32, 32])
         assert_equal(str(type(model.layers[0])), "<class 'keras.layers.normalization.BatchNormalization'>",
                      'Wrong layer type.')
+
+    def test_generate_models_metrics(self):
+        models = modelgen.generate_models((None, 20, 3), 2)
+        model, hyperparams, modeltype = models[0]
+        assert_equal(model.metrics, ['accuracy'])
 
     def setUp(self):
         np.random.seed(1234)
