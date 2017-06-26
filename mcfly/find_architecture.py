@@ -20,7 +20,8 @@ from keras.callbacks import EarlyStopping
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             nr_epochs=5, subset_size=100, verbose=True,
-                            outputfile=None, early_stopping=False):
+                            outputfile=None, early_stopping=False,
+                            batch_size=20):
     """
     Given a list of compiled models, this function trains
     them all on a subset of the train data. If the given size of the subset is
@@ -48,6 +49,8 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         File location to store the model results
     early_stopping: bool
         Stop when validation loss does not decrease
+    batch_size : int
+        nr of samples per batch
 
     Returns
     ----------
@@ -73,7 +76,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         else:
             callbacks = []
         history = model.fit(X_train_sub, y_train_sub,
-                            epochs=nr_epochs, batch_size=20,
+                            epochs=nr_epochs, batch_size=batch_size,
                             # see comment on subsize_set
                             validation_data=(X_val, y_val),
                             verbose=verbose,
