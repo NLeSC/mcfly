@@ -57,6 +57,27 @@ class FindArchitectureSuite(unittest.TestCase):
         self.assertIsNotNone(best_model_type)
         assert 1 >= knn_acc >= 0
 
+    def train_models_on_samples_empty(self):
+        np.random.seed(123)
+        num_timesteps = 100
+        num_channels = 2
+        num_samples_train = 5
+        num_samples_val = 3
+        X_train = np.random.rand(
+            num_samples_train,
+            num_timesteps,
+            num_channels)
+        y_train = to_categorical(np.array([0, 0, 1, 1, 1]))
+        X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
+        y_val = to_categorical(np.array([0, 1, 1]))
+
+        histories, val_metrics, val_losses = \
+            find_architecture.train_models_on_samples(X_train, y_train, X_val, y_val, [],
+                                nr_epochs=1, subset_size=10, verbose=False,
+                                outputfile=None, early_stopping=False,
+                                batch_size=20, metric='accuracy')
+        assert len(histories) == 0
+
     def setUp(self):
         np.random.seed(1234)
 
@@ -78,6 +99,16 @@ class FindArchitectureSuite(unittest.TestCase):
         if test is True:
             os.remove(filename)
         assert test
+
+    def test_get_metricname_acc(self):
+        metric_name = find_architecture.get_metric_name('accuracy')
+        assert metric_name == 'acc'
+
+    def test_get_metricname_myfunc(self):
+        def myfunc(a, b):
+            return None
+        metric_name = find_architecture.get_metric_name(myfunc)
+        assert metric_name == 'myfunc'
 
 
 if __name__ == '__main__':

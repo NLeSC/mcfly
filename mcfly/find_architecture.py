@@ -12,16 +12,17 @@
 """
 import numpy as np
 from . import modelgen
-from sklearn import neighbors, metrics
+from sklearn import neighbors, metrics as sklearnmetrics
 import warnings
 import json
 import os
 from keras.callbacks import EarlyStopping
+from keras import metrics
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             nr_epochs=5, subset_size=100, verbose=True,
                             outputfile=None, early_stopping=False,
-                            batch_size=20):
+                            batch_size=20, metric='accuracy'):
     """
     Given a list of compiled models, this function trains
     them all on a subset of the train data. If the given size of the subset is
@@ -51,12 +52,14 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         Stop when validation loss does not decrease
     batch_size : int
         nr of samples per batch
+    metric : str
+        metric to output for visualization
 
     Returns
     ----------
     histories : list of Keras History objects
         train histories for all models
-    val_accuracies : list of floats
+    val_metrics : list of floats
         validation accuraracies of the models
     val_losses : list of floats
         validation losses of the models
@@ -65,12 +68,17 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     X_train_sub = X_train[:subset_size, :, :]
     y_train_sub = y_train[:subset_size, :]
 
+    metric_name = get_metric_name(metric)
+
     histories = []
-    val_accuracies = []
+    val_metrics = []
     val_losses = []
     for i, (model, params, model_types) in enumerate(models):
         if verbose:
             print('Training model %d' % i, model_types)
+        model_metrics = [get_metric_name(name) for name in model.metrics]
+        if metric_name not in model_metrics:
+            raise ValueError('Invalid metric, the model should be compiled with the same metric!')
         if early_stopping:
             callbacks = [EarlyStopping(monitor='val_loss', patience=0, verbose=verbose, mode='auto')]
         else:
@@ -82,15 +90,17 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             verbose=verbose,
                             callbacks=callbacks)
         histories.append(history)
-        val_accuracies.append(history.history['val_acc'][-1])
+
+        val_metrics.append(history.history['val_'+metric_name][-1])
         val_losses.append(history.history['val_loss'][-1])
         if outputfile is not None:
             store_train_hist_as_json(params, model_types,
-                                     history.history, outputfile)
-    return histories, val_accuracies, val_losses
+                                     history.history, outputfile,
+                                     metric_name)
+    return histories, val_metrics, val_losses
 
 
-def store_train_hist_as_json(params, model_type, history, outputfile):
+def store_train_hist_as_json(params, model_type, history, outputfile, metric_name='acc'):
     """
     This function stores the model parameters, the loss and accuracy history
     of one model in a JSON file. It appends the model information to the
@@ -106,17 +116,19 @@ def store_train_hist_as_json(params, model_type, history, outputfile):
         training history from one model
     outputfile : str
         path where the json file needs to be stored
+    metricname : str, optional
+        name of metric from history to store
     """
     jsondata = params.copy()
     for k in jsondata.keys():
         if isinstance(jsondata[k], np.ndarray):
             jsondata[k] = jsondata[k].tolist()
-    jsondata['train_acc'] = history['acc']
+    jsondata['train_metric'] = history[metric_name]
     jsondata['train_loss'] = history['loss']
-    jsondata['val_acc'] = history['val_acc']
+    jsondata['val_metric'] = history['val_'+metric_name]
     jsondata['val_loss'] = history['val_loss']
     jsondata['modeltype'] = model_type
-    jsondata['modeltype'] = model_type
+    jsondata['metric'] = metric_name
     if os.path.isfile(outputfile):
         with open(outputfile, 'r') as outfile:
             previousdata = json.load(outfile)
@@ -130,7 +142,7 @@ def store_train_hist_as_json(params, model_type, history, outputfile):
 
 def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                            number_of_models=5, nr_epochs=5, subset_size=100,
-                           outputpath=None, **kwargs
+                           outputpath=None, metric='accuracy', **kwargs
                            ):
     """
     Tries out a number of models on a subsample of the data,
@@ -178,6 +190,7 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
     """
     models = modelgen.generate_models(X_train.shape, y_train.shape[1],
                                       number_of_models=number_of_models,
+                                      metrics=[metric],
                                       **kwargs)
     histories, val_accuracies, val_losses = train_models_on_samples(X_train,
                                                                     y_train,
@@ -187,7 +200,8 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                                                                     nr_epochs,
                                                                     subset_size=subset_size,
                                                                     verbose=verbose,
-                                                                    outputfile=outputpath)
+                                                                    outputfile=outputpath,
+                                                                    metric=metric)
     best_model_index = np.argmax(val_accuracies)
     best_model, best_params, best_model_type = models[best_model_index]
     knn_acc = kNN_accuracy(
@@ -205,6 +219,17 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                       str(knn_acc)
                       )
     return best_model, best_params, best_model_type, knn_acc
+
+
+def get_metric_name(name):
+    if name=='acc' or name=='accuracy':
+        return 'acc'
+    try:
+        metric_fn = metrics.get(name)
+        return metric_fn.__name__
+    except:
+        pass
+    return name
 
 
 def kNN_accuracy(X_train, y_train, X_val, y_val, k=1):
@@ -241,4 +266,4 @@ def kNN_accuracy(X_train, y_train, X_val, y_val, k=1):
     val_predict = clf.predict(
         X_val.reshape(num_samples,
                       num_timesteps * num_channels))
-    return metrics.accuracy_score(val_predict, y_val)
+    return sklearnmetrics.accuracy_score(val_predict, y_val)
