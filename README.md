@@ -37,7 +37,7 @@ When installing on Windows, there are a few things to take into consideration. T
 * To install mcfly, run `pip install .` in the cmd prompt.
 
 ## Visualization
-We build a tool to visualize the configuration and performance of the models. To run the  model visualization, cd to the `html` directory and start up a python web server:
+We build a tool to visualize the configuration and performance of the models. The tool can be found on http://nlesc.github.io/mcfly/. To run the  model visualization on your own computer, cd to the `html` directory and start up a python web server:
 
 `python -m http.server 8888 &`
 
