@@ -53,7 +53,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     batch_size : int
         nr of samples per batch
     metric : str
-        metric to output for visualization
+        metric to store in the history object
 
     Returns
     ----------
@@ -116,7 +116,7 @@ def store_train_hist_as_json(params, model_type, history, outputfile, metric_nam
         training history from one model
     outputfile : str
         path where the json file needs to be stored
-    metricname : str, optional
+    metric_name : str, optional
         name of metric from history to store
     """
     jsondata = params.copy()
@@ -173,6 +173,9 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
         the optimal architecture
     outputpath : str, optional
         File location to store the model results
+    metric: str, optional
+        metric that is used to evaluate the model on the validation set.
+        See https://keras.io/metrics/ for possible metrics
     **kwargs: key-value parameters
         parameters for generating the models
         (see docstring for modelgen.generate_models)
@@ -210,7 +213,7 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
         print('Best model: model ', best_model_index)
         print('Model type: ', best_model_type)
         print('Hyperparameters: ', best_params)
-        print('Accuracy on validation set: ', val_accuracies[best_model_index])
+        print(str(metric) + ' on validation set: ', val_accuracies[best_model_index])
         print('Accuracy of kNN on validation set', knn_acc)
 
     if val_accuracies[best_model_index] < knn_acc:
@@ -222,6 +225,17 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
 
 
 def get_metric_name(name):
+    """
+    Gives the keras name for a metric
+
+    Parameters
+    ----------
+    name : str
+        original name of the metric
+    Returns
+    -------
+
+    """
     if name=='acc' or name=='accuracy':
         return 'acc'
     try:

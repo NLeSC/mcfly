@@ -30,6 +30,9 @@ def generate_models(
         Number of classes for classification task
     number_of_models : int
         Number of models to generate
+    metrics : list
+        Metrics to calculate on the validation set.
+        See https://keras.io/metrics/ for possible values.
     model_type : str, optional
         Type of model to build: 'CNN' or 'DeepConvLSTM'.
         Default option None generates both models.
@@ -135,6 +138,9 @@ def generate_DeepConvLSTM_model(
         learning rate
     regularization_rate : float
         regularization rate
+    metrics : list
+        Metrics to calculate on the validation set.
+        See https://keras.io/metrics/ for possible values.
 
     Returns
     -------
@@ -208,7 +214,8 @@ def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes,
     regularization_rate : float
         regularization rate
     metrics : list
-        list of metrics to use for validating
+        Metrics to calculate on the validation set.
+        See https://keras.io/metrics/ for possible values.
 
     Returns
     -------
