@@ -6,21 +6,25 @@ var trainChart = dc.seriesChart("#train-chart"),
     filterChart = dc.rowChart("#chart-filters"),
     lrRegChart = dc.heatMap("#heatmap"),
     ndx,
-    data;
+    data,
+    metric;
 
 
 var isModelValid = function(model){
 	/// Returns true when a model is valid, and false otherwise. Checks can be added
 	/// later. They include at least checkin for the presence of NaN or null values 
 	/// in loss or accuracy arrays.
-    var floatArrayKeys = ["train_acc", "train_loss", "val_acc", "val_loss"];    
+    var floatArrayKeys = ["train_metric", "train_loss", "train_acc", "val_metric", "val_loss", "val_acc"];
     for (var key of floatArrayKeys){
-        var floatArray = model[key];
-        for (var float of floatArray){
-            if (float == null || float == "NaN"){                
-                return false;
+        if(key in model){
+            var floatArray = model[key];
+            for (var float of floatArray){
+                if (float == null || float == "NaN"){
+                    return false;
+                }
             }
         }
+
     }
     return true;
 }
@@ -44,8 +48,9 @@ var onNewDataEvent = function(e) {
 	d3.select("#missing-models-warning")
 	.classed("hidden", allModels.length == validModels.length);
 	
-    var data = flattenModels(validModels);	
-	createVisualizations(data);
+    var data = flattenModels(validModels);
+    metric = validModels[0].metric? validModels[0].metric : 'accuracy';
+	createVisualizations(data, metric);
     ndx.remove();
     ndx.add(data);
     dc.filterAll();
@@ -61,7 +66,7 @@ var loadData = function(){
     }
 };
 
-var createVisualizations = function(data){	
+var createVisualizations = function(data, metric){
 	d3.select("#visualizations").classed("hidden", false);
 	d3.select("#data-selection").classed("hidden", true);
 	
@@ -71,8 +76,8 @@ var createVisualizations = function(data){
     var runDimension1 = ndx.dimension(function(d) {return [+d.model, +d.iteration]; });
     var runDimension2 = ndx.dimension(function(d) {return [+d.model, +d.iteration]; });
     //var runGroup = runDimension.group();
-    var runValAcc = runDimension1.group().reduceSum(function(d) { return +d.val_acc; });
-    var runTrainAcc = runDimension2.group().reduceSum(function(d) { return +d.train_acc; });
+    var runValAcc = runDimension1.group().reduceSum(function(d) { return +d.val_metric; });
+    var runTrainAcc = runDimension2.group().reduceSum(function(d) { return +d.train_metric; });
 
     //Second plot: select model
     var modelDimension = ndx.dimension(function(d) {return +d.model; });
@@ -125,7 +130,7 @@ var createVisualizations = function(data){
 	.width("300")
 	.x(d3.scale.linear())
 	.brushOn(false)
-	.yAxisLabel("Validation accuracy")
+	.yAxisLabel("Validation "+metric)
 	.xAxisLabel("Iteration")
 	.colors(d3.scale.category20())
 	.elasticX(true)
@@ -142,7 +147,7 @@ var createVisualizations = function(data){
 	.width("300")
     .x(d3.scale.linear())
     .brushOn(false)
-    .yAxisLabel("Train accuracy")
+    .yAxisLabel("Train "+metric)
     .xAxisLabel("Iteration")
     .colors(d3.scale.category20())
     .elasticX(true)
