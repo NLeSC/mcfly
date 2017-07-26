@@ -27,6 +27,17 @@ class StorageSuite(unittest.TestCase):
             os.remove(filename2)
         assert test
 
+    def test_savemodel_keras(self):
+        """ Test whether a dummy model is saved """
+        best_model = create_dummy_model()
+        filepath = os.getcwd() + '/'
+        modelname = 'teststorage.h5'
+        filename = os.path.join(filepath,modelname)
+        best_model.save(filename)
+        test = os.path.isfile(filename)
+        if test is True:
+            os.remove(filename)
+        assert test
 
     def test_loadmodel(self):
         """ Test whether a dummy model can be save and then loaded """

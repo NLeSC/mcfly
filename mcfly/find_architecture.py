@@ -20,7 +20,7 @@ from keras.callbacks import EarlyStopping
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             nr_epochs=5, subset_size=100, verbose=True,
-                            outputfile=None, early_stopping=False,
+                            outputpath=None, save_models=False, early_stopping=False,
                             batch_size=20):
     """
     Given a list of compiled models, this function trains
@@ -45,8 +45,10 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         The number of samples used from the complete train set
     verbose : bool, optional
         flag for displaying verbose output
-    outputfile : str, optional
-        File location to store the model results
+    outputpath : str, optional
+        Directory to store the model results
+    save_models: bool, optional
+        Save the models as HDF5 files (only if outputpath is specified)
     early_stopping: bool
         Stop when validation loss does not decrease
     batch_size : int
@@ -84,9 +86,12 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         histories.append(history)
         val_accuracies.append(history.history['val_acc'][-1])
         val_losses.append(history.history['val_loss'][-1])
-        if outputfile is not None:
+        if outputpath is not None:
+            outputfile = os.path.join(outputpath, 'models.json')
             store_train_hist_as_json(params, model_types,
                                      history.history, outputfile)
+            if save_models:
+                model.save(os.path.join(outputpath, 'model_{}.h5'.format(i)))
     return histories, val_accuracies, val_losses
 
 
@@ -130,7 +135,7 @@ def store_train_hist_as_json(params, model_type, history, outputfile):
 
 def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                            number_of_models=5, nr_epochs=5, subset_size=100,
-                           outputpath=None, **kwargs
+                           outputpath=None, save_models=False, **kwargs
                            ):
     """
     Tries out a number of models on a subsample of the data,
@@ -160,7 +165,9 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
         The size of the subset of the data that is used for finding
         the optimal architecture
     outputpath : str, optional
-        File location to store the model results
+        Directory to store the model results
+    save_models: bool, optional
+        Save the models as HDF5 files (only if outputpath is specified)
     **kwargs: key-value parameters
         parameters for generating the models
         (see docstring for modelgen.generate_models)
@@ -187,7 +194,8 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                                                                     nr_epochs,
                                                                     subset_size=subset_size,
                                                                     verbose=verbose,
-                                                                    outputfile=outputpath)
+                                                                    outputpath=outputpath,
+                                                                    save_models=save_models)
     best_model_index = np.argmax(val_accuracies)
     best_model, best_params, best_model_type = models[best_model_index]
     knn_acc = kNN_accuracy(
