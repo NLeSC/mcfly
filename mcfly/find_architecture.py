@@ -20,7 +20,7 @@ from keras.callbacks import EarlyStopping
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             nr_epochs=5, subset_size=100, verbose=True, outputfile=None,
-                            model_path=False, early_stopping=False,
+                            model_path=None, early_stopping=False,
                             batch_size=20):
     """
     Given a list of compiled models, this function trains
