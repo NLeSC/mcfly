@@ -80,7 +80,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
             print('Training model %d' % i, model_types)
         model_metrics = [get_metric_name(name) for name in model.metrics]
         if metric_name not in model_metrics:
-            raise ValueError('Invalid metric, the model should be compiled with the same metric!')
+            raise ValueError('Invalid metric. The model was not compiled with {} as metric'.format(metric_name))
         if early_stopping:
             callbacks = [EarlyStopping(monitor='val_loss', patience=0, verbose=verbose, mode='auto')]
         else:
