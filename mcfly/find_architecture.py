@@ -20,8 +20,8 @@ from keras.callbacks import EarlyStopping
 from keras import metrics
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
-                            nr_epochs=5, subset_size=100, verbose=True,
-                            outputfile=None, early_stopping=False,
+                            nr_epochs=5, subset_size=100, verbose=True, outputfile=None,
+                            model_path=None, early_stopping=False,
                             batch_size=20, metric='accuracy'):
     """
     Given a list of compiled models, this function trains
@@ -46,8 +46,10 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         The number of samples used from the complete train set
     verbose : bool, optional
         flag for displaying verbose output
-    outputfile : str, optional
-        File location to store the model results
+    outputfile: str, optional
+        Filename to store the model training results
+    model_path : str, optional
+        Directory to store the models as HDF5 files
     early_stopping: bool
         Stop when validation loss does not decrease
     batch_size : int
@@ -95,9 +97,12 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         val_losses.append(history.history['val_loss'][-1])
         if outputfile is not None:
             store_train_hist_as_json(params, model_types,
-                                     history.history, outputfile,
-                                     metric_name)
+                         history.history, outputfile)
+        if model_path is not None:
+                model.save(os.path.join(model_path, 'model_{}.h5'.format(i)))
+
     return histories, val_metrics, val_losses
+
 
 
 def store_train_hist_as_json(params, model_type, history, outputfile, metric_name='acc'):
@@ -142,8 +147,8 @@ def store_train_hist_as_json(params, model_type, history, outputfile, metric_nam
 
 def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                            number_of_models=5, nr_epochs=5, subset_size=100,
-                           outputpath=None, metric='accuracy', **kwargs
-                           ):
+                           outputpath=None, model_path=None, metric='accuracy',
+                           **kwargs):
     """
     Tries out a number of models on a subsample of the data,
     and outputs the best found architecture and hyperparameters.
@@ -173,6 +178,8 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
         the optimal architecture
     outputpath : str, optional
         File location to store the model results
+    model_path: str, optional
+        Directory to save the models as HDF5 files
     metric: str, optional
         metric that is used to evaluate the model on the validation set.
         See https://keras.io/metrics/ for possible metrics
@@ -204,6 +211,7 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                                                                     subset_size=subset_size,
                                                                     verbose=verbose,
                                                                     outputfile=outputpath,
+                                                                    model_path=model_path,
                                                                     metric=metric)
     best_model_index = np.argmax(val_accuracies)
     best_model, best_params, best_model_type = models[best_model_index]
