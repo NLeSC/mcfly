@@ -161,7 +161,7 @@ def generate_DeepConvLSTM_model(
         # filt: number of filters used in a layer
         # filters: vector of filt values
         model.add(
-            Convolution2D(filt, kernel_size=(3,1), padding='same',
+            Convolution2D(filt, kernel_size=(3, 1), padding='same',
                           kernel_regularizer=l2(regularization_rate),
                           kernel_initializer=weightinit))
         model.add(BatchNormalization())

@@ -7,6 +7,7 @@ import unittest
 
 
 class FindArchitectureSuite(unittest.TestCase):
+
     """Basic test cases."""
 
     def test_kNN_accuracy_1(self):
@@ -72,10 +73,11 @@ class FindArchitectureSuite(unittest.TestCase):
         y_val = to_categorical(np.array([0, 1, 1]))
 
         histories, val_metrics, val_losses = \
-            find_architecture.train_models_on_samples(X_train, y_train, X_val, y_val, [],
-                                nr_epochs=1, subset_size=10, verbose=False,
-                                outputfile=None, early_stopping=False,
-                                batch_size=20, metric='accuracy')
+            find_architecture.train_models_on_samples(
+                X_train, y_train, X_val, y_val, [],
+                nr_epochs=1, subset_size=10, verbose=False,
+                outputfile=None, early_stopping=False,
+                batch_size=20, metric='accuracy')
         assert len(histories) == 0
 
     def setUp(self):
@@ -93,8 +95,10 @@ class FindArchitectureSuite(unittest.TestCase):
         history = {'loss': [1, 1], 'acc': [0, 0],
                    'val_loss': [1, 1], 'val_acc': [0, 0]}
         model_type = 'ABC'
-        filename = os.getcwd() + '/modelshistory.json'  # get current working directory
-        find_architecture.store_train_hist_as_json(params, model_type, history, filename)
+        filename = os.getcwd() + \
+            '/modelshistory.json'  # get current working directory
+        find_architecture.store_train_hist_as_json(
+            params, model_type, history, filename)
         test = os.path.isfile(filename)
         if test is True:
             os.remove(filename)
