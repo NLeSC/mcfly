@@ -21,7 +21,6 @@ setup(
     install_requires=required,
     long_description=read('README.md'),
     classifiers=[
-        'Development Status :: 1 - Planning',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python',
     ],
