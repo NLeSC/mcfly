@@ -1,26 +1,25 @@
 # environment:
 matrix:
-  include:
-    # Python 2.7
-    - MINICONDA: C:\Miniconda
-      platform: x86
-    - MINICONDA: C:\Miniconda-x64
-      platform: x64
-    # Python 3.4
-    - MINICONDA: C:\Miniconda3
-      platform: x86
-    - MINICONDA: C:\Miniconda3-x64
-      platform: x64
-    # Python 3.5
-    - MINICONDA: C:\Miniconda35
-      platform: x86
-    - MINICONDA: C:\Miniconda35-x64
-      platform: x64
-    # Python 3.6
-    - MINICONDA: C:\Miniconda36
-      platform: x86
-    - MINICONDA: C:\Miniconda36-x64
-      platform: x64
+  # Python 2.7
+  - MINICONDA: C:\Miniconda
+    platform: x86
+  - MINICONDA: C:\Miniconda-x64
+    platform: x64
+  # Python 3.4
+  - MINICONDA: C:\Miniconda3
+    platform: x86
+  - MINICONDA: C:\Miniconda3-x64
+    platform: x64
+  # Python 3.5
+  - MINICONDA: C:\Miniconda35
+    platform: x86
+  - MINICONDA: C:\Miniconda35-x64
+    platform: x64
+  # Python 3.6
+  - MINICONDA: C:\Miniconda36
+    platform: x86
+  - MINICONDA: C:\Miniconda36-x64
+    platform: x64
 
 init:
   - ps: if($env:Platform -eq "x86"){$MINICONDA = "C:\Miniconda36"}
