@@ -39,7 +39,7 @@ matrix:
       platform: x64
     - MINICONDA: C:\Miniconda36-x64
       platform: x86
- fast_finish: true
+  fast_finish: true
 
 init:
   - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%MINICONDA%\\Library\\bin;%PATH%"
