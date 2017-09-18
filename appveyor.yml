@@ -4,15 +4,16 @@ platform:
 
 environment:
   matrix:
+    # Python 3.5, 64 bit (only working version according to TensorFlow docs)
+    - MINICONDA: C:\Miniconda35-x64
     # Python 2.7
     - MINICONDA: C:\Miniconda
     - MINICONDA: C:\Miniconda-x64
     # Python 3.4
     - MINICONDA: C:\Miniconda3
     - MINICONDA: C:\Miniconda3-x64
-    # Python 3.5
+    # Python 3.5, 32 bit
     - MINICONDA: C:\Miniconda35
-    - MINICONDA: C:\Miniconda35-x64
     # Python 3.6
     - MINICONDA: C:\Miniconda36
     - MINICONDA: C:\Miniconda36-x64
@@ -39,7 +40,12 @@ matrix:
       platform: x64
     - MINICONDA: C:\Miniconda36-x64
       platform: x86
-  fast_finish: true
+  # fast_finish: true
+  allow_failures:
+    - platform: x86
+    - MINICONDA: C:\Miniconda-x64
+    - MINICONDA: C:\Miniconda3-x64
+    - MINICONDA: C:\Miniconda36-x64
 
 init:
   - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%MINICONDA%\\Library\\bin;%PATH%"
