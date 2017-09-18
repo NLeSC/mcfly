@@ -26,10 +26,9 @@ install:
   - "echo done"
 
 # command to run tests, e.g. python setup.py test
-build_script: 
+test_script: 
   - nosetests --with-coverage --cover-package=mcfly
 
-after_script:
+after_test:
   - "pip install scrutinizer-ocular"
   - "ocular"
-
