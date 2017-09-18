@@ -58,14 +58,9 @@ install:
   - conda update -q conda
   - conda install pip numpy scipy
   - "pip install -q nose"
-  - "pip install 'coverage<4'"  # After 4, there is some issue when using python 3.2
   - "pip install -qr requirements.txt"
   - "echo done"
 
 # command to run tests, e.g. python setup.py test
-test_script: 
-  - nosetests --with-coverage --cover-package=mcfly
-
-after_test:
-  - "pip install scrutinizer-ocular"
-  - "ocular"
+test_script:
+  - nosetests
