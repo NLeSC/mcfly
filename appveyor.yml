@@ -32,3 +32,4 @@ build_script:
 after_script:
   - "pip install scrutinizer-ocular"
   - "ocular"
+
