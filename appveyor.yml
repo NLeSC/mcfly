@@ -39,6 +39,7 @@ matrix:
       platform: x64
     - MINICONDA: C:\Miniconda36-x64
       platform: x86
+ fast_finish: true
 
 init:
   - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%MINICONDA%\\Library\\bin;%PATH%"
@@ -47,8 +48,7 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda config --add channels conda-forge
   - conda update -q conda
-  - conda create -q -n test-environment pip numpy scipy
-  - source activate test-environment
+  - conda install pip numpy scipy
   - "pip install -q nose"
   - "pip install 'coverage<4'"  # After 4, there is some issue when using python 3.2
   - "pip install -qr requirements.txt"
