@@ -1,0 +1,34 @@
+platform:
+  - x64
+  - x86
+
+environment:
+  matrix:
+    - PYTHON_VERSION: "2.7"
+    - PYTHON_VERSION: "3.4"
+    - PYTHON_VERSION: "3.5"
+    - PYTHON_VERSION: "3.6"
+
+init:
+  - ps: if($env:Platform -eq "x86"){$MINICONDA = "C:\Miniconda36"}
+  - ps: if($env:Platform -eq "x64"){$MINICONDA = "C:\Miniconda36-x64"}
+  - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%MINICONDA%\\Library\\bin;%PATH%"
+
+install:
+  - conda config --set always_yes yes --set changeps1 no
+  - conda config --add channels conda-forge
+  - conda update -q conda
+  - conda create -q -n test-environment python=$PYTHON_VERSION pip openblas numpy scipy
+  - source activate test-environment
+  - "pip install -q nose"
+  - "pip install 'coverage<4'"  # After 4, there is some issue when using python 3.2
+  - "pip install -qr requirements.txt"
+  - "echo done"
+
+# command to run tests, e.g. python setup.py test
+build_script: 
+  - nosetests --with-coverage --cover-package=mcfly
+
+after_script:
+  - "pip install scrutinizer-ocular"
+  - "ocular"

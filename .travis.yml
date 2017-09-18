@@ -1,24 +1,57 @@
-language: python
-dist: trusty
+language: generic
+# dist: trusty
 sudo: false
 
-python:
-- "2.7"
-- "3.4"
-- "3.5"
-- "3.6"
+os:
+- linux
+- osx
+
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      env: PYTHON_VERSION=2.7
+    - os: osx
+      env: PYTHON_VERSION=2.7
+    - os: linux
+      dist: trusty
+      env: PYTHON_VERSION=3.4
+    - os: osx
+      env: PYTHON_VERSION=3.4
+    - os: linux
+      dist: trusty
+      env: PYTHON_VERSION=3.5
+    - os: osx
+      env: PYTHON_VERSION=3.5
+    - os: linux
+      dist: trusty
+      env: PYTHON_VERSION=3.6
+    - os: osx
+      env: PYTHON_VERSION=3.6
+
+env:
+  global:
+    - MINCONDA_VERSION="latest"
+    - MINCONDA_LINUX="Linux-x86_64"
+    - MINCONDA_OSX="MacOSX-x86_64"
 
 before_install: 
-- if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then       
-    wget http://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;       
+- if [[ "$PYTHON_VERSION" == "2.7" ]]; then       
+    MINCONDA_PYTHON_VERSION=2;
   else
-    wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh; 
+    MINCONDA_PYTHON_VERSION=3;
   fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+    MINCONDA_OS=$MINCONDA_LINUX;
+  elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    MINCONDA_OS=$MINCONDA_OSX;
+  fi
+- wget "http://repo.continuum.io/miniconda/Miniconda$MINCONDA_PYTHON_VERSION-$MINCONDA_VERSION-$MINCONDA_OS.sh" -O miniconda.sh;
 - bash miniconda.sh -b -p $HOME/miniconda
 - export PATH="$HOME/miniconda/bin:$PATH"
 - conda config --set always_yes yes
 - conda update -q conda
-- conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pip openblas numpy scipy
+- conda create -q -n test-environment python=$PYTHON_VERSION pip openblas numpy scipy
 - source activate test-environment
 - "pip install -q nose"
 - "pip install 'coverage<4'"  # After 4, there is some issue when using python 3.2
