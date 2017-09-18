@@ -8,7 +8,9 @@ import pickle
 import os
 import unittest
 
+
 class StorageSuite(unittest.TestCase):
+
     """Basic test cases."""
 
     def test_savemodel(self):
@@ -16,7 +18,7 @@ class StorageSuite(unittest.TestCase):
         best_model = create_dummy_model()
         filepath = os.getcwd() + '/'
         modelname = 'teststorage'
-        storage.savemodel(best_model,filepath,modelname)
+        storage.savemodel(best_model, filepath, modelname)
         filename1 = filepath + modelname + '_architecture.json'
         filename2 = filepath + modelname + '_weights.npy'
         test1 = os.path.isfile(filename1)
@@ -32,7 +34,7 @@ class StorageSuite(unittest.TestCase):
         best_model = create_dummy_model()
         filepath = os.getcwd() + '/'
         modelname = 'teststorage.h5'
-        filename = os.path.join(filepath,modelname)
+        filename = os.path.join(filepath, modelname)
         best_model.save(filename)
         test = os.path.isfile(filename)
         if test is True:
@@ -44,7 +46,7 @@ class StorageSuite(unittest.TestCase):
         best_model = create_dummy_model()
         filepath = os.getcwd() + '/'
         modelname = 'teststorage'
-        storage.savemodel(best_model,filepath,modelname)
+        storage.savemodel(best_model, filepath, modelname)
         filename1 = filepath + modelname + '_architecture.json'
         filename2 = filepath + modelname + '_weights.npy'
         model_loaded = storage.loadmodel
@@ -53,6 +55,7 @@ class StorageSuite(unittest.TestCase):
             os.remove(filename1)
             os.remove(filename2)
         assert test
+
 
 def create_dummy_model():
     """ Function to aid the tests on saving and loading a model"""

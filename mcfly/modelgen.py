@@ -8,7 +8,8 @@ import numpy as np
 
 
 def generate_models(
-        x_shape, number_of_classes, number_of_models=5, model_type=None,
+        x_shape, number_of_classes, number_of_models=5, metrics=['accuracy'],
+        model_type=None,
         cnn_min_layers=1, cnn_max_layers=10,
         cnn_min_filters=10, cnn_max_filters=100,
         cnn_min_fc_nodes=10, cnn_max_fc_nodes=2000,
@@ -29,6 +30,9 @@ def generate_models(
         Number of classes for classification task
     number_of_models : int
         Number of models to generate
+    metrics : list
+        Metrics to calculate on the validation set.
+        See https://keras.io/metrics/ for possible values.
     model_type : str, optional
         Type of model to build: 'CNN' or 'DeepConvLSTM'.
         Default option None generates both models.
@@ -108,14 +112,14 @@ def generate_models(
                 low_lr=low_lr, high_lr=high_lr, low_reg=low_reg,
                 high_reg=high_reg)
         models.append(
-            (generate_model(x_shape, number_of_classes, **hyperparameters),
+            (generate_model(x_shape, number_of_classes, metrics=metrics, **hyperparameters),
              hyperparameters, current_model_type))
     return models
 
 
 def generate_DeepConvLSTM_model(
         x_shape, class_number, filters, lstm_dims, learning_rate=0.01,
-        regularization_rate=0.01):
+        regularization_rate=0.01, metrics=['accuracy']):
     """
     Generate a model with convolution and LSTM layers.
     See Ordonez et al., 2016, http://dx.doi.org/10.3390/s16010115
@@ -134,6 +138,9 @@ def generate_DeepConvLSTM_model(
         learning rate
     regularization_rate : float
         regularization rate
+    metrics : list
+        Metrics to calculate on the validation set.
+        See https://keras.io/metrics/ for possible values.
 
     Returns
     -------
@@ -154,7 +161,7 @@ def generate_DeepConvLSTM_model(
         # filt: number of filters used in a layer
         # filters: vector of filt values
         model.add(
-            Convolution2D(filt, kernel_size=(3,1), padding='same',
+            Convolution2D(filt, kernel_size=(3, 1), padding='same',
                           kernel_regularizer=l2(regularization_rate),
                           kernel_initializer=weightinit))
         model.add(BatchNormalization())
@@ -179,13 +186,14 @@ def generate_DeepConvLSTM_model(
 
     model.compile(loss='categorical_crossentropy',
                   optimizer=Adam(lr=learning_rate),
-                  metrics=['accuracy'])
+                  metrics=metrics)
 
     return model
 
 
 def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes,
-                       learning_rate=0.01, regularization_rate=0.01):
+                       learning_rate=0.01, regularization_rate=0.01,
+                       metrics=['accuracy']):
     """
     Generate a convolutional neural network (CNN) model.
 
@@ -205,6 +213,9 @@ def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes,
         learning rate
     regularization_rate : float
         regularization rate
+    metrics : list
+        Metrics to calculate on the validation set.
+        See https://keras.io/metrics/ for possible values.
 
     Returns
     -------
@@ -238,7 +249,7 @@ def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes,
 
     model.compile(loss='categorical_crossentropy',
                   optimizer=Adam(lr=learning_rate),
-                  metrics=['accuracy'])
+                  metrics=metrics)
 
     return model
 
