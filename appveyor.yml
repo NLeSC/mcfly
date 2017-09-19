@@ -42,7 +42,6 @@ matrix:
       platform: x64
     - MINICONDA: C:\Miniconda36-x64
       platform: x86
-  fast_finish: true
   allow_failures:
     - platform: x86
     - MINICONDA: C:\Miniconda-x64
