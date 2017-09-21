@@ -8,6 +8,7 @@ var trainChart = dc.seriesChart("#train-chart"),
     ndx,
     data;
 
+var visualizationsCreated = false;
 
 var isModelValid = function(model){
 	/// Returns true when a model is valid, and false otherwise. Checks can be added
@@ -49,7 +50,10 @@ var loadNewDataText = function (txt) {
   	 .classed("hidden", allModels.length == validModels.length);
   	
     var data = flattenModels(validModels);	
-  	createVisualizations(data);
+    if (!visualizationsCreated) {
+      createVisualizations(data);
+      visualizationsCreated = true;
+    }
     ndx.remove();
     ndx.add(data);
     dc.filterAll();
@@ -72,9 +76,8 @@ var loadExampleData = function() {
 };
 
 var createVisualizations = function(data){	
-	d3.select("#visualizations").classed("hidden", false);
-	d3.select("#data-selection").classed("hidden", true);
-	
+  d3.select("#visualizations").classed("hidden", false);
+
 	ndx = crossfilter(data);
 
     // First plot: iterations
@@ -135,8 +138,8 @@ var createVisualizations = function(data){
 	.width("300")
 	.x(d3.scale.linear())
 	.brushOn(false)
-	.yAxisLabel("Validation accuracy")
-	.xAxisLabel("Iteration")
+  .yAxisLabel("Validation accuracy")
+  .xAxisLabel("Iteration")
 	.colors(d3.scale.category20())
 	.elasticX(true)
 	.dimension(runDimension1)
@@ -231,6 +234,4 @@ var createVisualizations = function(data){
                 .calculateColorDomain()
                 .yBorderRadius(20)
         .controlsUseVisibility(true);
-
-	dc.renderAll();
 }
