@@ -38,14 +38,18 @@ var getValidModels = function(data){
 //If new data is read, replace the data in the crossfilter
 var onNewDataEvent = function(e) {
     var filetxt = e.target.result;
-	var allModels = JSON.parse(filetxt.replace(/\bNaN\b/g, '"NaN"'));
+    loadNewDataText(filetxt);
+};
+
+var loadNewDataText = function (txt) {
+  	var allModels = JSON.parse(txt.replace(/\bNaN\b/g, '"NaN"'));
     var validModels = getValidModels(allModels);
-		
-	d3.select("#missing-models-warning")
-	.classed("hidden", allModels.length == validModels.length);
-	
+  		
+  	d3.select("#missing-models-warning")
+  	 .classed("hidden", allModels.length == validModels.length);
+  	
     var data = flattenModels(validModels);	
-	createVisualizations(data);
+  	createVisualizations(data);
     ndx.remove();
     ndx.add(data);
     dc.filterAll();
@@ -59,6 +63,12 @@ var loadData = function(){
         fileReader.onload = onNewDataEvent;
         fileReader.readAsText(jsonfile);
     }
+};
+
+var loadExampleData = function() {
+    fetch("https://raw.githubusercontent.com/NLeSC/mcfly/gh-pages/example_modelcomparsion.json")
+      .then(res => res.text()) // Gets the response and returns it as a file
+      .then(jsontext => loadNewDataText(jsontext));
 };
 
 var createVisualizations = function(data){	
