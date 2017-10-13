@@ -13,7 +13,7 @@ The goal of mcfly is to ease the use of deep learning technology for time series
 
 ## Installation
 Prerequisites:
-- Python 2.7 or 3.5
+- Python 2.7, 3.5 or 3.6
 - pip
 
 Installing all dependencies in sparate conda environment:
@@ -31,10 +31,10 @@ To install the package, run in the project directory:
 ### Installing on Windows
 When installing on Windows, there are a few things to take into consideration. The preferred (in other words: easiest) way to install Keras and mcfly is as follows:
 * Use [Anaconda](https://www.continuum.io/downloads)
+* Use Python 3.x, because tensorflow is not available on Windows for Python 2.7
 * Install numpy and scipy through the conda package manager (and not with pip)
-* Use TensorFlow, and not Theano as a backend (this is the default setting in Keras)
-* Preferably use Python version >= 3.5, because Tensorflow is available on pypi for python 3.5 only
-* To install mcfly, run `pip install .` in the cmd prompt.
+* To install mcfly, run `pip install mcfly` in the cmd prompt.
+* Loading and saving models can give problems on Windows, see https://github.com/NLeSC/mcfly-tutorial/issues/17
 
 ## Visualization
 We build a tool to visualize the configuration and performance of the models. The tool can be found on http://nlesc.github.io/mcfly/. To run the  model visualization on your own computer, cd to the `html` directory and start up a python web server:
