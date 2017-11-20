@@ -33,7 +33,7 @@ before_install:
   - export PATH="$HOME/miniconda/bin:$PATH"
   - conda config --set always_yes yes
   - conda update -q conda
-  - conda create -q -n test-environment python=$PYTHON_VERSION pip openblas numpy scipy=0.*
+  - conda create -q -n test-environment python=$PYTHON_VERSION pip openblas numpy scipy=0.* cython scikit-learn
   - source activate test-environment
   - "pip install -q nose"
   - "pip install 'coverage<4'"  # After 4, there is some issue when using python 3.2
