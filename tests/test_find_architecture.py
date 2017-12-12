@@ -1,6 +1,6 @@
 from mcfly import find_architecture
 import numpy as np
-from nose.tools import assert_equal, assert_equals, assert_almost_equal
+from pytest import approx
 from keras.utils.np_utils import to_categorical
 import os
 import unittest
@@ -21,7 +21,7 @@ class FindArchitectureSuite(unittest.TestCase):
 
         acc = find_architecture.kNN_accuracy(
             X_train, y_train, X_val, y_val, k=1)
-        assert_almost_equal(acc, 1.0)
+        assert acc == approx(1.0)
 
     def test_kNN_accuracy_0(self):
         """
@@ -34,7 +34,7 @@ class FindArchitectureSuite(unittest.TestCase):
 
         acc = find_architecture.kNN_accuracy(
             X_train, y_train, X_val, y_val, k=1)
-        assert_almost_equal(acc, 0)
+        assert acc == approx(0)
 
     def test_find_best_architecture(self):
         """ Find_best_architecture should return a single model, parameters, type and valid knn accuracy."""
