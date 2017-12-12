@@ -45,7 +45,7 @@ install:
 
 # command to run tests, e.g. python setup.py test
 script:
-  - coverage run -m pytest
+  - coverage run --source=mcfly -m pytest
 
 after_script:
   - "pip install scrutinizer-ocular"
