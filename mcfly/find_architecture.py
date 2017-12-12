@@ -12,7 +12,7 @@
 """
 import numpy as np
 from . import modelgen
-from .storage import serial_registry
+from .storage import (serial_registry, TrainedModel)
 import noodles
 
 from sklearn import neighbors, metrics as sklearnmetrics
@@ -21,6 +21,27 @@ import json
 import os
 from keras.callbacks import EarlyStopping
 from keras import metrics
+
+
+@noodles.schedule_hint(call_by_ref=['model'])
+def train_model(
+        model, X_train_sub, y_train_sub, epochs, batch_size,
+        validation_data, verbose, callbacks):
+
+    result = model.fit(
+        X_train_sub,
+        y_train_sub,
+        epochs=epochs,
+        batch_size=batch_size,  # see comment on subsize_set
+        validation_data=validation_data,
+        verbose=verbose,
+        callbacks=callbacks)
+
+    # metric = result.history['val_' + metric_name][-1]
+    # loss = result.history['val_loss'][-1]
+
+    return TrainedModel(
+        history=result.history, model=model)  # , metric=metric, loss=loss)
 
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
@@ -79,9 +100,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     val_metrics = []
     val_losses = []
 
-    def make_history(model, params, model_types):
-        if verbose:
-            print('Training model: ', model_types)
+    def make_history(model):
         model_metrics = [get_metric_name(name) for name in model.metrics]
         if metric_name not in model_metrics:
             raise ValueError(
@@ -92,7 +111,8 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         else:
             callbacks = []
 
-        return noodles.schedule(model.fit)(
+        return train_model(
+            model,
             X_train_sub,
             y_train_sub,
             epochs=nr_epochs,
@@ -101,19 +121,22 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
             verbose=verbose,
             callbacks=callbacks)
 
-    histories_wf = noodles.gather_all([make_history(*args) for args in models])
-    noodles.run_process(histories_wf, n_processes=4, registry=serial_registry)
+    training_wf = noodles.gather_all([make_history(model[0]) for model in models])
+    trained_models = noodles.run_process(training_wf, n_processes=4, registry=serial_registry)
 
-    for i, (model, params, model_types) in enumerate(models):
-        val_metrics.append(history.history['val_' + metric_name][-1])
-        val_losses.append(history.history['val_loss'][-1])
+    val_metrics = [tm.history['val_' + metric_name]
+                   for tm in trained_models]
+    val_losses = [tm.history['val_loss']
+                  for tm in trained_models]
+
+    for i, (history, model) in enumerate(trained_models):
         if outputfile is not None:
-            store_train_hist_as_json(params, model_types,
-                                     history.history, outputfile)
+            store_train_hist_as_json(models[i][1], models[i][2],
+                                     history, outputfile)
         if model_path is not None:
             model.save(os.path.join(model_path, 'model_{}.h5'.format(i)))
 
-    return histories, val_metrics, val_losses
+    return [tm.history for tm in trained_models], val_metrics, val_losses
 
 
 def store_train_hist_as_json(params, model_type, history, outputfile, metric_name='acc'):

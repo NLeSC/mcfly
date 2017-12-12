@@ -15,6 +15,7 @@ import uuid
 
 import noodles
 from noodles.serial.numpy import arrays_to_string
+from noodles.serial.namedtuple import SerNamedTuple
 
 
 def savemodel(model, filepath, modelname):
@@ -85,6 +86,12 @@ def loadmodel(filepath, modelname):
 # del modelh5
 # modelh5 = load_model(resultpath+'mymodel.h5')
 
+from collections import namedtuple
+
+
+TrainedModel = namedtuple(
+        'TrainedModel', ['history', 'model'])
+
 
 class SerModel(noodles.serial.Serialiser):
     def __init__(self):
@@ -102,8 +109,10 @@ class SerModel(noodles.serial.Serialiser):
 
 def serial_registry():
     return noodles.serial.Registry(
-        parent=noodles.serial.pickle() + noodles.serial.base() + arrays_to_string(),
+        # parent=noodles.serial.pickle() +
+        parent=noodles.serial.base() + arrays_to_string(),
         types={
-            keras.models.Model: SerModel()
+            keras.models.Model: SerModel(),
+            TrainedModel: SerNamedTuple(TrainedModel)
         }
     )
