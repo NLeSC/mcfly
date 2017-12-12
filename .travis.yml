@@ -17,8 +17,8 @@ env:
     - MINCONDA_LINUX="Linux-x86_64"
     - MINCONDA_OSX="MacOSX-x86_64"
 
-before_install: 
-  - if [[ "$PYTHON_VERSION" == "2.7" ]]; then       
+before_install:
+  - if [[ "$PYTHON_VERSION" == "2.7" ]]; then
       MINCONDA_PYTHON_VERSION=2;
     else
       MINCONDA_PYTHON_VERSION=3;
@@ -35,7 +35,7 @@ before_install:
   - conda update -q conda
   - conda create -q -n test-environment python=$PYTHON_VERSION pip numpy scipy=0.* scikit-learn
   - source activate test-environment
-  - "pip install -q nose"
+  - "pip install -q pytest"
   - "pip install 'coverage<4'"  # After 4, there is some issue when using python 3.2
   - "pip install -qr requirements.txt"
   - "conda list" # Show the package versions (for debugging)
@@ -44,10 +44,10 @@ install:
   - "echo done"
 
 # command to run tests, e.g. python setup.py test
-script: 
-  - nosetests --with-coverage --cover-package=mcfly
+script:
+  - coverage run --source=mcfly -m pytest
 
 after_script:
   - "pip install scrutinizer-ocular"
   - "ocular"
- 
+
