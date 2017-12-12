@@ -92,28 +92,30 @@ try:
     import noodles
     from noodles.serial.numpy import arrays_to_string
     from noodles.serial.namedtuple import SerNamedTuple
+    from pathlib import Path
 
 
     class SerModel(noodles.serial.Serialiser):
-        def __init__(self):
+        def __init__(self, tmpdir):
+            self.tmpdir = Path(tmpdir)
             super(SerModel, self).__init__(keras.models.Model)
 
         def encode(self, obj, make_rec):
-            random_filename = str(uuid.uuid4()) + '.hdf5'
-            obj.save(random_filename)
-            return make_rec({'filename': random_filename},
-                            files=[random_filename], ref=True)
+            random_filename = self.tmpdir / (str(uuid.uuid4()) + '.hdf5')
+            obj.save(str(random_filename))
+            return make_rec({'filename': str(random_filename)},
+                            files=[str(random_filename)], ref=True)
 
         def decode(self, cls, data):
             return keras.models.load_model(data['filename'])
 
 
-    def serial_registry():
+    def serial_registry(tmpdir='.'):
         return noodles.serial.Registry(
             # parent=noodles.serial.pickle() +
             parent=noodles.serial.base() + arrays_to_string(),
             types={
-                keras.models.Model: SerModel(),
+                keras.models.Model: SerModel(tmpdir),
                 TrainedModel: SerNamedTuple(TrainedModel)
             }
         )

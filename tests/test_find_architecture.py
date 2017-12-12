@@ -58,7 +58,7 @@ class FindArchitectureSuite(unittest.TestCase):
         self.assertIsNotNone(best_model_type)
         assert 1 >= knn_acc >= 0
 
-    def train_models_on_samples_empty(self):
+    def test_train_models_on_samples_empty(self):
         np.random.seed(123)
         num_timesteps = 100
         num_channels = 2
