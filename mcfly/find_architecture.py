@@ -106,7 +106,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     val_metrics = []
     val_losses = []
 
-    def make_history(model):
+    def make_history(model, i=None):
         model_metrics = [get_metric_name(name) for name in model.metrics]
         if metric_name not in model_metrics:
             raise ValueError(
@@ -125,31 +125,46 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                   'callbacks': callbacks}
 
         if use_noodles is None:
-            return train_model(*args, **kwargs)
+            # if not using noodles, save every nugget when it comes
+            trained_model = train_model(*args, **kwargs)
+            if outputfile is not None:
+                store_train_hist_as_json(models[i][1], models[i][2],
+                                         trained_model.history, outputfile)
+            if model_path is not None:
+                trained_model.save(
+                        os.path.join(model_path, 'model_{}.h5'.format(i)))
+            return trained_model
+
         else:
             assert has_noodles, "Noodles is not installed, or could not be imported."
-            return noodles.schedule_hint(call_by_ref=['model'])(train_model)(*args, **kwargs)
+            return noodles.schedule_hint(call_by_ref=['model']) \
+                    (train_model)(*args, **kwargs)
 
     if use_noodles is None:
-        trained_models = [make_history(model[0]) for model in models]
+        trained_models = [
+            make_history(model[0], i)
+            for i, model in enumerate(models)]
+
     else:
         assert has_noodles, "Noodles is not installed, or could not be imported."
+        
+        # in case of noodles, first run everything
         training_wf = noodles.gather_all([make_history(model[0]) for model in models])
         trained_models = use_noodles(training_wf)
-        # noodles.run_process(training_wf, n_processes=4, registry=serial_registry)
 
+        # then save everything
+        for i, (history, model) in enumerate(trained_models):
+            if outputfile is not None:
+                store_train_hist_as_json(models[i][1], models[i][2],
+                                         history, outputfile)
+            if model_path is not None:
+                model.save(os.path.join(model_path, 'model_{}.h5'.format(i)))
+
+    # accumulate results
     val_metrics = [tm.history['val_' + metric_name]
                    for tm in trained_models]
     val_losses = [tm.history['val_loss']
                   for tm in trained_models]
-
-    for i, (history, model) in enumerate(trained_models):
-        if outputfile is not None:
-            store_train_hist_as_json(models[i][1], models[i][2],
-                                     history, outputfile)
-        if model_path is not None:
-            model.save(os.path.join(model_path, 'model_{}.h5'.format(i)))
-
     return [tm.history for tm in trained_models], val_metrics, val_losses
 
 
