@@ -1,6 +1,5 @@
 from mcfly import find_architecture, storage
 import numpy as np
-from nose.tools import assert_equal, assert_equals, assert_almost_equal
 from keras.utils.np_utils import to_categorical
 from keras.models import model_from_json
 import json
@@ -10,7 +9,6 @@ import unittest
 
 
 class StorageSuite(unittest.TestCase):
-
     """Basic test cases."""
 
     def test_savemodel(self):
