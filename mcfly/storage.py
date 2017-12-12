@@ -6,9 +6,15 @@
  Example function calls in 'Tutorial mcfly on PAMAP2.ipynb'
 """
 from keras.models import model_from_json
+import keras
+
 import json
 import numpy as np
 import os
+import uuid
+
+import noodles
+from noodles.serial.numpy import arrays_to_string
 
 
 def savemodel(model, filepath, modelname):
@@ -78,3 +84,26 @@ def loadmodel(filepath, modelname):
 # modelh5.save(resultpath+'mymodel.h5')
 # del modelh5
 # modelh5 = load_model(resultpath+'mymodel.h5')
+
+
+class SerModel(noodles.serial.Serialiser):
+    def __init__(self):
+        super(SerModel, self).__init__(keras.models.Model)
+
+    def encode(self, obj, make_rec):
+        random_filename = str(uuid.uuid4()) + '.hdf5'
+        obj.save(random_filename)
+        return make_rec({'filename': random_filename},
+                        files=[random_filename], ref=True)
+
+    def decode(self, cls, data):
+        return keras.models.load_model(data['filename'])
+
+
+def serial_registry():
+    return noodles.serial.Registry(
+        parent=noodles.serial.pickle() + noodles.serial.base() + arrays_to_string(),
+        types={
+            keras.models.Model: SerModel()
+        }
+    )

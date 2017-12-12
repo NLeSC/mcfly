@@ -12,6 +12,9 @@
 """
 import numpy as np
 from . import modelgen
+from .storage import serial_registry
+import noodles
+
 from sklearn import neighbors, metrics as sklearnmetrics
 import warnings
 import json
@@ -73,12 +76,12 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
 
     metric_name = get_metric_name(metric)
 
-    histories = []
     val_metrics = []
     val_losses = []
-    for i, (model, params, model_types) in enumerate(models):
+
+    def make_history(model, params, model_types):
         if verbose:
-            print('Training model %d' % i, model_types)
+            print('Training model: ', model_types)
         model_metrics = [get_metric_name(name) for name in model.metrics]
         if metric_name not in model_metrics:
             raise ValueError(
@@ -88,21 +91,27 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                 EarlyStopping(monitor='val_loss', patience=0, verbose=verbose, mode='auto')]
         else:
             callbacks = []
-        history = model.fit(X_train_sub, y_train_sub,
-                            epochs=nr_epochs, batch_size=batch_size,
-                            # see comment on subsize_set
-                            validation_data=(X_val, y_val),
-                            verbose=verbose,
-                            callbacks=callbacks)
-        histories.append(history)
 
+        return noodles.schedule(model.fit)(
+            X_train_sub,
+            y_train_sub,
+            epochs=nr_epochs,
+            batch_size=batch_size,  # see comment on subsize_set
+            validation_data=(X_val, y_val),
+            verbose=verbose,
+            callbacks=callbacks)
+
+    histories_wf = noodles.gather_all([make_history(*args) for args in models])
+    noodles.run_process(histories_wf, n_processes=4, registry=serial_registry)
+
+    for i, (model, params, model_types) in enumerate(models):
         val_metrics.append(history.history['val_' + metric_name][-1])
         val_losses.append(history.history['val_loss'][-1])
         if outputfile is not None:
             store_train_hist_as_json(params, model_types,
                                      history.history, outputfile)
         if model_path is not None:
-                model.save(os.path.join(model_path, 'model_{}.h5'.format(i)))
+            model.save(os.path.join(model_path, 'model_{}.h5'.format(i)))
 
     return histories, val_metrics, val_losses
 

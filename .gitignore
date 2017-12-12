@@ -3,3 +3,4 @@ notebooks/.ipynb_checkpoints
 *.egg-info
 docs/_build/
 notebooks/tutorial/data
+*.hdf5
