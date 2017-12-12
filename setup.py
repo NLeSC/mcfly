@@ -24,4 +24,8 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python',
     ],
+    extras_require={
+        'noodles': ['noodles[numpy,xenon,prov]'],
+        'test': ['pytest', 'coverage']
+    }
 )

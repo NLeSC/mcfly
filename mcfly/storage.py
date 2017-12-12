@@ -12,10 +12,11 @@ import json
 import numpy as np
 import os
 import uuid
+from collections import namedtuple
 
-import noodles
-from noodles.serial.numpy import arrays_to_string
-from noodles.serial.namedtuple import SerNamedTuple
+
+TrainedModel = namedtuple(
+        'TrainedModel', ['history', 'model'])
 
 
 def savemodel(model, filepath, modelname):
@@ -86,33 +87,36 @@ def loadmodel(filepath, modelname):
 # del modelh5
 # modelh5 = load_model(resultpath+'mymodel.h5')
 
-from collections import namedtuple
+
+try:
+    import noodles
+    from noodles.serial.numpy import arrays_to_string
+    from noodles.serial.namedtuple import SerNamedTuple
 
 
-TrainedModel = namedtuple(
-        'TrainedModel', ['history', 'model'])
+    class SerModel(noodles.serial.Serialiser):
+        def __init__(self):
+            super(SerModel, self).__init__(keras.models.Model)
+
+        def encode(self, obj, make_rec):
+            random_filename = str(uuid.uuid4()) + '.hdf5'
+            obj.save(random_filename)
+            return make_rec({'filename': random_filename},
+                            files=[random_filename], ref=True)
+
+        def decode(self, cls, data):
+            return keras.models.load_model(data['filename'])
 
 
-class SerModel(noodles.serial.Serialiser):
-    def __init__(self):
-        super(SerModel, self).__init__(keras.models.Model)
+    def serial_registry():
+        return noodles.serial.Registry(
+            # parent=noodles.serial.pickle() +
+            parent=noodles.serial.base() + arrays_to_string(),
+            types={
+                keras.models.Model: SerModel(),
+                TrainedModel: SerNamedTuple(TrainedModel)
+            }
+        )
 
-    def encode(self, obj, make_rec):
-        random_filename = str(uuid.uuid4()) + '.hdf5'
-        obj.save(random_filename)
-        return make_rec({'filename': random_filename},
-                        files=[random_filename], ref=True)
-
-    def decode(self, cls, data):
-        return keras.models.load_model(data['filename'])
-
-
-def serial_registry():
-    return noodles.serial.Registry(
-        # parent=noodles.serial.pickle() +
-        parent=noodles.serial.base() + arrays_to_string(),
-        types={
-            keras.models.Model: SerModel(),
-            TrainedModel: SerNamedTuple(TrainedModel)
-        }
-    )
+except ImportError:
+    pass

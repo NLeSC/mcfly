@@ -4,3 +4,5 @@ notebooks/.ipynb_checkpoints
 docs/_build/
 notebooks/tutorial/data
 *.hdf5
+.coverage
+.cache

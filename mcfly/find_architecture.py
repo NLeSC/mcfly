@@ -12,8 +12,15 @@
 """
 import numpy as np
 from . import modelgen
-from .storage import (serial_registry, TrainedModel)
-import noodles
+from .storage import TrainedModel
+
+try:
+    import noodles
+    from .storage import serial_registry
+except ImportError:
+    has_noodles = False
+else:
+    has_noodles = True
 
 from sklearn import neighbors, metrics as sklearnmetrics
 import warnings
@@ -23,7 +30,6 @@ from keras.callbacks import EarlyStopping
 from keras import metrics
 
 
-@noodles.schedule_hint(call_by_ref=['model'])
 def train_model(
         model, X_train_sub, y_train_sub, epochs, batch_size,
         validation_data, verbose, callbacks):
@@ -47,7 +53,7 @@ def train_model(
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             nr_epochs=5, subset_size=100, verbose=True, outputfile=None,
                             model_path=None, early_stopping=False,
-                            batch_size=20, metric='accuracy'):
+                            batch_size=20, metric='accuracy', use_noodles=None):
     """
     Given a list of compiled models, this function trains
     them all on a subset of the train data. If the given size of the subset is
@@ -111,18 +117,26 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         else:
             callbacks = []
 
-        return train_model(
-            model,
-            X_train_sub,
-            y_train_sub,
-            epochs=nr_epochs,
-            batch_size=batch_size,  # see comment on subsize_set
-            validation_data=(X_val, y_val),
-            verbose=verbose,
-            callbacks=callbacks)
+        args = (model, X_train_sub, y_train_sub)
+        kwargs = {'epochs': nr_epochs,
+                  'batch_size': batch_size,
+                  'validation_data': (X_val, y_val),
+                  'verbose': verbose,
+                  'callbacks': callbacks}
 
-    training_wf = noodles.gather_all([make_history(model[0]) for model in models])
-    trained_models = noodles.run_process(training_wf, n_processes=4, registry=serial_registry)
+        if use_noodles is None:
+            return train_model(*args, **kwargs)
+        else:
+            assert has_noodles, "Noodles is not installed, or could not be imported."
+            return noodles.schedule_hint(call_by_ref=['model'])(train_model)(*args, **kwargs)
+
+    if use_noodles is None:
+        trained_models = [make_history(model[0]) for model in models]
+    else:
+        assert has_noodles, "Noodles is not installed, or could not be imported."
+        training_wf = noodles.gather_all([make_history(model[0]) for model in models])
+        trained_models = use_noodles(training_wf)
+        # noodles.run_process(training_wf, n_processes=4, registry=serial_registry)
 
     val_metrics = [tm.history['val_' + metric_name]
                    for tm in trained_models]
@@ -182,7 +196,7 @@ def store_train_hist_as_json(params, model_type, history, outputfile, metric_nam
 def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                            number_of_models=5, nr_epochs=5, subset_size=100,
                            outputpath=None, model_path=None, metric='accuracy',
-                           **kwargs):
+                           use_noodles=None, **kwargs):
     """
     Tries out a number of models on a subsample of the data,
     and outputs the best found architecture and hyperparameters.
@@ -246,7 +260,8 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                                                                     verbose=verbose,
                                                                     outputfile=outputpath,
                                                                     model_path=model_path,
-                                                                    metric=metric)
+                                                                    metric=metric,
+                                                                    use_noodles=use_noodles)
     best_model_index = np.argmax(val_accuracies)
     best_model, best_params, best_model_type = models[best_model_index]
     knn_acc = kNN_accuracy(
