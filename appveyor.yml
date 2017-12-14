@@ -58,6 +58,7 @@ install:
   - conda install pip numpy scipy
   - "pip install -q pytest"
   - "pip install -qr requirements.txt"
+  - "pip install ."
   - "echo done"
 
 # command to run tests, e.g. python setup.py test
