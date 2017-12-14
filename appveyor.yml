@@ -56,10 +56,11 @@ install:
   - conda config --add channels conda-forge
   - conda update -q conda
   - conda install pip numpy scipy
-  - "pip install -q nose"
+  - "pip install -q pytest"
   - "pip install -qr requirements.txt"
+  - "pip install ."
   - "echo done"
 
 # command to run tests, e.g. python setup.py test
 test_script:
-  - nosetests
+  - pytest
