@@ -37,7 +37,7 @@ before_install:
   - source activate test-environment
   - "pip install -q pytest"
   - "pip install 'coverage<4'"  # After 4, there is some issue when using python 3.2
-  - "pip install -qr requirements.txt"
+  - "pip install -r requirements.txt"
   - "conda list" # Show the package versions (for debugging)
 
 install:
