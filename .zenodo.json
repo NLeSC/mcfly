@@ -1,0 +1,48 @@
+{
+    "description": "A deep learning tool for time series classification",
+    "license": "Apache-2.0",
+    "title": "mcfly",
+    "upload_type": "software",
+    "creators": [
+        {
+            "affiliation": "Netherlands eScience Center",
+            "name": "van Kuppevelt, Dafne"
+        },
+        {
+            "affiliation": "Netherlands eScience Center",
+            "name": "Meijer, Christiaan"
+        },
+        {
+            "affiliation": "Netherlands eScience Center",
+            "name": "van Hees, Vincent"
+        },
+        {
+            "affiliation": "Netherlands eScience Center",
+            "name": "Bos, Patrick"
+        },
+        {
+            "affiliation": "Netherlands eScience Center",
+            "name": "Spaaks, Jurriaan H."
+        },
+        {
+            "affiliation": "Netherlands eScience Center",
+            "name": "Kuzak, Mateusz",
+            "orchid": "0000-0003-0087-6021"
+        },
+        {
+            "affiliation": "Netherlands eScience Center",
+            "name": "Hidding, Johan"
+        },
+        {
+            "affiliation": "Netherlands eScience Center",
+            "name": "van der Ploeg, Atze"
+        }
+    ],
+    "access_right": "open",
+    "keywords": [
+          "machine learning",
+          "deep learning",
+          "time series",
+          "automatic classification"
+    ]
+}
