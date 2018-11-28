@@ -40,6 +40,7 @@ before_install:
   - "conda list" # Show the package versions (for debugging)
 
 install:
+  - "pip install ."
   - "echo done"
 
 # command to run tests, e.g. python setup.py test
