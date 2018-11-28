@@ -33,9 +33,8 @@ before_install:
   - export PATH="$HOME/miniconda/bin:$PATH"
   - conda config --set always_yes yes
   - conda update -q conda
-  - conda create -q -n test-environment python=$PYTHON_VERSION pip numpy
+  - conda create -q -n test-environment python=$PYTHON_VERSION pip numpy pytest
   - source activate test-environment
-  - "pip install -q pytest"
   - "pip install 'coverage<4'"  # After 4, there is some issue when using python 3.2
   - "pip install -r requirements.txt"
   - "conda list" # Show the package versions (for debugging)
@@ -48,7 +47,7 @@ script:
   - if [[ "$PYTHON_VERSION" == "3.6" ]]; then
       coverage run --source=mcfly -m pytest;
     else
-      pytest .  ;
+      py.test  ;
     fi
   
 
