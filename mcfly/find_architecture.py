@@ -22,11 +22,10 @@
  optimal model architecture. The work flow is as follows:
  Function generate_models from modelgen.py generates and compiles models.
  Function train_models_on_samples trains those models.
- Function plotTrainingProcess plots the training process.
  Function find_best_architecture is wrapper function that combines
  these steps.
  Example function calls can be found in the tutorial notebook
- 'EvaluateDifferentModels.ipynb'.
+ (https://github.com/NLeSC/mcfly-tutorial)
 """
 import numpy as np
 from . import modelgen
