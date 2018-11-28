@@ -46,9 +46,10 @@ install:
 # command to run tests, e.g. python setup.py test
 script:
   - if [[ "$PYTHON_VERSION" == "3.6" ]]; then
-      coverage run --source=mcfly -m pytest
+      coverage run --source=mcfly -m pytest;
     else
-      pytest .  
+      pytest .  ;
+    fi
   
 
 after_script:
