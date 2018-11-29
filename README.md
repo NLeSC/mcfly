@@ -46,11 +46,7 @@ Navigate to `http://localhost:8888/` in your browser to open the visualization. 
 
 
 ## User documentation
-* [Wiki page](https://github.com/NLeSC/mcfly/wiki/Home---mcfly)
-* [User manual](https://github.com/NLeSC/mcfly/wiki/User-manual)
-* [Code documentation](http://mcfly.readthedocs.io/en/latest/)
-* [Technical Documentation](https://github.com/NLeSC/mcfly/wiki/Technical-documentation)
-* [Information on Data preprocessing](https://github.com/NLeSC/mcfly/wiki/Data-preprocessing)
+[User and code documentation](https://mcfly.readthedocs.io).
 
 ## Contributing
 You are welcome to contribute to the code via pull requests. Please have a look at the [NLeSC guide](https://nlesc.gitbooks.io/guide/content/software/software_overview.html) for guidelines about software development.
