@@ -16,11 +16,20 @@
 # limitations under the License.
 #
 
+"""
+ Summary:
+ This module allows to generate a simplified graphical representation
+ of the generated Keras/mcfly models. 
+ The main callable function is model_overview with 'models' a list of
+ Keras-type models as main input.
+
+"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 import keras
 
-
+ 
 def model_overview(
         models, 
         max_num_models=6, 
@@ -128,7 +137,25 @@ def model_overview(
 # --------------------------------
 
 def draw_box(pos_x, pos_y, size, face_color, text0, text1=None):
-    # draw textbox using matplotlib
+    """ 
+    Helper function.
+    Draw textbox using matplotlib.
+    
+    Parameters
+    ----------
+    pos_x: float
+        x position of box in plot
+    pos_y: float
+        y position of box in plot
+    size: float
+        value to determine size of text and textbox
+    face_color: tuple, str
+        color value for textbox
+    text0: str
+        Text to print with textbox
+    text1: str, optional
+        Additional info-text to print as 2nd line within textbox (default is None)
+    """
     if text1 is None:
         text = text0
     else:
@@ -147,13 +174,18 @@ def draw_box(pos_x, pos_y, size, face_color, text0, text1=None):
 
 
 def draw_arrow(pos_x, pos_y, dx, dy, width):
-    #plt.annotate("", xy=(pos_x, pos_y), xytext=(pos_x, pos_y-dy), arrowprops=dict(arrowstyle="->"))
+    """ 
+    Helper function to draw arrow in plot.
+    """
 
     plt.arrow(pos_x, pos_y, -0.2*dx, -0.2*dy, width=width)
 
 
 def draw_model_header(pos_x, pos_y, scale_y, model_no, model_type, size):
-    # header: model number and type
+    """ 
+    Helper function. Plot header using strings model number and model_type.
+
+    """
 
     header_dy = size/500 * scale_y
     plt.text(pos_x, pos_y, "Model "+str(model_no), size=1.5*size, rotation=0,
@@ -163,7 +195,11 @@ def draw_model_header(pos_x, pos_y, scale_y, model_no, model_type, size):
 
 
 def get_spaced_colors(n, alpha):
-    # generate a list of different colors (as RGBA format) with given alpha
+    """ 
+    Helper function. 
+    Generate a list of different colors (as RGBA format) with given alpha
+
+    """
 
     max_value = 16581375 #255**3
     interval = int(max_value / n)
@@ -174,7 +210,11 @@ def get_spaced_colors(n, alpha):
 
 
 def collect_layer_infos(models):
-    # Collect infos of model layers (relevant for plotting)
+    """ 
+    Helper function. 
+    Collect infos of model layers (relevant for plotting).
+
+    """
     
     model_types = []  # type of model (CNN, LSTM...)
     model_layers = []  # layer types
