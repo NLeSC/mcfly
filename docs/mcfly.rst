@@ -28,14 +28,6 @@ mcfly.storage module
     :undoc-members:
     :show-inheritance:
 
-mcfly.tutorial_pamap2 module
-----------------------------
-
-.. automodule:: mcfly.tutorial_pamap2
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 
 Module contents
 ---------------
