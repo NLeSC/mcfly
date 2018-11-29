@@ -27,6 +27,14 @@ mcfly.storage module
     :members:
     :undoc-members:
     :show-inheritance:
+    
+mcfly.modelviz module
+---------------------------------
+
+.. automodule:: mcfly.modelviz
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 
 Module contents
