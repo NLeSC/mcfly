@@ -1,26 +1,50 @@
+#
+# mcfly
+#
+# Copyright 2017 Netherlands eScience Center
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 import matplotlib.pyplot as plt
 import numpy as np
 import keras
 
 
-def model_overview(models, 
-                   max_num_models=6, 
-                   scale_figwidth=6,
-                   scale_boxes=1.5, 
-                   file_figure = None,
-                   extra_layer_info=True):
-    ''' 
+def model_overview(
+        models, 
+        max_num_models=6, 
+        scale_figwidth=6,
+        scale_boxes=1.5, 
+        file_figure = None,
+        extra_layer_info=True):
+    """ 
     Visual comparison of different deep learning models
     
     Parameters
     ----------
-    max_num_models      -- maximum number of models that should be displayed in one plot
-    scale_figwidth      -- scales total figure size
-    scale_boxes         -- scales size of text and of boxes that represent the layers
-    file_figure         -- if filename is given figure will be saved under that name
-                           (e.g. "model_comparison.png", or "model_comparison.jpg")
-    extra_layer_info    -- if True-> show additional layer information (such as no. of filters)
-    '''
+    max_num_models: int
+        maximum number of models that should be displayed in one plot
+    scale_figwidth: float
+        scales total figure size
+    scale_boxes: float
+        scales size of text and of boxes that represent the layers
+    file_figure: str, optional
+        if filename is given figure will be saved under that name
+        (e.g. "model_comparison.png", or "model_comparison.jpg")
+    extra_layer_info: boolean
+        if True-> show additional layer information (such as no. of filters)
+    """
 
     # Collect relevant layer information from all models
     model_types, model_layers, model_layer_infos = collect_layer_infos(models) 
