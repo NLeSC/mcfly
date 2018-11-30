@@ -35,10 +35,10 @@ before_install:
   - conda update -q conda
   - conda create -q -n test-environment python=$PYTHON_VERSION pip numpy pytest
   - source activate test-environment
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      conda install matplotlib
   - "pip install 'coverage<4'"  # After 4, there is some issue when using python 3.2
   - "pip install -r requirements.txt"
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      conda install python.app
     fi
   - "conda list" # Show the package versions (for debugging)
 
