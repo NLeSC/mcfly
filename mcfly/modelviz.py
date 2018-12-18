@@ -18,23 +18,23 @@
 
 """
  Summary:
+ 
  This module allows to generate a simplified graphical representation
  of the generated Keras/mcfly models. 
  The main callable function is model_overview with 'models' a list of
  Keras-type models as main input.
 
 """
-
-import matplotlib.pyplot as plt
+import bokeh.plotting as bk_plot
+import bokeh.models as bk_models
 import numpy as np
 import keras
 
- 
+
 def model_overview(
         models, 
         max_num_models=6, 
-        scale_figwidth=6,
-        scale_boxes=1.5, 
+        figure_scale = 0.7,
         file_figure = None,
         extra_layer_info=True):
     """ 
@@ -44,10 +44,8 @@ def model_overview(
     ----------
     max_num_models: int
         maximum number of models that should be displayed in one plot
-    scale_figwidth: float
+    figure_scale: float
         scales total figure size
-    scale_boxes: float
-        scales size of text and of boxes that represent the layers
     file_figure: str, optional
         if filename is given figure will be saved under that name
         (e.g. "model_comparison.png", or "model_comparison.jpg")
@@ -66,68 +64,110 @@ def model_overview(
     layers_unique = list(set(layers_all)) 
 
     # Access dimensions:
+    fig_width = int(figure_scale * max_num_models * 130)
     num_models = min(len(models), max_num_models)  # number of models to compare 
     maxlength_models = np.max([len(x) for x in model_layers])
 
-    # Set plot dimensions
-    size_x = scale_figwidth * num_models/5
-    scale_y = scale_figwidth
-    box_size = scale_boxes*scale_y
-    dx = size_x/(num_models + 1)
-    dy = 0.06 * scale_y
-    dy_infobox = 1.5 * dy
-    dy_header = scale_y * 0.15
-    arrow_width = 0.002*scale_figwidth
-
-    # set figure size
-    if extra_layer_info:
-        expected_size_y = dy_header + (1.25*maxlength_models)*dy  
-        print("Create figure with extra information")
-    else:
-        expected_size_y = dy_header + (maxlength_models)*dy 
-
-    fig = plt.figure(figsize=(size_x, max(expected_size_y, scale_y)))
-
     # Choose colors for plot
-    selected_colors = get_spaced_colors(len(layers_unique)+4, alpha=0.2) 
+    RGBA_colors, hex_colors = get_spaced_colors(len(layers_unique)+4) 
 
-    # Plot layers of all models
-    fig_heights = []
-    for i in range(num_models):
-        pos_x = dx/2 + i * dx
-        pos_y = - 0.05*scale_y
-        draw_model_header(pos_x, pos_y, expected_size_y, i+1, model_types[i], box_size)
+    size_x = 1
+    box_scaling_x = 0.75
+    box_scaling_y = 0.55
+    dx = size_x/(num_models) 
+    dx_box = dx * box_scaling_x
 
-        #initialize pos_y
-        pos_y = -dy_header + dy
-        for j in range(len(model_layers[i])):
-            color = selected_colors[layers_unique.index(model_layers[i][j])]
-            
-            # check if extra information present
-            if model_layer_infos[i][j] == "" or (extra_layer_info==False):
-                pos_y = pos_y - dy
-                draw_box(pos_x, pos_y, box_size, color, model_layers[i][j])
-                if j > 0:
-                    draw_arrow(pos_x, pos_y+0.8*dy, 0, dy, arrow_width)
-            else:
-                pos_y = pos_y - dy_infobox
-                draw_box(pos_x, pos_y, box_size, color, model_layers[i][j], text1=model_layer_infos[i][j])
-                if j > 0:
-                    draw_arrow(pos_x, pos_y+0.8*dy_infobox, 0, dy, 0.01*scale_figwidth)
 
-        fig_heights.append(pos_y)
+    dy = 0.4 * dx
+    size_y = maxlength_models * dy
+    dy_box = dy * box_scaling_y
+    dy_arrow = dy * (1-box_scaling_y)
+    dy_box_info = 1.5 * dy_box
+    dy_header = 1.25*dy
 
-    # set xlim and ylim, show figure
-    plt.axis('equal')
-    plt.xlim(-dx, size_x)
-    plt.ylim(np.min(fig_heights)-dy, dy)
-    plt.axis('off')
-    plt.savefig("test.png")
-    plt.show()
+    font_scaling = 0.01*fig_width/max_num_models
+    fontsize = str(font_scaling*0.7)+'em'
+    header_fontsize = str(font_scaling)+'em'
+#    info_fontsize = str(font_scaling*0.55)+'em'
+
     # Save figure if filanem (file_figure) is given
     if file_figure is not None:
-        print("Save model comparison figure to file: '" + file_figure + "'")
-        plt.savefig(file_figure, dpi= 600, bbox_inches='tight')
+        print("Save model comparison figure to file: '" + file_figure + ".html'")
+        bk_plot.output_file(file_figure, title="model_overview figure")
+#    else:
+#        bk_plot.output_file("none", title="model_overview figure", mode="inline")
+
+    p = bk_plot.figure(plot_width=fig_width, plot_height=int(size_y/size_x * fig_width))
+
+    # Plot all selected models:
+    for i in range(num_models):
+        pos_x = np.zeros(len(model_layers[i]))
+        pos_y = np.zeros(len(model_layers[i]))
+        pos_y_box = np.zeros(len(model_layers[i]))
+        widths = []
+        heights = []
+        box_text = []
+        box_text_info = []
+        box_color = []
+
+        # Create header 
+        header_txt = 'Model ' + str(i+1)
+        p.text(x=[dx*i], y=[0], text=[header_txt], text_align='center', text_baseline='middle',
+               text_font_size=fontsize)
+        subheader_txt = model_types[i]
+        p.text(x=[dx*i], y=[-dy/2], text=[subheader_txt] , text_align='center', text_baseline='middle',
+               text_font_size=header_fontsize)
+
+        for j in range(len(model_layers[i])):
+            widths.append(dx_box)
+            # Create small box
+            if model_layer_infos[i][j] == "" or (extra_layer_info==False):
+                heights.append(dy_box) 
+                box_text.append(model_layers[i][j])
+                box_text_info.append("")
+                dy_box_used = dy_box           
+            else: # Create larger box (incl. extra information)
+                heights.append(dy_box_info) 
+                box_text.append(model_layers[i][j] + "\n " + model_layer_infos[i][j])
+                box_text_info.append(model_layer_infos[i][j])
+                dy_box_used = dy_box_info
+
+            pos_x[j] = dx*i 
+            if j == 0:
+                pos_y[j] = -dy_header
+            else:
+                pos_y[j] = pos_y[j-1]-(dy_box_used + dy_arrow) 
+
+            pos_y_box[j] = pos_y[j] + dy_box_used/2 
+
+            box_color.append('#'+hex_colors[layers_unique.index(model_layers[i][j])])
+
+            # Plot arrows
+            p.add_layout(bk_models.Arrow(end=bk_models.NormalHead(fill_color="black", size=10, line_width=0.1),
+                               x_start=dx*i, 
+                               y_start=pos_y[j], 
+                               x_end=dx*i, 
+                               y_end=pos_y[j] - dy_arrow))    
+
+        # Actual plotting of boxes and text
+        p.rect(x=pos_x, y=pos_y_box, width=widths, height=heights, 
+               fill_color=box_color, fill_alpha=0.3)
+        p.text(x=pos_x, y=pos_y_box, text=box_text, 
+               text_align='center', text_baseline='middle',
+               text_font_size=fontsize)
+
+#    citation = bk_models.Label(x=fig_width/2, y=((size_y/size_x - 0.05) * fig_width), x_units='screen', y_units='screen',
+#                     text='Generated model architectures', text_align='center',
+#                     text_font_size='1.5em', render_mode='css',
+#                     border_line_color='black', border_line_alpha=1.0,
+#                     background_fill_color='white', background_fill_alpha=1.0)
+
+    p.axis.visible = False
+    p.grid.visible = False
+#    p.add_layout(citation)
+
+    bk_plot.show(p)
+    
 
 
 
@@ -136,77 +176,19 @@ def model_overview(
 # Visualization helper functions:
 # --------------------------------
 
-def draw_box(pos_x, pos_y, size, face_color, text0, text1=None):
-    """ 
-    Helper function.
-    Draw textbox using matplotlib.
-    
-    Parameters
-    ----------
-    pos_x: float
-        x position of box in plot
-    pos_y: float
-        y position of box in plot
-    size: float
-        value to determine size of text and textbox
-    face_color: tuple, str
-        color value for textbox
-    text0: str
-        Text to print with textbox
-    text1: str, optional
-        Additional info-text to print as 2nd line within textbox (default is None)
-    """
-    if text1 is None:
-        text = text0
-    else:
-        #text = "  " + "\n" + text1
-        plt.text(pos_x, pos_y, text1, size=0.8*size, rotation=0,
-             horizontalalignment="center", 
-             verticalalignment="bottom")
-        text = text0 + "\n" + "  "
-
-    plt.text(pos_x, pos_y, text, size=size, rotation=0,
-             horizontalalignment="center", 
-             verticalalignment="bottom",
-             bbox=dict(boxstyle="round",
-                       ec=(0, 0, 0, 0.5),
-                       fc=face_color))
-
-
-def draw_arrow(pos_x, pos_y, dx, dy, width):
-    """ 
-    Helper function to draw arrow in plot.
-    """
-
-    plt.arrow(pos_x, pos_y, -0.2*dx, -0.2*dy, width=width)
-
-
-def draw_model_header(pos_x, pos_y, scale_y, model_no, model_type, size):
-    """ 
-    Helper function. Plot header using strings model number and model_type.
-
-    """
-
-    header_dy = size/500 * scale_y
-    plt.text(pos_x, pos_y, "Model "+str(model_no), size=1.5*size, rotation=0,
-             horizontalalignment="center", verticalalignment="center")
-    plt.text(pos_x, pos_y - header_dy, "type: "+model_type, size=size, rotation=0,
-             horizontalalignment="center", verticalalignment="center")
-
-
-def get_spaced_colors(n, alpha):
+def get_spaced_colors(n, alpha=1):
     """ 
     Helper function. 
-    Generate a list of different colors (as RGBA format) with given alpha
+    Generate a list of different colors (as RGBA with given alpha, and as hex format)
 
     """
 
     max_value = 16581375 #255**3
     interval = int(max_value / n)
-    colors = [hex(I)[2:].zfill(6) for I in range(0, max_value, interval)]
-    RGBA_colors = [(int(i[1::3], 16)/255, int(i[0::3], 16)/255, int(i[2::3], 16)/255, alpha) for i in colors]    
+    hex_colors = [hex(I)[2:].zfill(6) for I in range(0, max_value, interval)]
+    RGBA_colors = [(int(i[1::3], 16)/255, int(i[0::3], 16)/255, int(i[2::3], 16)/255, alpha) for i in hex_colors]    
 
-    return RGBA_colors
+    return RGBA_colors, hex_colors
 
 
 def collect_layer_infos(models):
@@ -264,7 +246,7 @@ def collect_layer_infos(models):
                 layer_types.append("Reshape");
                 layer_infos.append("")
             elif (type(layer) == keras.layers.wrappers.TimeDistributed):
-                layer_types.append("TimeDistributed");
+                layer_types.append("TimeDist");
                 layer_infos.append("")
             elif (type(layer) == keras.layers.core.Lambda):
                 layer_types.append("Lambda");
