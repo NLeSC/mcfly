@@ -5,5 +5,5 @@ six==1.10.0
 Keras>=2.0.0
 pandas>=0.17.1
 tensorflow>=0.12.1
-matplotlib
+bokeh
 h5py
