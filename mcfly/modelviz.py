@@ -38,7 +38,8 @@ def model_overview(
         file_figure = None,
         extra_layer_info=True):
     """ 
-    Visual comparison of different deep learning models
+    Visual comparison of the generated deep learning models. 
+    The first 'max_num_models' will be displayed.  
     
     Parameters
     ----------
@@ -94,8 +95,6 @@ def model_overview(
     if file_figure is not None:
         print("Save model comparison figure to file: '" + file_figure + ".html'")
         bk_plot.output_file(file_figure, title="model_overview figure")
-#    else:
-#        bk_plot.output_file("none", title="model_overview figure", mode="inline")
 
     p = bk_plot.figure(plot_width=fig_width, plot_height=int(size_y/size_x * fig_width))
 
@@ -156,15 +155,8 @@ def model_overview(
                text_align='center', text_baseline='middle',
                text_font_size=fontsize)
 
-#    citation = bk_models.Label(x=fig_width/2, y=((size_y/size_x - 0.05) * fig_width), x_units='screen', y_units='screen',
-#                     text='Generated model architectures', text_align='center',
-#                     text_font_size='1.5em', render_mode='css',
-#                     border_line_color='black', border_line_alpha=1.0,
-#                     background_fill_color='white', background_fill_alpha=1.0)
-
     p.axis.visible = False
     p.grid.visible = False
-#    p.add_layout(citation)
 
     bk_plot.show(p)
     
