@@ -42,7 +42,7 @@ We build a tool to visualize the configuration and performance of the models. Th
 
 `python -m http.server 8888 &`
 
-Navigate to `http://localhost:8888/` in your browser to open the visualization. For a more elaborate description of the visualization see [user manual](https://github.com/NLeSC/mcfly/wiki/User-manual).
+Navigate to `http://localhost:8888/` in your browser to open the visualization. For a more elaborate description of the visualization see [user manual](https://mcfly.readthedocs.io/en/latest/user_manual.html).
 
 
 ## User documentation
