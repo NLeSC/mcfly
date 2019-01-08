@@ -1,10 +1,10 @@
 # Change Log
 
-## v1.1.0
+## v1.0.2
 - Small bug fixes
-- Added function model_overview to create model visualisation
 - Added metric option to model training
 - Extended documentation
+- Removed redundant dependency on Pandas
 
 ## v1.0.1
 - Small bug fixes
