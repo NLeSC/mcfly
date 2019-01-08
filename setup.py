@@ -5,7 +5,7 @@ with open(os.path.join(os.path.dirname(__file__), 'mcfly/_version.py')) as versi
     exec(versionpy.read())
 
 def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+    return list(open(os.path.join(os.path.dirname(__file__), fname)).readlines())
 
 with open('requirements.txt') as f:
     required = f.read().splitlines()
@@ -19,7 +19,7 @@ setup(
     url = "https://github.com/NLeSC/mcfly",
     packages=['mcfly'],
     install_requires=required,
-    long_description=read('README.md'),
+    long_description='\n'.join(read('README.md')[12:]),
     classifiers=[
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python',
