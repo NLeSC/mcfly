@@ -1,8 +1,4 @@
 {
-    "description": "A deep learning tool for time series classification",
-    "license": "Apache-2.0",
-    "title": "mcfly",
-    "upload_type": "software",
     "creators": [
         {
             "affiliation": "Netherlands eScience Center",
@@ -15,7 +11,7 @@
         {
             "affiliation": "Netherlands eScience Center",
             "name": "van Hees, Vincent",
-            "orchid": "0000-0003-0182-9008"
+            "orcid": "0000-0003-0182-9008"
         },
         {
             "affiliation": "Netherlands eScience Center",
@@ -23,17 +19,17 @@
         },
         {
             "affiliation": "Netherlands eScience Center",
-            "name": "Spaaks, Jurriaan H."
+            "name": "Spaaks, Jurriaan"
         },
         {
             "affiliation": "Netherlands eScience Center",
             "name": "Kuzak, Mateusz",
-            "orchid": "0000-0003-0087-6021"
+            "orcid": "0000-0003-0087-6021"
         },
         {
             "affiliation": "Netherlands eScience Center",
             "name": "Huber, Florian",
-            "orchid": "0000-0002-3535-9406"
+            "orcid": "0000-0002-3535-9406"
         },
         {
             "affiliation": "Netherlands eScience Center",
@@ -44,11 +40,15 @@
             "name": "van der Ploeg, Atze"
         }
     ],
-    "access_right": "open",
+    "description": "The goal of mcfly is to ease the use of deep learning technology for time series classification. The advantage of deep learning is that it can handle raw data directly, without the need to compute signal features. Deep learning does not require expert domain knowledge about the data, and has been shown to be competitive with conventional machine learning techniques. As an example, you can apply mcfly on accelerometer data for activity classification.",
     "keywords": [
-          "machine learning",
-          "deep learning",
-          "time series",
-          "automatic classification"
-    ]
+        "machine learning",
+        "deep learning",
+        "time series",
+        "automated machine learning"
+    ],
+    "license": {
+        "id": "Apache-2.0"
+    },
+    "title": "mcfly: deep learning for time series"
 }

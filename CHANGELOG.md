@@ -1,5 +1,8 @@
 # Change Log
 
+## v1.0.4
+- Fixed Zenodo configuration
+
 ## v1.0.3
 - Requirements change (six>=1.10.0)
 - Fixed Zenodo configuration

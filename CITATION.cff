@@ -1,36 +1,59 @@
 # YAML 1.2
---- 
-authors: 
-  - 
+---
+abstract: "The goal of mcfly is to ease the use of deep learning technology for time series classification. The advantage of deep learning is that it can handle raw data directly, without the need to compute signal features. Deep learning does not require expert domain knowledge about the data, and has been shown to be competitive with conventional machine learning techniques. As an example, you can apply mcfly on accelerometer data for activity classification."
+authors:
+  -
     affiliation: "Netherlands eScience Center"
     family-names: Kuppevelt
     given-names: Dafne
     name-particle: van
-  - 
+  -
     affiliation: "Netherlands eScience Center"
     family-names: Meijer
     given-names: Christiaan
-  - 
+  -
     affiliation: "Netherlands eScience Center"
     family-names: Hees
     given-names: Vincent
     name-particle: van
-  - 
+    orcid: "https://orcid.org/0000-0003-0182-9008"
+  -
+    affiliation: "Netherlands eScience Center"
+    family-names: Bos
+    given-names: Patrick
+  -
+    affiliation: "Netherlands eScience Center"
+    family-names: Spaaks
+    given-names: Jurriaan
+  -
     affiliation: "Netherlands eScience Center"
     family-names: Kuzak
     given-names: Mateusz
     orcid: "https://orcid.org/0000-0003-0087-6021"
+  -
+    affiliation: "Netherlands eScience Center"
+    family-names: Huber
+    given-names: Florian
+    orcid: "https://orcid.org/0000-0002-3535-9406"
+  -
+    affiliation: "Netherlands eScience Center"
+    family-names: Hidding
+    given-names: Johan
+  -
+    affiliation: "Netherlands eScience Center"
+    family-names: Ploeg
+    given-names: Atze
+    name-particle: "van der"
 cff-version: "1.0.3"
-commit: 95c5a7f76525655562baeca0af8d334d1796bf57
-date-released: 2017-04-06
-doi: 10.5281/zenodo.495345
-keywords: 
+date-released: 2018-01-16
+doi: "10.5281/zenodo.596127"
+keywords:
   - "machine learning"
   - "deep learning"
   - "time series"
-  - "automatic classification"
-license: Apache-2.0
+  - "automated machine learning"
+license: "Apache-2.0"
 message: "If you use this software, please cite it using these metadata."
-repository-code: "https://github.com/NLeSC/mcfly"
-title: mcfly
-version: "1.0.1"
+title: "mcfly: deep learning for time series"
+version: "1.0.4"
+...
