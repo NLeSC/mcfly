@@ -7,7 +7,7 @@
 [![Code quality](https://scrutinizer-ci.com/g/NLeSC/mcfly/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/NLeSC/mcfly/)
 [![Coverage](https://scrutinizer-ci.com/g/NLeSC/mcfly/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/NLeSC/mcfly/statistics/)
 [![PyPI](https://img.shields.io/pypi/v/mcfly.svg)](https://pypi.python.org/pypi/mcfly/)
-[![DOI](https://zenodo.org/badge/59207352.svg)](https://zenodo.org/badge/latestdoi/59207352)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.2541698.svg)](https://doi.org/10.5281/zenodo.2541698)
 [![Binder](http://mybinder.org/badge.svg)](http://mybinder.org:/repo/nlesc/mcfly)
 <!-- The first 12 lines are skipped while generating 'long description' (see setup.py)) -->
 
