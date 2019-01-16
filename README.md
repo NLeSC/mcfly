@@ -1,5 +1,5 @@
 <p align="left">
-  <img src="mcflylogo.png" width="200"/>
+  <img src="https://github.com/NLeSC/mcfly/blob/master/mcflylogo.png" width="200"/>
 </p>
 
 [![Build Status](https://travis-ci.org/NLeSC/mcfly.svg?branch=master)](https://travis-ci.org/NLeSC/mcfly)
