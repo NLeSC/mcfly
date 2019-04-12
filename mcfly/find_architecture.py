@@ -39,7 +39,7 @@ from keras import metrics
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             nr_epochs=5, subset_size=100, verbose=True, outputfile=None,
-                            model_path=None, early_stopping=False,
+                            model_path=None, early_stopping=False, 
                             batch_size=20, metric='accuracy'):
     """
     Given a list of compiled models, this function trains
@@ -102,7 +102,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                 'Invalid metric. The model was not compiled with {} as metric'.format(metric_name))
         if early_stopping:
             callbacks = [
-                EarlyStopping(monitor='val_loss', patience=0, verbose=verbose, mode='auto')]
+                EarlyStopping(monitor='val_loss', patience=0, verbose=verbose, mode='auto', restore_best_weights=True)]
         else:
             callbacks = []
         history = model.fit(X_train_sub, y_train_sub,
