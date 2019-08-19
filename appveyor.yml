@@ -11,9 +11,6 @@ environment:
     # Python 2.7
     - MINICONDA: C:\Miniconda
     - MINICONDA: C:\Miniconda-x64
-    # Python 3.4
-    - MINICONDA: C:\Miniconda3
-    - MINICONDA: C:\Miniconda3-x64
     # Python 3.5, 32 bit
     - MINICONDA: C:\Miniconda35
     # Python 3.6
@@ -26,11 +23,6 @@ matrix:
     - MINICONDA: C:\Miniconda
       platform: x64
     - MINICONDA: C:\Miniconda-x64
-      platform: x86
-    # Python 3.4
-    - MINICONDA: C:\Miniconda3
-      platform: x64
-    - MINICONDA: C:\Miniconda3-x64
       platform: x86
     # Python 3.5
     - MINICONDA: C:\Miniconda35
@@ -45,7 +37,6 @@ matrix:
   allow_failures:
     - platform: x86
     - MINICONDA: C:\Miniconda-x64
-    - MINICONDA: C:\Miniconda3-x64
     - MINICONDA: C:\Miniconda36-x64
 
 init:
