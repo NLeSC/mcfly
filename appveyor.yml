@@ -37,11 +37,12 @@ install:
   - conda update -q conda
   - conda install pip numpy scipy
   - "pip install -q pytest"
-  - "pip install -qr requirements.txt"
+  
   # Added --ignore-installed in next line because of failures like in
   # https://ci.appveyor.com/project/NLeSC/mcfly/builds/26750694/job/1klik02e6464okfc
   # for which the used fix is suggested here: https://github.com/ContinuumIO/anaconda-issues/issues/542.
-  - "pip install .  --ignore-installed "
+  - "pip install -qr requirements.txt --ignore-installed"
+  - "pip install .  --ignore-installed"
   - "echo done"
 
 # command to run tests, e.g. python setup.py test
