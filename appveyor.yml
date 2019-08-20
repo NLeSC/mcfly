@@ -26,7 +26,8 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda config --add channels conda-forge
   - conda update -q conda
-  - conda install pip numpy scipy
+  - conda install pip 
+  - "pip install numpy scipy"
   - "pip install -q pytest"
   
   # Added --ignore-installed in next line because of failures like in
