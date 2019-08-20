@@ -1,43 +1,23 @@
 build: false
 
 platform:
-  - x86
   - x64
 
 environment:
   matrix:
-    # Python 3.5, 64 bit (only working version according to TensorFlow docs)
-    - MINICONDA: C:\Miniconda35-x64
-    # Python 2.7
-    - MINICONDA: C:\Miniconda
-    - MINICONDA: C:\Miniconda-x64
     # Python 3.5, 32 bit
-    - MINICONDA: C:\Miniconda35
+    - MINICONDA: C:\Miniconda35-x64
     # Python 3.6
-    - MINICONDA: C:\Miniconda36
     - MINICONDA: C:\Miniconda36-x64
 
 matrix:
   exclude:
-    # Python 2.7
-    - MINICONDA: C:\Miniconda
-      platform: x64
-    - MINICONDA: C:\Miniconda-x64
-      platform: x86
     # Python 3.5
     - MINICONDA: C:\Miniconda35
       platform: x64
-    - MINICONDA: C:\Miniconda35-x64
-      platform: x86
     # Python 3.6
     - MINICONDA: C:\Miniconda36
       platform: x64
-    - MINICONDA: C:\Miniconda36-x64
-      platform: x86
-  allow_failures:
-    - platform: x86
-    - MINICONDA: C:\Miniconda-x64
-    - MINICONDA: C:\Miniconda36-x64
 
 init:
   - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%MINICONDA%\\Library\\bin;%PATH%"
@@ -46,13 +26,15 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda config --add channels conda-forge
   - conda update -q conda
-  - conda install pip numpy scipy
+  - conda install pip 
+  - "pip install numpy scipy"
   - "pip install -q pytest"
-  - "pip install -qr requirements.txt"
+  
   # Added --ignore-installed in next line because of failures like in
   # https://ci.appveyor.com/project/NLeSC/mcfly/builds/26750694/job/1klik02e6464okfc
   # for which the used fix is suggested here: https://github.com/ContinuumIO/anaconda-issues/issues/542.
-  - "pip install .  --ignore-installed "
+  - "pip install -qr requirements.txt --ignore-installed"
+  - "pip install .  --ignore-installed"
   - "echo done"
 
 # command to run tests, e.g. python setup.py test
