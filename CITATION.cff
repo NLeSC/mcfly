@@ -55,5 +55,5 @@ keywords:
 license: "Apache-2.0"
 message: "If you use this software, please cite it using these metadata."
 title: "mcfly: deep learning for time series"
-version: "1.0.4"
+version: "1.0.5"
 ...

@@ -1,5 +1,8 @@
 # Change Log
 
+## v1.0.5
+- Requirements change (keras<2.3.0)
+
 ## v1.0.4
 - Fixed Zenodo configuration
 
