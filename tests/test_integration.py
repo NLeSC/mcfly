@@ -52,14 +52,14 @@ class IntegrationSuite(unittest.TestCase):
         y_val = np.random.randn(100, 7)
         return X_train, X_val, y_train, y_val
 
-    def setUp(self) -> None:
+    def setUp(self):
         np.random.seed(1234)
         self.outputfile = '.generated_model_comparison_for_integration_test.json'
         self.modelfile = '.generated_model_for_integration_test.h5'
         save_remove(self.outputfile)
         save_remove(self.modelfile)
 
-    def tearDown(self) -> None:
+    def tearDown(self):
         save_remove(self.outputfile)
         save_remove(self.modelfile)
 
