@@ -23,7 +23,7 @@
  implemented our own functions until the keras functionality has matured.
  Example function calls in 'Tutorial mcfly on PAMAP2.ipynb'
 """
-from keras.models import model_from_json
+from tensorflow.keras.models import model_from_json
 import json
 import numpy as np
 import os
