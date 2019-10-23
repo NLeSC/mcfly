@@ -1,11 +1,10 @@
-from mcfly import find_architecture, storage
-import numpy as np
-from keras.utils.np_utils import to_categorical
-from keras.models import model_from_json
-import json
-import pickle
 import os
 import unittest
+
+import numpy as np
+from tensorflow.keras.utils import to_categorical
+
+from mcfly import find_architecture, storage
 
 
 class StorageSuite(unittest.TestCase):

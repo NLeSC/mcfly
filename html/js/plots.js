@@ -14,7 +14,8 @@ var isModelValid = function(model){
 	/// Returns true when a model is valid, and false otherwise. Checks can be added
 	/// later. They include at least checkin for the presence of NaN or null values 
 	/// in loss or accuracy arrays.
-    var floatArrayKeys = ["train_metric", "train_loss", "train_acc", "val_metric", "val_loss", "val_acc"];
+    var floatArrayKeys = ["train_metric", "train_loss", "train_acc", "train_accuracy",
+                          "val_metric", "val_loss", "val_acc", "val_accuracy"];
     for (var key of floatArrayKeys){
         if(key in model){
             var floatArray = model[key];

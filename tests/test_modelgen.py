@@ -26,7 +26,7 @@ class ModelGenerationSuite(unittest.TestCase):
         """ CNN models should always start with a batch normalization layer. """
         model = modelgen.generate_CNN_model((None, 20, 3), 2, [32, 32], 100)
         assert str(type(model.layers[0])) \
-            == "<class 'keras.layers.normalization.BatchNormalization'>", \
+            == "<class 'tensorflow.python.keras.layers.normalization_v2.BatchNormalization'>", \
             'Wrong layer type.'
 
     def test_cnn_fc_nodes(self):
@@ -75,7 +75,7 @@ class ModelGenerationSuite(unittest.TestCase):
         metrics = ['accuracy', 'mae']
         model = modelgen.generate_CNN_model((None, 20, 3), 2, [32, 32],
                                             100, metrics=metrics)
-        assert model.metrics == metrics
+        assert [m.name for m in model.metrics] == metrics
 
     def test_CNN_hyperparameters_nrlayers(self):
         """ Number of Conv layers from range [4, 4] should be 4. """
@@ -100,13 +100,13 @@ class ModelGenerationSuite(unittest.TestCase):
         model = modelgen.generate_DeepConvLSTM_model(
             (None, 20, 3), 2, [32, 32], [32, 32])
         assert str(type(model.layers[0])) \
-            == "<class 'keras.layers.normalization.BatchNormalization'>", \
+            == "<class 'tensorflow.python.keras.layers.normalization_v2.BatchNormalization'>", \
             'Wrong layer type.'
 
     def test_generate_models_metrics(self):
         models = modelgen.generate_models((None, 20, 3), 2)
         model, hyperparams, modeltype = models[0]
-        assert model.metrics == ['accuracy']
+        assert [m.name for m in model.metrics] == ['accuracy']
 
     def setUp(self):
         np.random.seed(1234)

@@ -27,14 +27,16 @@
  Example function calls can be found in the tutorial notebook
  (https://github.com/NLeSC/mcfly-tutorial)
 """
-import numpy as np
-from . import modelgen
-from sklearn import neighbors, metrics as sklearnmetrics
-import warnings
 import json
 import os
-from keras.callbacks import EarlyStopping
-from keras import metrics
+import warnings
+
+import numpy as np
+from sklearn import neighbors, metrics as sklearnmetrics
+from tensorflow.keras import metrics
+from tensorflow.keras.callbacks import EarlyStopping
+
+from . import modelgen
 
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
@@ -96,10 +98,10 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     for i, (model, params, model_types) in enumerate(models):
         if verbose:
             print('Training model %d' % i, model_types)
-        model_metrics = [get_metric_name(name) for name in model.metrics]
+        model_metrics = [get_metric_name(metric.name) for metric in model.metrics]
         if metric_name not in model_metrics:
-            raise ValueError(
-                'Invalid metric. The model was not compiled with {} as metric'.format(metric_name))
+            raise ValueError('Invalid metric: "{}" is not among the metrics the models was compiled with ({}).'
+                             .format(metric_name, model_metrics))
         if early_stopping:
             callbacks = [
                 EarlyStopping(monitor='val_loss', patience=0, verbose=verbose, mode='auto')]
@@ -119,12 +121,12 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
             store_train_hist_as_json(params, model_types,
                                      history.history, outputfile)
         if model_path is not None:
-                model.save(os.path.join(model_path, 'model_{}.h5'.format(i)))
+            model.save(os.path.join(model_path, 'model_{}.h5'.format(i)))
 
     return histories, val_metrics, val_losses
 
 
-def store_train_hist_as_json(params, model_type, history, outputfile, metric_name='acc'):
+def store_train_hist_as_json(params, model_type, history, outputfile, metric_name='accuracy'):
     """
     This function stores the model parameters, the loss and accuracy history
     of one model in a JSON file. It appends the model information to the
@@ -144,15 +146,15 @@ def store_train_hist_as_json(params, model_type, history, outputfile, metric_nam
         name of metric from history to store
     """
     jsondata = params.copy()
-    for k in jsondata.keys():
-        if isinstance(jsondata[k], np.ndarray):
-            jsondata[k] = jsondata[k].tolist()
     jsondata['train_metric'] = history[metric_name]
     jsondata['train_loss'] = history['loss']
     jsondata['val_metric'] = history['val_' + metric_name]
     jsondata['val_loss'] = history['val_loss']
     jsondata['modeltype'] = model_type
     jsondata['metric'] = metric_name
+    for k in jsondata.keys():
+        if isinstance(jsondata[k], np.ndarray) or isinstance(jsondata[k], list):
+            jsondata[k] = [_cast_to_primitive_type(element) for element in jsondata[k]]
     if os.path.isfile(outputfile):
         with open(outputfile, 'r') as outfile:
             previousdata = json.load(outfile)
@@ -162,6 +164,15 @@ def store_train_hist_as_json(params, model_type, history, outputfile, metric_nam
     with open(outputfile, 'w') as outfile:
         json.dump(previousdata, outfile, sort_keys=True,
                   indent=4, ensure_ascii=False)
+
+
+def _cast_to_primitive_type(obj):
+    if isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.int32):
+        return int(obj)
+    else:
+        return obj
 
 
 def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
@@ -264,8 +275,6 @@ def get_metric_name(name):
     -------
 
     """
-    if name == 'acc' or name == 'accuracy':
-        return 'acc'
     try:
         metric_fn = metrics.get(name)
         return metric_fn.__name__

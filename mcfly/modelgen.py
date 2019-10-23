@@ -16,12 +16,12 @@
 # limitations under the License.
 #
 
-from keras.models import Sequential
-from keras.layers import Dense, Activation, Convolution1D, Lambda, \
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Activation, Convolution1D, Lambda, \
     Convolution2D, Flatten, \
     Reshape, LSTM, Dropout, TimeDistributed, BatchNormalization
-from keras.regularizers import l2
-from keras.optimizers import Adam
+from tensorflow.keras.regularizers import l2
+from tensorflow.keras.optimizers import Adam
 import numpy as np
 
 
