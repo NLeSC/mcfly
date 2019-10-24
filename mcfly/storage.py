@@ -48,16 +48,22 @@ def savemodel(model, filepath, modelname):
     numpy_path : str
         Path to npy file with weights
     """
-    json_string = model.to_json()  # save architecture to json string
+    json_path = _save_architecture_and_return_path(filepath, model, modelname)
+    numpy_path = _save_weights_and_return_path(filepath, model, modelname)
+    return json_path, numpy_path
+
+
+def _save_weights_and_return_path(filepath, model, modelname):
+    numpy_path = os.path.join(filepath, modelname + '_weights')
+    np.save(numpy_path, model.get_weights())
+    return numpy_path
+
+
+def _save_architecture_and_return_path(filepath, model, modelname):
     json_path = os.path.join(filepath, modelname + '_architecture.json')
     with open(json_path, 'w') as outfile:
-        json.dump(json_string, outfile, sort_keys=True, indent=4,
-                  ensure_ascii=False)
-    wweights = model.get_weights()  # get weight from model
-    numpy_path = os.path.join(filepath, modelname + '_weights')
-    np.save(numpy_path,
-            wweights)  # save weights in npy file
-    return json_path, numpy_path
+        json.dump(model.to_json(), outfile, sort_keys=True, indent=4, ensure_ascii=False)
+    return json_path
 
 
 def loadmodel(filepath, modelname):
@@ -72,18 +78,15 @@ def loadmodel(filepath, modelname):
 
     Returns
     ----------
-    model_repro : Keras object
+    model : Keras object
         reproduced model
     """
     with open(os.path.join(filepath, modelname + '_architecture.json'), 'r') as outfile:
-        json_string_loaded = json.load(outfile)
-    model_repro = model_from_json(json_string_loaded)
-    # wweights2 = model_repro.get_weights()
-    #  extracting the weights would give us the untrained/default weights
-    wweights_recovered = np.load(
-        os.path.join(filepath, modelname + '_weights.npy'))  # load the original weights
-    model_repro.set_weights(wweights_recovered)  # now set the weights
-    return model_repro
+        loaded_json = json.load(outfile)
+    model = model_from_json(loaded_json)
+    weights_path = os.path.join(filepath, modelname + '_weights.npy')
+    model.set_weights(np.load(weights_path, allow_pickle=True))
+    return model
 
 # If we would use standard Keras function, which stores model and weights
 # in HDF5 format it would look like code below. However, we did not use this
