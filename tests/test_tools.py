@@ -4,7 +4,7 @@ import os
 try:
     FileNotFoundError
 except NameError:
-    FileNotFoundError = IOError
+    FileNotFoundError = OSError
 
 
 def safe_remove(path):
