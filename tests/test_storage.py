@@ -5,7 +5,7 @@ import numpy as np
 from tensorflow.keras.utils import to_categorical
 
 from mcfly import find_architecture, storage
-from test_tools import save_remove
+from test_tools import safe_remove
 
 
 class StorageSuite(unittest.TestCase):
@@ -44,9 +44,9 @@ class StorageSuite(unittest.TestCase):
         self.keras_model_file_path = os.path.join(self.path, 'teststorage.h5')
 
     def tearDown(self):
-        save_remove(self.architecture_json_file_name)
-        save_remove(self.weights_file_name)
-        save_remove(self.keras_model_file_path)
+        safe_remove(self.architecture_json_file_name)
+        safe_remove(self.weights_file_name)
+        safe_remove(self.keras_model_file_path)
 
 
 def create_dummy_model():

@@ -5,7 +5,7 @@ from tensorflow.keras.utils import to_categorical
 import os
 import unittest
 
-from test_tools import save_remove
+from test_tools import safe_remove
 
 
 class FindArchitectureSuite(unittest.TestCase):
@@ -83,7 +83,7 @@ class FindArchitectureSuite(unittest.TestCase):
         def myfunc(a, b):
             return None
 
-        metric_name = find_architecture.get_metric_name(myfunc)
+        metric_name = find_architecture._get_metric_name(myfunc)
         assert metric_name == 'myfunc'
 
     def setUp(self):
@@ -108,10 +108,10 @@ class HistoryStoringSuite(unittest.TestCase):
 
     def setUp(self):
         self.history_file_path = '.generated_models_history_for_storing_test.json'
-        save_remove(self.history_file_path)
+        safe_remove(self.history_file_path)
 
     def tearDown(self):
-        save_remove(self.history_file_path)
+        safe_remove(self.history_file_path)
 
 
 if __name__ == '__main__':

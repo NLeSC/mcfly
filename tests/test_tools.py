@@ -1,7 +1,7 @@
 import os
 
 
-def save_remove(path):
+def safe_remove(path):
     try:
         os.remove(path)
     except FileNotFoundError:

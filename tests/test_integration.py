@@ -3,7 +3,7 @@ import unittest
 
 import numpy as np
 from tensorflow.keras.models import load_model
-from test_tools import save_remove
+from test_tools import safe_remove
 
 from mcfly import modelgen, find_architecture
 
@@ -45,12 +45,12 @@ class IntegrationSuite(unittest.TestCase):
         np.random.seed(1234)
         self.outputfile = '.generated_model_comparison_for_integration_test.json'
         self.modelfile = '.generated_model_for_integration_test.h5'
-        save_remove(self.outputfile)
-        save_remove(self.modelfile)
+        safe_remove(self.outputfile)
+        safe_remove(self.modelfile)
 
     def tearDown(self):
-        save_remove(self.outputfile)
-        save_remove(self.modelfile)
+        safe_remove(self.outputfile)
+        safe_remove(self.modelfile)
 
 
 if __name__ == '__main__':

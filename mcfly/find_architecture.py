@@ -90,7 +90,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     X_train_sub = X_train[:subset_size, :, :]
     y_train_sub = y_train[:subset_size, :]
 
-    metric_name = get_metric_name(metric)
+    metric_name = _get_metric_name(metric)
 
     histories = []
     val_metrics = []
@@ -98,7 +98,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     for i, (model, params, model_types) in enumerate(models):
         if verbose:
             print('Training model %d' % i, model_types)
-        model_metrics = [get_metric_name(metric.name) for metric in model.metrics]
+        model_metrics = [_get_metric_name(metric.name) for metric in model.metrics]
         if metric_name not in model_metrics:
             raise ValueError('Invalid metric: "{}" is not among the metrics the models was compiled with ({}).'
                              .format(metric_name, model_metrics))
@@ -263,7 +263,7 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
     return best_model, best_params, best_model_type, knn_acc
 
 
-def get_metric_name(name):
+def _get_metric_name(name):
     """
     Gives the keras name for a metric
 
