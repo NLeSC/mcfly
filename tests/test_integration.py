@@ -2,21 +2,10 @@ import os
 import unittest
 
 import numpy as np
-from tensorflow.keras.utils import to_categorical
-
-from mcfly import find_architecture, storage
-
-import sys
-import os
-import numpy as np
-import pandas as pd
-# mcfly
-from mcfly import modelgen, find_architecture, storage
 from tensorflow.keras.models import load_model
-
 from test_tools import save_remove
 
-np.random.seed(2)
+from mcfly import modelgen, find_architecture
 
 
 class IntegrationSuite(unittest.TestCase):
