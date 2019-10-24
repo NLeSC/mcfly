@@ -275,6 +275,8 @@ def _get_metric_name(name):
     -------
 
     """
+    if name == 'acc' or name == 'accuracy':
+        return 'accuracy'
     try:
         metric_fn = metrics.get(name)
         return metric_fn.__name__

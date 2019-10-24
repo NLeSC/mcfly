@@ -10,7 +10,6 @@ from test_tools import safe_remove
 
 class FindArchitectureSuite(unittest.TestCase):
     """Basic test cases."""
-
     def test_kNN_accuracy_1(self):
         """
         The accuracy for this single-point dataset should be 1.
@@ -79,15 +78,28 @@ class FindArchitectureSuite(unittest.TestCase):
                 batch_size=20, metric='accuracy')
         assert len(histories) == 0
 
-    def test_get_metricname_myfunc(self):
+    def setUp(self):
+        np.random.seed(1234)
+
+
+class MetricNamingSuite(unittest.TestCase):
+    @staticmethod
+    def test_get_metric_name_accuracy():
+        metric_name = find_architecture._get_metric_name('accuracy')
+        assert metric_name == 'accuracy'
+
+    @staticmethod
+    def test_get_metric_name_acc():
+        metric_name = find_architecture._get_metric_name('acc')
+        assert metric_name == 'accuracy'
+
+    @staticmethod
+    def test_get_metric_name_myfunc():
         def myfunc(a, b):
             return None
 
         metric_name = find_architecture._get_metric_name(myfunc)
         assert metric_name == 'myfunc'
-
-    def setUp(self):
-        np.random.seed(1234)
 
 
 class HistoryStoringSuite(unittest.TestCase):
