@@ -169,7 +169,7 @@ def store_train_hist_as_json(params, model_type, history, outputfile, metric_nam
 def _cast_to_primitive_type(obj):
     if isinstance(obj, np.floating):
         return float(obj)
-    elif isinstance(obj, np.int32):
+    elif isinstance(obj, np.integer):
         return int(obj)
     else:
         return obj
