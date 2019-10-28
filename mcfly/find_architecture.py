@@ -115,15 +115,31 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             callbacks=callbacks)
         histories.append(history)
 
-        val_metrics.append(history.history['val_' + metric_name][-1])
+        val_metrics.append(_get_from_history('val_' + metric_name, history.history)[-1])
         val_losses.append(history.history['val_loss'][-1])
         if outputfile is not None:
-            store_train_hist_as_json(params, model_types,
-                                     history.history, outputfile)
+            store_train_hist_as_json(params, model_types, history.history, outputfile)
         if model_path is not None:
             model.save(os.path.join(model_path, 'model_{}.h5'.format(i)))
 
     return histories, val_metrics, val_losses
+
+
+def _get_from_history(metric_name, history_history):
+    """Gets the metric from the history object. Tries to solve inconsistencies in abbreviation of accuracy between
+    Tensorflow/Keras versions. """
+    val_accuracy = 'val_accuracy'
+    val_acc = 'val_acc'
+    if metric_name is val_accuracy:
+        try:
+            return history_history[metric_name]
+        except KeyError:
+            try:
+                return history_history[val_acc]
+            except KeyError:
+                raise KeyError('No {} or {} in history.'.format(val_accuracy, val_acc))
+    else:
+        return history_history[metric_name]
 
 
 def store_train_hist_as_json(params, model_type, history, outputfile, metric_name='accuracy'):

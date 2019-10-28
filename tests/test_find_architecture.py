@@ -1,6 +1,6 @@
 from mcfly import find_architecture
 import numpy as np
-from pytest import approx
+from pytest import approx, raises
 from tensorflow.keras.utils import to_categorical
 import os
 import unittest
@@ -10,6 +10,7 @@ from test_tools import safe_remove
 
 class FindArchitectureSuite(unittest.TestCase):
     """Basic test cases."""
+
     def test_kNN_accuracy_1(self):
         """
         The accuracy for this single-point dataset should be 1.
@@ -100,6 +101,31 @@ class MetricNamingSuite(unittest.TestCase):
 
         metric_name = find_architecture._get_metric_name(myfunc)
         assert metric_name == 'myfunc'
+
+    @staticmethod
+    def test_val_accuracy_get_from_history_acc():
+        history_history = {'val_acc': 'val_accuracy'}
+        result = find_architecture._get_from_history('val_accuracy', history_history)
+        assert result == 'val_accuracy'
+
+    @staticmethod
+    def test_val_accuracy_get_from_history_accuracy():
+        history_history = {'val_accuracy': 'val_accuracy'}
+        result = find_architecture._get_from_history('val_accuracy', history_history)
+        assert result == 'val_accuracy'
+
+    @staticmethod
+    def test_val_loss_get_from_history_accuracy():
+        history_history = {'val_loss': 'val_loss'}
+        result = find_architecture._get_from_history('val_loss', history_history)
+        assert result == 'val_loss'
+
+    @staticmethod
+    def test_val_accuracy_get_from_history_none_raise():
+        history_history = {}
+        with raises(KeyError) as e_info:
+            find_architecture._get_from_history('val_accuracy', history_history)
+        print(e_info)
 
 
 class HistoryStoringSuite(unittest.TestCase):
