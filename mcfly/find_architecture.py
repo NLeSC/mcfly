@@ -130,7 +130,7 @@ def _get_from_history(metric_name, history_history):
     Tensorflow/Keras versions. """
     val_accuracy = 'val_accuracy'
     val_acc = 'val_acc'
-    if metric_name is val_accuracy:
+    if metric_name == val_accuracy:
         try:
             return history_history[metric_name]
         except KeyError:
