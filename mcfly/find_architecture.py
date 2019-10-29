@@ -116,7 +116,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         histories.append(history)
 
         val_metrics.append(_get_from_history('val_' + metric_name, history.history)[-1])
-        val_losses.append(history.history['val_loss'][-1])
+        val_losses.append(_get_from_history('val_loss', history.history)[-1])
         if outputfile is not None:
             store_train_hist_as_json(params, model_types, history.history, outputfile)
         if model_path is not None:
@@ -162,10 +162,10 @@ def store_train_hist_as_json(params, model_type, history, outputfile, metric_nam
         name of metric from history to store
     """
     jsondata = params.copy()
-    jsondata['train_metric'] = history[metric_name]
-    jsondata['train_loss'] = history['loss']
-    jsondata['val_metric'] = history['val_' + metric_name]
-    jsondata['val_loss'] = history['val_loss']
+    jsondata['train_metric'] = _get_from_history(metric_name, history)
+    jsondata['train_loss'] = _get_from_history('loss', history)
+    jsondata['val_metric'] = _get_from_history('val_' + metric_name, history)
+    jsondata['val_loss'] = _get_from_history('val_loss', history)
     jsondata['modeltype'] = model_type
     jsondata['metric'] = metric_name
     for k in jsondata.keys():
