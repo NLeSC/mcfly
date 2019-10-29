@@ -2,9 +2,8 @@ import os
 import unittest
 
 import numpy as np
-from tensorflow.keras.utils import to_categorical
 
-from mcfly import find_architecture, storage
+from mcfly import storage, modelgen
 from test_tools import safe_remove
 
 
@@ -51,21 +50,11 @@ class StorageSuite(unittest.TestCase):
 
 def create_dummy_model():
     np.random.seed(123)
-    num_timesteps = 100
+    num_time_steps = 100
     num_channels = 2
     num_samples_train = 5
-    num_samples_val = 3
-    X_train = np.random.rand(
-        num_samples_train,
-        num_timesteps,
-        num_channels)
-    y_train = to_categorical(np.array([0, 0, 1, 1, 1]))
-    X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
-    y_val = to_categorical(np.array([0, 1, 1]))
-    best_model, best_params, best_model_type, knn_acc = find_architecture.find_best_architecture(
-        X_train, y_train, X_val, y_val, verbose=False, subset_size=10,
-        number_of_models=1, nr_epochs=1)
-    return best_model
+    model, _parameters, _type = modelgen.generate_models((num_samples_train, num_time_steps, num_channels), 5, 1)[0]
+    return model
 
 
 if __name__ == '__main__':
