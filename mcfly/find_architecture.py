@@ -128,18 +128,22 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
 def _get_from_history(metric_name, history_history):
     """Gets the metric from the history object. Tries to solve inconsistencies in abbreviation of accuracy between
     Tensorflow/Keras versions. """
-    val_accuracy = 'val_accuracy'
-    val_acc = 'val_acc'
-    if metric_name == val_accuracy:
-        try:
-            return history_history[metric_name]
-        except KeyError:
-            try:
-                return history_history[val_acc]
-            except KeyError:
-                raise KeyError('No {} or {} in history.'.format(val_accuracy, val_acc))
+    if metric_name == 'val_accuracy':
+        return _get_either_from_history('val_accuracy', 'val_acc', history_history)
+    elif metric_name == 'accuracy':
+        return _get_either_from_history('accuracy', 'acc', history_history)
     else:
         return history_history[metric_name]
+
+
+def _get_either_from_history(option1, option2, history_history):
+    try:
+        return history_history[option1]
+    except KeyError:
+        try:
+            return history_history[option2]
+        except KeyError:
+            raise KeyError('No {} or {} in history.'.format(option1, option2))
 
 
 def store_train_hist_as_json(params, model_type, history, outputfile, metric_name='accuracy'):

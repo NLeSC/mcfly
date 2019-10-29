@@ -123,10 +123,26 @@ class MetricNamingSuite(unittest.TestCase):
     @staticmethod
     def test_val_accuracy_get_from_history_none_raise():
         history_history = {}
-        with raises(KeyError) as e_info:
+        with raises(KeyError):
             find_architecture._get_from_history('val_accuracy', history_history)
-        print(e_info)
 
+    @staticmethod
+    def test_accuracy_get_from_history_acc():
+        history_history = {'acc': 'accuracy'}
+        result = find_architecture._get_from_history('accuracy', history_history)
+        assert result == 'accuracy'
+
+    @staticmethod
+    def test_accuracy_get_from_history_accuracy():
+        history_history = {'accuracy': 'accuracy'}
+        result = find_architecture._get_from_history('accuracy', history_history)
+        assert result == 'accuracy'
+
+    @staticmethod
+    def test_accuracy_get_from_history_none_raise():
+        history_history = {}
+        with raises(KeyError):
+            find_architecture._get_from_history('accuracy', history_history)
 
 class HistoryStoringSuite(unittest.TestCase):
     def test_store_train_history_as_json(self):
