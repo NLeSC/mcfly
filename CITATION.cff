@@ -45,7 +45,7 @@ authors:
     given-names: Atze
     name-particle: "van der"
 cff-version: "1.0.3"
-date-released: 2018-01-16
+date-released: 2019-11-05
 doi: "10.5281/zenodo.596127"
 keywords:
   - "machine learning"
@@ -55,5 +55,5 @@ keywords:
 license: "Apache-2.0"
 message: "If you use this software, please cite it using these metadata."
 title: "mcfly: deep learning for time series"
-version: "1.0.5"
+version: "2.0.1"
 ...

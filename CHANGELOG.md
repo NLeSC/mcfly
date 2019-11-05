@@ -1,5 +1,8 @@
 # Change Log
 
+## v2.0.1
+- Fix documentation inconsistency
+
 ## v2.0.0
 - Using Tensorflow.keras instead of Keras
 - Using keyword 'accuracy' instead of 'acc' in logs like latest keras versions do
