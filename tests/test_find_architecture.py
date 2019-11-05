@@ -1,13 +1,14 @@
 from mcfly import find_architecture
 import numpy as np
-from pytest import approx
-from keras.utils.np_utils import to_categorical
+from pytest import approx, raises
+from tensorflow.keras.utils import to_categorical
 import os
 import unittest
 
+from test_tools import safe_remove
+
 
 class FindArchitectureSuite(unittest.TestCase):
-
     """Basic test cases."""
 
     def test_kNN_accuracy_1(self):
@@ -38,7 +39,6 @@ class FindArchitectureSuite(unittest.TestCase):
 
     def test_find_best_architecture(self):
         """ Find_best_architecture should return a single model, parameters, type and valid knn accuracy."""
-        np.random.seed(123)
         num_timesteps = 100
         num_channels = 2
         num_samples_train = 5
@@ -59,7 +59,6 @@ class FindArchitectureSuite(unittest.TestCase):
         assert 1 >= knn_acc >= 0
 
     def train_models_on_samples_empty(self):
-        np.random.seed(123)
         num_timesteps = 100
         num_channels = 2
         num_samples_train = 5
@@ -83,36 +82,90 @@ class FindArchitectureSuite(unittest.TestCase):
     def setUp(self):
         np.random.seed(1234)
 
-    def test_storetrainhist2json(self):
-        """
-        The code should produce a json file
-        """
-        params = {'fc_hidden_nodes': 1, 'learning_rate': 1,
+
+class MetricNamingSuite(unittest.TestCase):
+    @staticmethod
+    def test_get_metric_name_accuracy():
+        metric_name = find_architecture._get_metric_name('accuracy')
+        assert metric_name == 'accuracy'
+
+    @staticmethod
+    def test_get_metric_name_acc():
+        metric_name = find_architecture._get_metric_name('acc')
+        assert metric_name == 'accuracy'
+
+    @staticmethod
+    def test_get_metric_name_myfunc():
+        def myfunc(a, b):
+            return None
+
+        metric_name = find_architecture._get_metric_name(myfunc)
+        assert metric_name == 'myfunc'
+
+    @staticmethod
+    def test_val_accuracy_get_from_history_acc():
+        history_history = {'val_acc': 'val_accuracy'}
+        result = find_architecture._get_from_history('val_accuracy', history_history)
+        assert result == 'val_accuracy'
+
+    @staticmethod
+    def test_val_accuracy_get_from_history_accuracy():
+        history_history = {'val_accuracy': 'val_accuracy'}
+        result = find_architecture._get_from_history('val_accuracy', history_history)
+        assert result == 'val_accuracy'
+
+    @staticmethod
+    def test_val_loss_get_from_history_accuracy():
+        history_history = {'val_loss': 'val_loss'}
+        result = find_architecture._get_from_history('val_loss', history_history)
+        assert result == 'val_loss'
+
+    @staticmethod
+    def test_val_accuracy_get_from_history_none_raise():
+        history_history = {}
+        with raises(KeyError):
+            find_architecture._get_from_history('val_accuracy', history_history)
+
+    @staticmethod
+    def test_accuracy_get_from_history_acc():
+        history_history = {'acc': 'accuracy'}
+        result = find_architecture._get_from_history('accuracy', history_history)
+        assert result == 'accuracy'
+
+    @staticmethod
+    def test_accuracy_get_from_history_accuracy():
+        history_history = {'accuracy': 'accuracy'}
+        result = find_architecture._get_from_history('accuracy', history_history)
+        assert result == 'accuracy'
+
+    @staticmethod
+    def test_accuracy_get_from_history_none_raise():
+        history_history = {}
+        with raises(KeyError):
+            find_architecture._get_from_history('accuracy', history_history)
+
+class HistoryStoringSuite(unittest.TestCase):
+    def test_store_train_history_as_json(self):
+        """The code should produce a json file."""
+        params = {'fc_hidden_nodes': 1,
+                  'learning_rate': 1,
                   'regularization_rate': 0,
                   'filters': np.array([1, 1]),
                   'lstm_dims': np.array([1, 1])
                   }
-        history = {'loss': [1, 1], 'acc': [0, 0],
-                   'val_loss': [1, 1], 'val_acc': [0, 0]}
+        history = {'loss': [1, 1], 'accuracy': [np.float64(0), np.float32(0)],
+                   'val_loss': [np.float(1), np.float(1)], 'val_accuracy': [np.float64(0), np.float64(0)]}
         model_type = 'ABC'
-        filename = os.getcwd() + \
-            '/modelshistory.json'  # get current working directory
-        find_architecture.store_train_hist_as_json(
-            params, model_type, history, filename)
-        test = os.path.isfile(filename)
-        if test is True:
-            os.remove(filename)
-        assert test
 
-    def test_get_metricname_acc(self):
-        metric_name = find_architecture.get_metric_name('accuracy')
-        assert metric_name == 'acc'
+        find_architecture.store_train_hist_as_json(params, model_type, history, self.history_file_path)
+        assert os.path.isfile(self.history_file_path)
 
-    def test_get_metricname_myfunc(self):
-        def myfunc(a, b):
-            return None
-        metric_name = find_architecture.get_metric_name(myfunc)
-        assert metric_name == 'myfunc'
+    def setUp(self):
+        self.history_file_path = '.generated_models_history_for_storing_test.json'
+        safe_remove(self.history_file_path)
+
+    def tearDown(self):
+        safe_remove(self.history_file_path)
 
 
 if __name__ == '__main__':

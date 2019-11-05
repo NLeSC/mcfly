@@ -27,14 +27,16 @@
  Example function calls can be found in the tutorial notebook
  (https://github.com/NLeSC/mcfly-tutorial)
 """
-import numpy as np
-from . import modelgen
-from sklearn import neighbors, metrics as sklearnmetrics
-import warnings
 import json
 import os
-from keras.callbacks import EarlyStopping
-from keras import metrics
+import warnings
+
+import numpy as np
+from sklearn import neighbors, metrics as sklearnmetrics
+from tensorflow.keras import metrics
+from tensorflow.keras.callbacks import EarlyStopping
+
+from . import modelgen
 
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
@@ -88,7 +90,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     X_train_sub = X_train[:subset_size, :, :]
     y_train_sub = y_train[:subset_size, :]
 
-    metric_name = get_metric_name(metric)
+    metric_name = _get_metric_name(metric)
 
     histories = []
     val_metrics = []
@@ -96,10 +98,10 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     for i, (model, params, model_types) in enumerate(models):
         if verbose:
             print('Training model %d' % i, model_types)
-        model_metrics = [get_metric_name(name) for name in model.metrics]
+        model_metrics = [_get_metric_name(metric.name) for metric in model.metrics]
         if metric_name not in model_metrics:
-            raise ValueError(
-                'Invalid metric. The model was not compiled with {} as metric'.format(metric_name))
+            raise ValueError('Invalid metric: "{}" is not among the metrics the models was compiled with ({}).'
+                             .format(metric_name, model_metrics))
         if early_stopping:
             callbacks = [
                 EarlyStopping(monitor='val_loss', patience=0, verbose=verbose, mode='auto')]
@@ -113,18 +115,38 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             callbacks=callbacks)
         histories.append(history)
 
-        val_metrics.append(history.history['val_' + metric_name][-1])
-        val_losses.append(history.history['val_loss'][-1])
+        val_metrics.append(_get_from_history('val_' + metric_name, history.history)[-1])
+        val_losses.append(_get_from_history('val_loss', history.history)[-1])
         if outputfile is not None:
-            store_train_hist_as_json(params, model_types,
-                                     history.history, outputfile)
+            store_train_hist_as_json(params, model_types, history.history, outputfile)
         if model_path is not None:
-                model.save(os.path.join(model_path, 'model_{}.h5'.format(i)))
+            model.save(os.path.join(model_path, 'model_{}.h5'.format(i)))
 
     return histories, val_metrics, val_losses
 
 
-def store_train_hist_as_json(params, model_type, history, outputfile, metric_name='acc'):
+def _get_from_history(metric_name, history_history):
+    """Gets the metric from the history object. Tries to solve inconsistencies in abbreviation of accuracy between
+    Tensorflow/Keras versions. """
+    if metric_name == 'val_accuracy':
+        return _get_either_from_history('val_accuracy', 'val_acc', history_history)
+    elif metric_name == 'accuracy':
+        return _get_either_from_history('accuracy', 'acc', history_history)
+    else:
+        return history_history[metric_name]
+
+
+def _get_either_from_history(option1, option2, history_history):
+    try:
+        return history_history[option1]
+    except KeyError:
+        try:
+            return history_history[option2]
+        except KeyError:
+            raise KeyError('No {} or {} in history.'.format(option1, option2))
+
+
+def store_train_hist_as_json(params, model_type, history, outputfile, metric_name='accuracy'):
     """
     This function stores the model parameters, the loss and accuracy history
     of one model in a JSON file. It appends the model information to the
@@ -144,15 +166,15 @@ def store_train_hist_as_json(params, model_type, history, outputfile, metric_nam
         name of metric from history to store
     """
     jsondata = params.copy()
-    for k in jsondata.keys():
-        if isinstance(jsondata[k], np.ndarray):
-            jsondata[k] = jsondata[k].tolist()
-    jsondata['train_metric'] = history[metric_name]
-    jsondata['train_loss'] = history['loss']
-    jsondata['val_metric'] = history['val_' + metric_name]
-    jsondata['val_loss'] = history['val_loss']
+    jsondata['train_metric'] = _get_from_history(metric_name, history)
+    jsondata['train_loss'] = _get_from_history('loss', history)
+    jsondata['val_metric'] = _get_from_history('val_' + metric_name, history)
+    jsondata['val_loss'] = _get_from_history('val_loss', history)
     jsondata['modeltype'] = model_type
     jsondata['metric'] = metric_name
+    for k in jsondata.keys():
+        if isinstance(jsondata[k], np.ndarray) or isinstance(jsondata[k], list):
+            jsondata[k] = [_cast_to_primitive_type(element) for element in jsondata[k]]
     if os.path.isfile(outputfile):
         with open(outputfile, 'r') as outfile:
             previousdata = json.load(outfile)
@@ -162,6 +184,15 @@ def store_train_hist_as_json(params, model_type, history, outputfile, metric_nam
     with open(outputfile, 'w') as outfile:
         json.dump(previousdata, outfile, sort_keys=True,
                   indent=4, ensure_ascii=False)
+
+
+def _cast_to_primitive_type(obj):
+    if isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.integer):
+        return int(obj)
+    else:
+        return obj
 
 
 def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
@@ -252,7 +283,7 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
     return best_model, best_params, best_model_type, knn_acc
 
 
-def get_metric_name(name):
+def _get_metric_name(name):
     """
     Gives the keras name for a metric
 
@@ -265,7 +296,7 @@ def get_metric_name(name):
 
     """
     if name == 'acc' or name == 'accuracy':
-        return 'acc'
+        return 'accuracy'
     try:
         metric_fn = metrics.get(name)
         return metric_fn.__name__
