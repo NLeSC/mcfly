@@ -2,6 +2,7 @@ from mcfly import find_architecture
 import numpy as np
 from pytest import approx, raises
 from tensorflow.keras.utils import to_categorical
+import tensorflow as tf
 import os
 import unittest
 
@@ -82,9 +83,9 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         even though a seed was set. Note2 that this test is very slow, taking up 40% of all mcfly test time."""
         X_train, y_train = _create_2_class_labeled_dataset(1, 999)  # very unbalanced
         X_val, y_val = _create_2_class_labeled_dataset(1, 99)
-        X_test, y_test = _create_2_class_labeled_dataset(5, 5)
-
+        X_test, y_test = _create_2_class_labeled_dataset(10, 10)
         class_weight = {0: 2, 1: 0.002}
+        
         best_model, best_params, best_model_type, knn_acc = find_architecture.find_best_architecture(
             X_train, y_train, X_val, y_val, verbose=False, subset_size=1000,
             number_of_models=5, nr_epochs=1, model_type='CNN', class_weight=class_weight)
@@ -95,6 +96,7 @@ class FindArchitectureBasicSuite(unittest.TestCase):
 
     def setUp(self):
         np.random.seed(1234)
+        tf.random.set_seed(1234)
 
 
 def _create_2_class_labeled_dataset(num_samples_class_a, num_samples_class_b):
