@@ -78,6 +78,7 @@ class FindArchitectureBasicSuite(unittest.TestCase):
                 batch_size=20, metric='accuracy')
         assert len(histories) == 0
 
+    @unittest.skip('Needs tensorflow API v2. Also, quite a slow test of 15s.')
     def test_find_best_architecture_with_class_weights(self):
         """Model should not ignore tiny class with huge class weight. Note that this test is non-deterministic,
         even though a seed was set. Note2 that this test is very slow, taking up 40% of all mcfly test time."""
@@ -85,7 +86,7 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         X_val, y_val = _create_2_class_labeled_dataset(1, 99)
         X_test, y_test = _create_2_class_labeled_dataset(10, 10)
         class_weight = {0: 2, 1: 0.002}
-        
+
         best_model, best_params, best_model_type, knn_acc = find_architecture.find_best_architecture(
             X_train, y_train, X_val, y_val, verbose=False, subset_size=1000,
             number_of_models=5, nr_epochs=1, model_type='CNN', class_weight=class_weight)
