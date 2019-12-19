@@ -82,6 +82,8 @@ class FindArchitectureBasicSuite(unittest.TestCase):
     def test_find_best_architecture_with_class_weights(self):
         """Model should not ignore tiny class with huge class weight. Note that this test is non-deterministic,
         even though a seed was set. Note2 that this test is very slow, taking up 40% of all mcfly test time."""
+        tf.random.set_seed(1234)  # Needs tensorflow API v2
+
         X_train, y_train = _create_2_class_labeled_dataset(1, 999)  # very unbalanced
         X_val, y_val = _create_2_class_labeled_dataset(1, 99)
         X_test, y_test = _create_2_class_labeled_dataset(10, 10)
@@ -97,7 +99,6 @@ class FindArchitectureBasicSuite(unittest.TestCase):
 
     def setUp(self):
         np.random.seed(1234)
-        tf.random.set_seed(1234)
 
 
 def _create_2_class_labeled_dataset(num_samples_class_a, num_samples_class_b):
