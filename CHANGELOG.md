@@ -1,5 +1,8 @@
 # Change Log
 
+## v2.1.0
+- Add class weight support
+
 ## v2.0.1
 - Fix documentation inconsistency
 

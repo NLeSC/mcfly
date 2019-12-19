@@ -42,7 +42,7 @@ from . import modelgen
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             nr_epochs=5, subset_size=100, verbose=True, outputfile=None,
                             model_path=None, early_stopping=False,
-                            batch_size=20, metric='accuracy'):
+                            batch_size=20, metric='accuracy', class_weight=None):
     """
     Given a list of compiled models, this function trains
     them all on a subset of the train data. If the given size of the subset is
@@ -76,6 +76,8 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         nr of samples per batch
     metric : str
         metric to store in the history object
+    class_weight: dict, optional
+        Dictionary containing class weights (example: {0: 0.5, 1: 2.})
 
     Returns
     ----------
@@ -86,7 +88,6 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     val_losses : list of floats
         validation losses of the models
     """
-    # if subset_size is smaller then X_train, this will work fine
     X_train_sub = X_train[:subset_size, :, :]
     y_train_sub = y_train[:subset_size, :]
 
@@ -112,7 +113,8 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             # see comment on subsize_set
                             validation_data=(X_val, y_val),
                             verbose=verbose,
-                            callbacks=callbacks)
+                            callbacks=callbacks,
+                            class_weight=class_weight)
         histories.append(history)
 
         val_metrics.append(_get_from_history('val_' + metric_name, history.history)[-1])
@@ -198,6 +200,7 @@ def _cast_to_primitive_type(obj):
 def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                            number_of_models=5, nr_epochs=5, subset_size=100,
                            outputpath=None, model_path=None, metric='accuracy',
+                           class_weight=None,
                            **kwargs):
     """
     Tries out a number of models on a subsample of the data,
@@ -230,6 +233,8 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
         File location to store the model results
     model_path: str, optional
         Directory to save the models as HDF5 files
+    class_weight: dict, optional
+        Dictionary containing class weights (example: {0: 0.5, 1: 2.})
     metric: str, optional
         metric that is used to evaluate the model on the validation set.
         See https://keras.io/metrics/ for possible metrics
@@ -262,7 +267,8 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                                                                     verbose=verbose,
                                                                     outputfile=outputpath,
                                                                     model_path=model_path,
-                                                                    metric=metric)
+                                                                    metric=metric,
+                                                                    class_weight=class_weight)
     best_model_index = np.argmax(val_accuracies)
     best_model, best_params, best_model_type = models[best_model_index]
     knn_acc = kNN_accuracy(
