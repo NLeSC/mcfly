@@ -1,3 +1,4 @@
+Please cite the software if you are using it in your scientific publication.
 <p align="left">
   <img src="https://raw.githubusercontent.com/NLeSC/mcfly/master/mcflylogo.png" width="200"/>
 </p>
