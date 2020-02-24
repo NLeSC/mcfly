@@ -1,7 +1,7 @@
 #
 # mcfly
 #
-# Copyright 2017 Netherlands eScience Center
+# Copyright 2020 Netherlands eScience Center
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ from . import modelgen
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             nr_epochs=5, subset_size=100, verbose=True, outputfile=None,
-                            model_path=None, early_stopping=False,
+                            model_path=None, early_stopping=True,
                             batch_size=20, metric='accuracy', class_weight=None):
     """
     Given a list of compiled models, this function trains
@@ -71,7 +71,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     model_path : str, optional
         Directory to store the models as HDF5 files
     early_stopping: bool
-        Stop when validation loss does not decrease
+        Stop when validation loss does not decrease. Default is True.
     batch_size : int
         nr of samples per batch
     metric : str

@@ -37,7 +37,10 @@ def generate_models(
         deepconvlstm_min_conv_filters=10, deepconvlstm_max_conv_filters=100,
         deepconvlstm_min_lstm_layers=1, deepconvlstm_max_lstm_layers=5,
         deepconvlstm_min_lstm_dims=10, deepconvlstm_max_lstm_dims=100,
-        low_lr=1, high_lr=4, low_reg=1, high_reg=4
+        IT_min_network_depth=3, IT_max_network_depth=6,
+        IT_min_filters_number=32, IT_max_filters_number=96,
+        IT_min_max_kernel_size=10, IT_max_max_kernel_size=80,
+        low_lr=1, high_lr=4, low_reg=1, high_reg=4 # TODO: use centralized default parameter file (e.g. yaml)
 ):
     """
     Generate one or multiple untrained Keras models with random hyperparameters.
@@ -84,6 +87,18 @@ def generate_models(
         minimum number of hidden nodes per LSTM layer in DeepConvLSTM model
     deepconvlstm_max_lstm_dims : int
         maximum number of hidden nodes per LSTM layer in DeepConvLSTM model
+    IT_min_network_dept : int
+        minimum number of Inception modules in InceptionTime model
+    IT_max_network_dept : int
+        maximum number of Inception modules in InceptionTime model
+    IT_min_filters_number : int
+        minimum number of filters per Conv layer in InceptionTime model
+    IT_max_filters_number : int
+        maximum number of filters per Conv layer in InceptionTime model
+    IT_min_max_kernel_size : int
+        minimum size of CNN kernels in InceptionTime model
+    IT_max_max_kernel_size : int
+        maximum size of CNN kernels in InceptionTime model
     low_lr : float
         minimum of log range for learning rate: learning rate is sampled
         between `10**(-low_reg)` and `10**(-high_reg)`
@@ -102,11 +117,16 @@ def generate_models(
     models : list
         List of compiled models
     """
+    model_types = ['CNN', 'DeepConvLSTM', 'InceptionTime']
+    model_types_selected = []
+    for i in range(int(np.ceil(number_of_models/len(model_types)))):
+        np.random.shuffle(model_types)
+        model_types_selected.extend(model_types)
+    
     models = []
-    for _ in range(0, number_of_models):
+    for i in range(0, number_of_models):
         if model_type is None:  # random model choice:
-            current_model_type = 'CNN' if np.random.random(
-            ) < 0.5 else 'DeepConvLSTM'
+            current_model_type = model_types_selected[i]
         else:  # user-defined model choice:
             current_model_type = model_type
         generate_model = None
@@ -131,6 +151,18 @@ def generate_models(
                 max_lstm_dims=deepconvlstm_max_lstm_dims,
                 low_lr=low_lr, high_lr=high_lr, low_reg=low_reg,
                 high_reg=high_reg)
+        if current_model_type == 'InceptionTime':
+            generate_model = generate_InceptionTime_model
+            hyperparameters = generate_InceptionTime_hyperparameter_set(
+                min_network_depth=IT_min_network_depth, 
+                max_network_depth=IT_max_network_depth,
+                min_filters_number=IT_min_filters_number, 
+                max_filters_number=IT_max_filters_number,
+                min_max_kernel_size=IT_min_max_kernel_size, 
+                max_max_kernel_size=IT_max_max_kernel_size,
+                low_lr=low_lr, high_lr=high_lr, low_reg=low_reg,
+                high_reg=high_reg)
+            
         models.append(
             (generate_model(x_shape, number_of_classes, metrics=metrics, **hyperparameters),
              hyperparameters, current_model_type))
