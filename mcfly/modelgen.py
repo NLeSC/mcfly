@@ -1,7 +1,7 @@
 #
 # mcfly
 #
-# Copyright 2017 Netherlands eScience Center
+# Copyright 2020 Netherlands eScience Center
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 #
 
 from tensorflow.keras.models import Sequential
+from tensorflow.keras import layers
+from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Dense, Activation, Convolution1D, Lambda, \
-    Convolution2D, Flatten, \
+    Convolution2D, Flatten, Input,\
     Reshape, LSTM, Dropout, TimeDistributed, BatchNormalization
 from tensorflow.keras.regularizers import l2
 from tensorflow.keras.optimizers import Adam
@@ -272,6 +274,140 @@ def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes,
     return model
 
 
+def generate_InceptionTime_model(input_shape, 
+                                 class_number, 
+                                 filters_number, 
+                                 network_depth=6,
+                                 use_residual=True, 
+                                 use_bottleneck=True, 
+                                 max_kernel_size = 20,
+                                 learning_rate=0.01, 
+                                 regularization_rate=0.01,
+                                 metrics=['accuracy']):
+    """
+    Generate a InceptionTime model. See Fawaz et al. 2019.
+
+    The compiled Keras model is returned.
+
+    Parameters
+    ----------
+    input_shape : tuple
+        Shape of the input dataset: (num_samples, num_timesteps, num_channels)
+    class_number : int
+        Number of classes for classification task
+    filters_number : int
+        number of filters for each convolutional layer
+    network_depth : int
+        Depth of network, i.e. number of Inception modules to stack.
+    use_residual: bool
+        If =True, then residual connections are used. Default is True.
+    use_bottleneck: bool
+        If=True, bottleneck layer is used at the entry of Inception modules. 
+        Default is true.
+    max_kernel_size: int,
+        Maximum kernel size for convolutions within Inception module.
+    learning_rate : float
+        learning rate
+    regularization_rate : float
+        regularization rate
+    metrics : list
+        Metrics to calculate on the validation set.
+        See https://keras.io/metrics/ for possible values.
+
+    Returns
+    -------
+    model : Keras model
+        The compiled Keras model
+    """
+    dim_length = input_shape[1]  # number of samples in a time series
+    dim_channels = input_shape[2]  # number of channels
+    outputdim = class_number  # number of classes
+    weightinit = 'lecun_uniform'  # weight initialization
+    bottleneck_size = 32
+    
+    # TODO: switch to Sequential() keras syntax ?
+    #model = Sequential()
+    #model.add(Input((dim_length, dim_channels)))
+    
+    def inception_module(input_tensor, stride=1, activation='linear'):
+
+        if use_bottleneck and int(input_tensor.shape[-1]) > 1:
+            input_inception = layers.Conv1D(filters=bottleneck_size, kernel_size=1,
+                                                  padding='same', 
+                                                  activation=activation, 
+                                                  kernel_initializer=weightinit,
+                                                  use_bias=False)(input_tensor)
+        else:
+            input_inception = input_tensor
+
+        kernel_sizes = [max_kernel_size // (2 ** i) for i in range(3)]
+        conv_list = []
+
+        for kernel_size in kernel_sizes:
+            conv_list.append(layers.Conv1D(filters=filters_number, 
+                                           kernel_size=kernel_size,
+                                           strides=stride, 
+                                           padding='same', 
+                                           activation=activation, 
+                                           kernel_initializer=weightinit, 
+                                           use_bias=False)(input_inception))
+
+        max_pool_1 = layers.MaxPool1D(pool_size=3, strides=stride, padding='same')(input_tensor)
+
+        conv_last = layers.Conv1D(filters=filters_number, 
+                               kernel_size=1,
+                               padding='same', 
+                               activation=activation, 
+                               kernel_initializer=weightinit,
+                               use_bias=False)(max_pool_1)
+
+        conv_list.append(conv_last)
+
+        x = layers.Concatenate(axis=2)(conv_list)
+        x = layers.BatchNormalization()(x)
+        x = layers.Activation(activation='relu')(x)
+        return x
+
+    def shortcut_layer(input_tensor, out_tensor):
+        shortcut_y = layers.Conv1D(filters=int(out_tensor.shape[-1]), 
+                                   kernel_size=1,
+                                   padding='same', 
+                                   kernel_initializer=weightinit, 
+                                   use_bias=False)(input_tensor)
+        shortcut_y = layers.normalization.BatchNormalization()(shortcut_y)
+
+        x = layers.Add()([shortcut_y, out_tensor])
+        x = layers.Activation('relu')(x)
+        return x
+    
+    # Build the actual model:
+    input_layer = layers.Input((dim_length, dim_channels))
+    x = input_layer
+    input_res = x
+
+    for depth in range(network_depth):
+        x = inception_module(x)
+
+        if use_residual and depth % 3 == 2:
+            x = shortcut_layer(input_res, x)
+            input_res = x
+
+    gap_layer = layers.GlobalAveragePooling1D()(x)
+    
+    # Final classification layer
+    output_layer = layers.Dense(class_number, activation='softmax')(gap_layer)
+    
+    # Create model and compile
+    model = Model(inputs=input_layer, outputs=output_layer)
+    
+    model.compile(loss='categorical_crossentropy',
+              optimizer=Adam(lr=learning_rate),
+              metrics=metrics)
+    
+    return model
+
+
+
 def generate_CNN_hyperparameter_set(min_layers=1, max_layers=10,
                                     min_filters=10, max_filters=100,
                                     min_fc_nodes=10, max_fc_nodes=2000,
@@ -376,6 +512,54 @@ def generate_DeepConvLSTM_hyperparameter_set(
     hyperparameters['lstm_dims'] = np.random.randint(
         min_lstm_dims, max_lstm_dims + 1, number_of_lstm_layers).tolist()
     return hyperparameters
+
+
+def generate_InceptionTime_hyperparameter_set(min_network_depth=3, max_network_depth=6,
+                                              min_filters_number=32, max_filters_number=96,
+                                              min_max_kernel_size=10, max_max_kernel_size=80,
+                                              low_lr=1, high_lr=4, 
+                                              low_reg=1, high_reg=4):
+    """ Generate a hyperparameter set that define a CNN model.
+
+    Parameters
+    ----------
+    min_network_dept : int
+        minimum number of Inception modules
+    max_network_dept : int
+        maximum number of Inception modules
+    min_filters_number : int
+        minimum number of filters per Conv layer
+    max_filters_number : int
+        maximum number of filters per Conv layer
+    min_max_kernel_size : int
+        minimum size of CNN kernels
+    max_max_kernel_size : int
+        maximum size of CNN kernels
+    low_lr : float
+        minimum of log range for learning rate: learning rate is sampled
+        between `10**(-low_reg)` and `10**(-high_reg)`
+    high_lr : float
+        maximum  of log range for learning rate: learning rate is sampled
+        between `10**(-low_reg)` and `10**(-high_reg)`
+    low_reg : float
+        minimum  of log range for regularization rate: regularization rate is
+        sampled between `10**(-low_reg)` and `10**(-high_reg)`
+    high_reg : float
+        maximum  of log range for regularization rate: regularization rate is
+        sampled between `10**(-low_reg)` and `10**(-high_reg)`
+
+    Returns
+    ----------
+    hyperparameters : dict
+        parameters for a CNN model
+    """ 
+    hyperparameters = generate_base_hyper_parameter_set(
+        low_lr, high_lr, low_reg, high_reg)
+    hyperparameters['network_depth'] = np.random.randint(min_network_depth, max_network_depth + 1)
+    hyperparameters['filters_number'] = np.random.randint(min_filters_number, max_filters_number + 1)
+    hyperparameters['max_kernel_size'] = np.random.randint(min_max_kernel_size, max_max_kernel_size + 1)
+    return hyperparameters
+
 
 
 def generate_base_hyper_parameter_set(
