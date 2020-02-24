@@ -406,7 +406,7 @@ def generate_InceptionTime_model(input_shape,
                                    padding='same', 
                                    kernel_initializer=weightinit, 
                                    use_bias=False)(input_tensor)
-        shortcut_y = layers.normalization.BatchNormalization()(shortcut_y)
+        shortcut_y = layers.BatchNormalization()(shortcut_y)
 
         x = layers.Add()([shortcut_y, out_tensor])
         x = layers.Activation('relu')(x)
