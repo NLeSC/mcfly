@@ -110,7 +110,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                              .format(metric_name, model_metrics))
         if early_stopping:
             callbacks = [
-                EarlyStopping(monitor='val_loss', patience=min(nr_epochs//5, 5), verbose=verbose, mode='auto')]
+                EarlyStopping(monitor='val_loss', patience=min(nr_epochs//10, 5), verbose=verbose, mode='auto')]
         else:
             callbacks = []
         history = model.fit(X_train_sub, y_train_sub,
