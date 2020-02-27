@@ -405,10 +405,10 @@ def generate_resnet_model(input_shape,
     
     # Define/guess filter sizes and kernel sizes
     # Logic here is that kernals become smaller while the number of filters increases
-    kernel_sizes = [max(3, int(max_kernel_size // (1.41 ** i))) for i in range(depth)]
-    filter_numbers = [max(16, int(max_filters_number // (1.41 ** i))) for i in range(depth)][::-1]
+    kernel_sizes = [max(3, int(max_kernel_size // (1.41 ** i))) for i in range(network_depth)]
+    filter_numbers = [max(16, int(max_filters_number // (1.41 ** i))) for i in range(network_depth)][::-1]
     
-    for i in range(depth): 
+    for i in range(network_depth): 
         x = conv_bn_relu_3_sandwich(x, filter_numbers[i], kernel_sizes[i])
     
     ##### Layer is not in paper: ##################
