@@ -39,7 +39,7 @@ def generate_models(
         deepconvlstm_min_lstm_dims=10, deepconvlstm_max_lstm_dims=100,
         IT_min_network_depth=3, IT_max_network_depth=6,
         IT_min_filters_number=32, IT_max_filters_number=96,
-        IT_min_max_kernel_size=10, IT_max_max_kernel_size=80,
+        IT_min_max_kernel_size=10, IT_max_max_kernel_size=100,
         low_lr=1, high_lr=4, low_reg=1, high_reg=4 # TODO: use centralized default parameter file (e.g. yaml)
 ):
     """
@@ -117,12 +117,21 @@ def generate_models(
     models : list
         List of compiled models
     """
+    
+    # Limit parameter space based on input
+    # -------------------------------------------------------------------------
+    if IT_max_max_kernel_size > x_shape[1]:
+        print("Set maximum kernel size for InceptionTime models to number of timesteps.")
+        IT_max_max_kernel_size = x_shape[1]
+    
     model_types = ['CNN', 'DeepConvLSTM', 'InceptionTime']
     model_types_selected = []
     for i in range(int(np.ceil(number_of_models/len(model_types)))):
         np.random.shuffle(model_types)
         model_types_selected.extend(model_types)
-    
+
+    # Create list of Keras models
+    # -------------------------------------------------------------------------    
     models = []
     for i in range(0, number_of_models):
         if model_type is None:  # random model choice:
