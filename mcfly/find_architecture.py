@@ -36,8 +36,7 @@ from sklearn import neighbors, metrics as sklearnmetrics
 from tensorflow.keras import metrics
 from tensorflow.keras.callbacks import EarlyStopping
 
-#from . 
-import modelgen
+from . import modelgen
 
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
@@ -91,7 +90,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     """
     if subset_size is None:
         subset_size = -1
-    
+
     X_train_sub = X_train[:subset_size, :, :]
     y_train_sub = y_train[:subset_size, :]
 
