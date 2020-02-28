@@ -120,7 +120,8 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         val_metrics.append(_get_from_history('val_' + metric_name, history.history)[-1])
         val_losses.append(_get_from_history('val_loss', history.history)[-1])
         if outputfile is not None:
-            store_train_hist_as_json(params, model_types, history.history, outputfile)
+            store_train_hist_as_json(params, model_types, history.history,
+                                     outputfile, metric_name)
         if model_path is not None:
             model.save(os.path.join(model_path, 'model_{}.h5'.format(i)))
 
