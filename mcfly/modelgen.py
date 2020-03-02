@@ -38,7 +38,7 @@ def generate_models(
         deepconvlstm_min_lstm_layers=1, deepconvlstm_max_lstm_layers=5,
         deepconvlstm_min_lstm_dims=10, deepconvlstm_max_lstm_dims=100,
         resnet_min_network_depth=2, resnet_max_network_depth=5,
-        resnet_min_max_filters_number=64, resnet_max_max_filters_number=256,
+        resnet_min_filters_number=32, resnet_max_filters_number=128,
         resnet_min_max_kernel_size=8, resnet_max_max_kernel_size=32,
         IT_min_network_depth=3, IT_max_network_depth=6,
         IT_min_filters_number=32, IT_max_filters_number=96,
@@ -94,9 +94,9 @@ def generate_models(
         minimum number of Inception modules in ResNet model
     resnet_max_network_dept : int
         maximum number of Inception modules in ResNet model
-    resnet_min_max_filters_number : int
+    resnet_min_filters_number : int
         minimum number of filters per Conv layer in ResNet model
-    resnet_max_max_filters_number : int
+    resnet_max_filters_number : int
         maximum number of filters per Conv layer in ResNet model
     resnet_min_max_kernel_size : int
         minimum size of CNN kernels in ResNet model
@@ -180,8 +180,8 @@ def generate_models(
             hyperparameters = generate_resnet_hyperparameter_set(
                 min_network_depth=resnet_min_network_depth, 
                 max_network_depth=resnet_max_network_depth,
-                min_max_filters_number=resnet_min_max_filters_number, 
-                max_max_filters_number=resnet_max_max_filters_number,
+                min_filters_number=resnet_min_filters_number, 
+                max_filters_number=resnet_max_filters_number,
                 min_max_kernel_size=resnet_min_max_kernel_size, 
                 max_max_kernel_size=resnet_max_max_kernel_size,
                 low_lr=low_lr, high_lr=high_lr, low_reg=low_reg,
@@ -347,7 +347,7 @@ def generate_CNN_model(x_shape,
 
 def generate_resnet_model(input_shape, 
                        class_number, 
-                       max_filters_number, 
+                       min_filters_number, 
                        max_kernel_size,
                        network_depth=3,
                        learning_rate=0.01, 
@@ -364,8 +364,8 @@ def generate_resnet_model(input_shape,
         Shape of the input dataset: (num_samples, num_timesteps, num_channels)
     class_number : int
         Number of classes for classification task
-    max_filters_number : int
-        Maximum number of filters for last convolutional layer
+    min_filters_number : int
+        Number of filters for first convolutional layer
     max_kernel_size: int,
         Maximum kernel size for convolutions within Inception modul
     network_depth : int
@@ -411,7 +411,7 @@ def generate_resnet_model(input_shape,
     # Define/guess filter sizes and kernel sizes
     # Logic here is that kernals become smaller while the number of filters increases
     kernel_sizes = [max(3, int(max_kernel_size // (1.41 ** i))) for i in range(network_depth)]
-    filter_numbers = [max(16, int(max_filters_number // (1.41 ** i))) for i in range(network_depth)][::-1]
+    filter_numbers = [int(min_filters_number * (1.41 ** i)) for i in range(network_depth)]
     
     for i in range(network_depth): 
         x = conv_bn_relu_3_sandwich(x, filter_numbers[i], kernel_sizes[i])
@@ -675,7 +675,7 @@ def generate_DeepConvLSTM_hyperparameter_set(
 
 
 def generate_resnet_hyperparameter_set(min_network_depth=2, max_network_depth=4,
-                                        min_max_filters_number=64, max_max_filters_number=256,
+                                        min_filters_number=32, max_filters_number=128,
                                         min_max_kernel_size=8, max_max_kernel_size=32,
                                         low_lr=1.5, high_lr=3.5,
                                         low_reg=1, high_reg=4):
@@ -689,9 +689,9 @@ def generate_resnet_hyperparameter_set(min_network_depth=2, max_network_depth=4,
         maximum number of Inception modules
     min_max_filters_number : int
         minimum number of filters per Conv layer
-    max_max_filters_number : int
+    max_filters_number : int
         maximum number of filters per Conv layer
-    min_max_kernel_size : int
+    min_kernel_size : int
         minimum size of CNN kernels
     max_max_kernel_size : int
         maximum size of CNN kernels
@@ -716,7 +716,7 @@ def generate_resnet_hyperparameter_set(min_network_depth=2, max_network_depth=4,
     hyperparameters = generate_base_hyper_parameter_set(
         low_lr, high_lr, low_reg, high_reg)
     hyperparameters['network_depth'] = np.random.randint(min_network_depth, max_network_depth + 1)
-    hyperparameters['max_filters_number'] = np.random.randint(min_max_filters_number, max_max_filters_number + 1)
+    hyperparameters['min_filters_number'] = np.random.randint(min_filters_number, max_filters_number + 1)
     hyperparameters['max_kernel_size'] = np.random.randint(min_max_kernel_size, max_max_kernel_size + 1)
     return hyperparameters
 
