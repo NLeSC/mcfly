@@ -20,7 +20,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras import layers
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Dense, Activation, Convolution1D, Lambda, \
-    Convolution2D, Flatten, Input,\
+    Convolution2D, Flatten,\
     Reshape, LSTM, Dropout, TimeDistributed, BatchNormalization
 from tensorflow.keras.regularizers import l2
 from tensorflow.keras.optimizers import Adam
@@ -37,7 +37,7 @@ def generate_models(
         deepconvlstm_min_conv_filters=10, deepconvlstm_max_conv_filters=100,
         deepconvlstm_min_lstm_layers=1, deepconvlstm_max_lstm_layers=5,
         deepconvlstm_min_lstm_dims=10, deepconvlstm_max_lstm_dims=100,
-        resnet_min_network_depth=2, resnet_max_network_depth=4,
+        resnet_min_network_depth=2, resnet_max_network_depth=5,
         resnet_min_max_filters_number=64, resnet_max_max_filters_number=256,
         resnet_min_max_kernel_size=8, resnet_max_max_kernel_size=32,
         IT_min_network_depth=3, IT_max_network_depth=6,
@@ -397,7 +397,12 @@ def generate_resnet_model(input_shape,
                                      kernel_regularizer=l2(regularization))(x)
             x = layers.BatchNormalization()(x)
             x = layers.ReLU()(x)    
-        x = layers.Concatenate()([x, first_x])
+            
+        #x = layers.Concatenate()([x, first_x])
+        first_x = layers.Convolution1D(filters, kernel_size=1, padding='same', 
+                                     kernel_initializer=weightinit, 
+                                     kernel_regularizer=l2(regularization))(x)   
+        x = layers.Add()([x, first_x])
         return x
     
     x = layers.Input((dim_length, dim_channels))
@@ -412,12 +417,12 @@ def generate_resnet_model(input_shape,
         x = conv_bn_relu_3_sandwich(x, filter_numbers[i], kernel_sizes[i])
     
     ##### Layer is not in paper: ##################
-    # Added to match filter number to label number
-    x = layers.Convolution1D(class_number, 1, kernel_regularizer=l2(regularization))(x)    
+    # Added to match filter number to label number --> was due to missing dense layer?
+    #x = layers.Convolution1D(class_number, 1, kernel_regularizer=l2(regularization))(x)    
     ###############################################
     
     x = layers.GlobalAvgPool1D()(x)
-    output_layer = layers.Softmax()(x)
+    output_layer = layers.Dense(class_number, activation='softmax')(x)
   
     # Create model and compile
     model = Model(inputs=inputs, outputs=output_layer)
