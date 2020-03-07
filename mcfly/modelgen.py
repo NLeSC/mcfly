@@ -571,7 +571,7 @@ def generate_CNN_hyperparameter_set(settings):
     hyperparameters : dict
         parameters for a CNN model
     """
-    params = Namespace(settings)
+    params = Namespace(**settings)
     hyperparameters = generate_base_hyper_parameter_set(params.low_lr, 
                                                         params.high_lr, 
                                                         params.low_reg, 
@@ -599,7 +599,7 @@ def generate_DeepConvLSTM_hyperparameter_set(settings):
     hyperparameters: dict
         hyperparameters for a DeepConvLSTM model
     """
-    params = Namespace(settings)
+    params = Namespace(**settings)
     hyperparameters = generate_base_hyper_parameter_set(params.low_lr, 
                                                         params.high_lr, 
                                                         params.low_reg, 
