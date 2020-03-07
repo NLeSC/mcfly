@@ -630,7 +630,7 @@ def generate_resnet_hyperparameter_set(settings):
     hyperparameters : dict
         parameters for a CNN model
     """
-    params = Namespace(settings)
+    params = Namespace(**settings)
     hyperparameters = generate_base_hyper_parameter_set(params.low_lr, 
                                                         params.high_lr, 
                                                         params.low_reg, 
@@ -657,7 +657,7 @@ def generate_InceptionTime_hyperparameter_set(settings):
     hyperparameters : dict
         parameters for a CNN model
     """
-    params = Namespace(settings)
+    params = Namespace(**settings)
     hyperparameters = generate_base_hyper_parameter_set(params.low_lr, 
                                                         params.high_lr, 
                                                         params.low_reg, 
