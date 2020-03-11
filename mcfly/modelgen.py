@@ -47,7 +47,7 @@ def generate_models(x_shape,
     metrics : list
         Metrics to calculate on the validation set.
         See https://keras.io/metrics/ for possible values.
-    model_types : str, list, optional
+    model_types : list, optional
         Type of model to build: 'CNN' 'DeepConvLSTM', 'ResNet', or 'InceptionTime'.
         Default is to use all models equally frequently.
     cnn_min_layers : int
