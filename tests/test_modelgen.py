@@ -151,12 +151,17 @@ class ModelGenerationSuite(unittest.TestCase):
         assert 'BatchNormalization' in str(type(model.layers[0])), 'Wrong layer type.'
 
     # Tests for ResNet model:
-    def test_ResNet_starts_with_sandwich(self):
+    def test_ResNet_starts_with_batchnorm(self):
+        """ ResNet models should always start with a batch normalization layer. """
+        model = modelgen.generate_resnet_model((None, 20, 3), 2, 16, 20)
+        assert 'BatchNormalization' in str(type(model.layers[1])), 'Wrong layer type.'
+
+    def test_ResNet_first_sandwich_layers(self):
         """ ResNet models should always start with a residual module. """
         model = modelgen.generate_resnet_model((None, 20, 3), 2, 16, 20)
-        assert 'Conv1D' or 'Convolution1D' in str(type(model.layers[1])), 'Wrong layer type.'
-        assert 'BatchNormalization' in str(type(model.layers[2])), 'Wrong layer type.'
-        assert 'ReLU' in str(type(model.layers[3])), 'Wrong layer type.'
+        assert 'Conv1D' or 'Convolution1D' in str(type(model.layers[2])), 'Wrong layer type.'
+        assert 'BatchNormalization' in str(type(model.layers[3])), 'Wrong layer type.'
+        assert 'ReLU' in str(type(model.layers[4])), 'Wrong layer type.'
 
     def test_ResNet_depth(self):
         """ ResNet model should have depth (number of residual modules) as defined by user. """
@@ -169,8 +174,8 @@ class ModelGenerationSuite(unittest.TestCase):
         """"The output shape throughout the first residual module should be (None, nr_timesteps, min_filters_number)"""
         min_filters_number = 16
         model = modelgen.generate_resnet_model((None, 30, 5), 2, min_filters_number, 20)
-        firstConvlayer = model.layers[1]
-        firstAddlayer = model.layers[11]
+        firstConvlayer = model.layers[2]
+        firstAddlayer = model.layers[12]
         assert firstConvlayer.output_shape == (None, 30, min_filters_number)
         assert firstAddlayer.output_shape == (None, 30, min_filters_number)
 
@@ -202,12 +207,17 @@ class ModelGenerationSuite(unittest.TestCase):
         assert hyperparams.get('min_filters_number') == 16, 'Wrong filter number'
 
     # Tests for InceptionTime model:
-    def test_InceptionTime_starts_with_inception(self):
-        """ InceptionTim models should always start with a inception module. """
+    def test_InceptionTime_starts_with_batchnorm(self):
+        """ InceptionTime models should always start with a batch normalization layer. """
         model = modelgen.generate_InceptionTime_model((None, 20, 3), 2, 16)
-        assert 'Conv1D' or 'Convolution1D' in str(type(model.layers[1])), 'Wrong layer type.'
-        assert 'MaxPooling1D' in str(type(model.layers[2])), 'Wrong layer type.'
-        assert 'Concatenate' in str(type(model.layers[7])), 'Wrong layer type.'
+        assert 'BatchNormalization' in str(type(model.layers[1])), 'Wrong layer type.'
+        
+    def test_InceptionTime_first_inception_module(self):
+        """ Test layers of first inception module. """
+        model = modelgen.generate_InceptionTime_model((None, 20, 3), 2, 16)
+        assert 'Conv1D' or 'Convolution1D' in str(type(model.layers[2])), 'Wrong layer type.'
+        assert 'MaxPooling1D' in str(type(model.layers[3])), 'Wrong layer type.'
+        assert 'Concatenate' in str(type(model.layers[8])), 'Wrong layer type.'
 
     def test_InceptionTime_depth(self):
         """ ResNet model should have depth (number of residual modules) as defined by user. """
@@ -220,8 +230,8 @@ class ModelGenerationSuite(unittest.TestCase):
         """"The output shape throughout the first residual module should be (None, nr_timesteps, min_filters_number)"""
         min_filters_number = 16
         model = modelgen.generate_InceptionTime_model((None, 30, 5), 2, min_filters_number)
-        secondConvlayer = model.layers[4]
-        firstConcatlayer = model.layers[7]
+        secondConvlayer = model.layers[5]
+        firstConcatlayer = model.layers[8]
         assert secondConvlayer.output_shape == (None, 30, min_filters_number)
         assert firstConcatlayer.output_shape == (None, 30, min_filters_number*4)
 
