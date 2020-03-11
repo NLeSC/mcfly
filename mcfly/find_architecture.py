@@ -36,12 +36,12 @@ from sklearn import neighbors, metrics as sklearnmetrics
 from tensorflow.keras import metrics
 from tensorflow.keras.callbacks import EarlyStopping
 
-from . import modelgen
+import modelgen
 
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             nr_epochs=5, subset_size=None, verbose=True, outputfile=None,
-                            model_path=None, early_stopping=True,
+                            model_path=None, early_stopping_patience='auto',
                             batch_size=20, metric='accuracy', class_weight=None):
     """
     Given a list of compiled models, this function trains
@@ -70,8 +70,11 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         Filename to store the model training results
     model_path : str, optional
         Directory to store the models as HDF5 files
-    early_stopping: bool
-        Stop when validation loss does not decrease. Default is True.
+    early_stopping_patience: str, int
+        Unless 'None' early Stopping is used for the model training. Set to integer
+        to define how many epochs without improvement to wait for before stopping.
+        Default is 'auto' in which case the patience will be set to number of epochs/10 
+        (and no smaller than 5).
     batch_size : int
         nr of samples per batch
     metric : str
@@ -106,9 +109,11 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         if metric_name not in model_metrics:
             raise ValueError('Invalid metric: "{}" is not among the metrics the models was compiled with ({}).'
                              .format(metric_name, model_metrics))
-        if early_stopping:
-            callbacks = [
-                EarlyStopping(monitor='val_loss', patience=min(nr_epochs//10, 5), verbose=verbose, mode='auto')]
+        if early_stopping_patience is not None:
+            if early_stopping_patience == 'auto':
+                callbacks = [EarlyStopping(monitor='val_loss', patience=min(nr_epochs//10, 5), verbose=verbose, mode='auto')]
+            else:
+                callbacks = [EarlyStopping(monitor='val_loss', patience=early_stopping_patience, verbose=verbose, mode='auto')]
         else:
             callbacks = []
         history = model.fit(X_train_sub, y_train_sub,
