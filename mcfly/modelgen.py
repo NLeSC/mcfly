@@ -405,6 +405,8 @@ def generate_resnet_model(input_shape,
 
     x = layers.Input((dim_length, dim_channels))
     inputs = x
+    
+    x = layers.BatchNormalization()(inputs) # Added batchnorm (not in original paper)
 
     # Define/guess filter sizes and kernel sizes
     # Logic here is that kernals become smaller while the number of filters increases
@@ -532,7 +534,7 @@ def generate_InceptionTime_model(input_shape,
 
     # Build the actual model:
     input_layer = layers.Input((dim_length, dim_channels))
-    x = input_layer
+    x = layers.BatchNormalization()(input_layer) # Added batchnorm (not in original paper)
     input_res = x
 
     for depth in range(network_depth):
