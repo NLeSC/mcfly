@@ -576,13 +576,13 @@ def generate_CNN_hyperparameter_set(settings):
                                                         params.high_lr, 
                                                         params.low_reg, 
                                                         params.high_reg)
-    number_of_layers = np.random.randint(params.min_layers, 
-                                         params.max_layers + 1)
-    hyperparameters['filters'] = np.random.randint(params.min_filters, 
-                                                   params.max_filters + 1, 
+    number_of_layers = np.random.randint(params.cnn_min_layers, 
+                                         params.cnn_max_layers + 1)
+    hyperparameters['filters'] = np.random.randint(params.cnn_min_filters, 
+                                                   params.cnn_max_filters + 1, 
                                                    number_of_layers)
-    hyperparameters['fc_hidden_nodes'] = np.random.randint(params.min_fc_nodes, 
-                                                           params.max_fc_nodes + 1)
+    hyperparameters['fc_hidden_nodes'] = np.random.randint(params.cnn_min_fc_nodes, 
+                                                           params.cnn_max_fc_nodes + 1)
     return hyperparameters
 
 
@@ -604,15 +604,15 @@ def generate_DeepConvLSTM_hyperparameter_set(settings):
                                                         params.high_lr, 
                                                         params.low_reg, 
                                                         params.high_reg)
-    number_of_conv_layers = np.random.randint(params.min_conv_layers, 
-                                              params.max_conv_layers + 1)
-    hyperparameters['filters'] = np.random.randint(params.min_conv_filters, 
-                                                   params.max_conv_filters + 1, 
+    number_of_conv_layers = np.random.randint(params.deepconvlstm_min_conv_layers, 
+                                              params.deepconvlstm_max_conv_layers + 1)
+    hyperparameters['filters'] = np.random.randint(params.deepconvlstm_min_conv_filters, 
+                                                   params.deepconvlstm_max_conv_filters + 1, 
                                                    number_of_conv_layers).tolist()
-    number_of_lstm_layers = np.random.randint(params.min_lstm_layers, 
-                                              params.max_lstm_layers + 1)
-    hyperparameters['lstm_dims'] = np.random.randint(params.min_lstm_dims, 
-                                                     params.max_lstm_dims + 1, 
+    number_of_lstm_layers = np.random.randint(params.deepconvlstm_min_lstm_layers, 
+                                              params.deepconvlstm_max_lstm_layers + 1)
+    hyperparameters['lstm_dims'] = np.random.randint(params.deepconvlstm_min_lstm_dims, 
+                                                     params.deepconvlstm_max_lstm_dims + 1, 
                                                      number_of_lstm_layers).tolist()
     return hyperparameters
 
@@ -635,12 +635,12 @@ def generate_resnet_hyperparameter_set(settings):
                                                         params.high_lr, 
                                                         params.low_reg, 
                                                         params.high_reg)
-    hyperparameters['network_depth'] = np.random.randint(params.min_network_depth, 
-                                                         params.max_network_depth + 1)
-    hyperparameters['min_filters_number'] = np.random.randint(params.min_filters_number, 
-                                                              params.max_filters_number + 1)
-    hyperparameters['max_kernel_size'] = np.random.randint(params.min_max_kernel_size, 
-                                                           params.max_max_kernel_size + 1)
+    hyperparameters['network_depth'] = np.random.randint(params.resnet_min_network_depth, 
+                                                         params.resnet_max_network_depth + 1)
+    hyperparameters['min_filters_number'] = np.random.randint(params.resnet_min_filters_number, 
+                                                              params.resnet_max_filters_number + 1)
+    hyperparameters['max_kernel_size'] = np.random.randint(params.resnet_min_max_kernel_size, 
+                                                           params.resnet_max_max_kernel_size + 1)
     return hyperparameters
 
 
@@ -662,12 +662,12 @@ def generate_InceptionTime_hyperparameter_set(settings):
                                                         params.high_lr, 
                                                         params.low_reg, 
                                                         params.high_reg)
-    hyperparameters['network_depth'] = np.random.randint(params.min_network_depth, 
-                                                         params.max_network_depth + 1)
-    hyperparameters['filters_number'] = np.random.randint(params.min_filters_number, 
-                                                          params.max_filters_number + 1)
-    hyperparameters['max_kernel_size'] = np.random.randint(params.min_max_kernel_size, 
-                                                           params.max_max_kernel_size + 1)
+    hyperparameters['network_depth'] = np.random.randint(params.IT_min_network_depth, 
+                                                         params.IT_max_network_depth + 1)
+    hyperparameters['filters_number'] = np.random.randint(params.IT_min_filters_number, 
+                                                          params.IT_max_filters_number + 1)
+    hyperparameters['max_kernel_size'] = np.random.randint(params.IT_min_max_kernel_size, 
+                                                           params.IT_max_max_kernel_size + 1)
     return hyperparameters
 
 
