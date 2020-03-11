@@ -8,9 +8,9 @@ os:
 
 env:
   matrix:
-    - PYTHON_VERSION=2.7
     - PYTHON_VERSION=3.5
     - PYTHON_VERSION=3.6
+    - PYTHON_VERSION=3.7
   global:
     - MINCONDA_VERSION="latest"
     - MINCONDA_LINUX="Linux-x86_64"
@@ -32,7 +32,7 @@ before_install:
   - export PATH="$HOME/miniconda/bin:$PATH"
   - conda config --set always_yes yes
   - conda update -q conda
-  - conda create -q -n test-environment python=$PYTHON_VERSION pip numpy pytest
+  - conda create -q -n test-environment python=$PYTHON_VERSION pip numpy pytest scikit-learn
   - source activate test-environment
   - "pip install 'coverage<4'"  # After 4, there is some issue when using python 3.2
   - "pip install -r requirements.txt"
@@ -49,9 +49,8 @@ script:
     else
       py.test  ;
     fi
-  
+
 
 after_script:
   - "pip install scrutinizer-ocular"
   - "ocular"
-
