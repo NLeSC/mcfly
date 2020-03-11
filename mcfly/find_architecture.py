@@ -36,11 +36,11 @@ from sklearn import neighbors, metrics as sklearnmetrics
 from tensorflow.keras import metrics
 from tensorflow.keras.callbacks import EarlyStopping
 
-import modelgen
+from . import modelgen
 
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
-                            nr_epochs=5, subset_size=None, verbose=True, outputfile=None,
+                            nr_epochs=5, subset_size=100, verbose=True, outputfile=None,
                             model_path=None, early_stopping_patience='auto',
                             batch_size=20, metric='accuracy', class_weight=None):
     """
@@ -63,7 +63,9 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     nr_epochs : int, optional
         nr of epochs to use for training one model
     subset_size :
-        The number of samples used from the complete train set. Default is None.
+        The number of samples used from the complete train set. If set to 'None'
+        use the entire dataset. Default is 100, but should be adjusted depending 
+        on the type ans size of the dataset.
     verbose : bool, optional
         flag for displaying verbose output
     outputfile: str, optional
@@ -74,7 +76,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         Unless 'None' early Stopping is used for the model training. Set to integer
         to define how many epochs without improvement to wait for before stopping.
         Default is 'auto' in which case the patience will be set to number of epochs/10 
-        (and no smaller than 5).
+        (and not bigger than 5).
     batch_size : int
         nr of samples per batch
     metric : str
@@ -91,8 +93,12 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     val_losses : list of floats
         validation losses of the models
     """
+    
     if subset_size is None:
         subset_size = -1
+    if subset_size != -1:
+        print("Generated models will be trained on subset of the data (subset size: {})."
+              .format(str(subset_size)))
 
     X_train_sub = X_train[:subset_size, :, :]
     y_train_sub = y_train[:subset_size, :]
@@ -207,7 +213,7 @@ def _cast_to_primitive_type(obj):
 
 
 def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
-                           number_of_models=5, nr_epochs=5, subset_size=None,
+                           number_of_models=5, nr_epochs=5, subset_size=100,
                            outputpath=None, model_path=None, metric='accuracy',
                            class_weight=None,
                            **kwargs):
@@ -272,7 +278,7 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                                                                     y_val,
                                                                     models,
                                                                     nr_epochs,
-                                                                    subset_size_size=subset_size,
+                                                                    subset_size=subset_size,
                                                                     verbose=verbose,
                                                                     outputfile=outputpath,
                                                                     model_path=model_path,
