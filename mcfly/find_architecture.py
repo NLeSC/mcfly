@@ -243,7 +243,7 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
         The number of epochs that each model is trained
     subset_size : int, optional
         The size of the subset of the data that is used for finding
-        the optimal architecture. Default is None
+        the optimal architecture. Default is 100.
     outputpath : str, optional
         File location to store the model results
     model_path: str, optional
