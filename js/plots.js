@@ -12,7 +12,7 @@ var trainChart = dc.seriesChart("#train-chart"),
 
 var isModelValid = function(model){
 	/// Returns true when a model is valid, and false otherwise. Checks can be added
-	/// later. They include at least checkin for the presence of NaN or null values 
+	/// later. They include at least checkin for the presence of NaN or null values
 	/// in loss or accuracy arrays.
     var floatArrayKeys = ["train_metric", "train_loss", "train_acc", "train_accuracy",
                           "val_metric", "val_loss", "val_acc", "val_accuracy"];
@@ -31,7 +31,7 @@ var isModelValid = function(model){
 }
 
 var getValidModels = function(data){
-    validModels = [];    
+    validModels = [];
     for (model of data){
         if(isModelValid(model)){
             validModels.push(model);
@@ -45,10 +45,10 @@ var onNewDataEvent = function(e) {
     var filetxt = e.target.result;
 	var allModels = JSON.parse(filetxt.replace(/\bNaN\b/g, '"NaN"'));
     var validModels = getValidModels(allModels);
-		
+
 	d3.select("#missing-models-warning")
 	.classed("hidden", allModels.length == validModels.length);
-	
+
     var data = flattenModels(validModels);
     metric = validModels[0].metric? validModels[0].metric : 'accuracy';
 	createVisualizations(data, metric);
@@ -58,7 +58,7 @@ var onNewDataEvent = function(e) {
     dc.renderAll();
 };
 
-var loadData = function(){    
+var loadData = function(){
     if(document.getElementById("json-file")) {
         var jsonfile = document.getElementById("json-file").files[0];
         var fileReader = new FileReader();
@@ -70,7 +70,7 @@ var loadData = function(){
 var createVisualizations = function(data, metric){
 	d3.select("#visualizations").classed("hidden", false);
 	d3.select("#data-selection").classed("hidden", true);
-	
+
 	ndx = crossfilter(data);
 
     // First plot: iterations
@@ -92,14 +92,14 @@ var createVisualizations = function(data, metric){
                             .exceptionCount(true)(modelTypeGroup);
     //var accPerModeltype = modelTypeGroup.reduceSum(function(d) {return d.final_val_acc;});
 
-    //Fourth plot: Nr of  conv layers
-    var nrconvlayersDim = ndx.dimension(function(d) {return +d.nr_convlayers;});
-    var convLayerGroup = nrconvlayersDim.group();
-    var accPerConvlayer = reductio()
+    //Fourth plot: Nr of   layers
+    var nrlayersDim = ndx.dimension(function(d) {return +d.nr_layers;});
+    var layerGroup = nrlayersDim.group();
+    var accPerlayer = reductio()
                             .exception(function(d) {return d.model;})
                             .exceptionCount(true)
                             .exceptionSum(function(d) {return d.final_val_acc;})
-                            (convLayerGroup);
+                            (layerGroup);
 
     // Fifth plot: Learning rates/Regularization rate heat map
     function roundLog10(x) { return Math.round(Math.log(x)/Math.log(10)); }
@@ -124,7 +124,7 @@ var createVisualizations = function(data, metric){
     var avgAccHeatmapFiltered = remove_empty_bins(avgAccHeatmap);
 
 	var curveMargin = {top: 10, left: 50, right: 10, bottom: 30};
-	
+
 	valChart
 	.margins(curveMargin)
 	.chart(dc.lineChart)
@@ -178,8 +178,8 @@ var createVisualizations = function(data, metric){
 
 	filterChart
     .margins({top: 0, left: 10, right: 10, bottom: 20})
-      .dimension(nrconvlayersDim)
-      .group(accPerConvlayer)
+      .dimension(nrlayersDim)
+      .group(accPerlayer)
       .valueAccessor(function(d) {
           if(d.value.exceptionCount === 0){return 0;}
           else {return +(d.value.exceptionSum / d.value.exceptionCount);}
