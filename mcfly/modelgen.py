@@ -47,7 +47,7 @@ def generate_models(x_shape,
     metrics : list
         Metrics to calculate on the validation set.
         See https://keras.io/metrics/ for possible values.
-    model_types : str, list, optional
+    model_types : list, optional
         Type of model to build: 'CNN' 'DeepConvLSTM', 'ResNet', or 'InceptionTime'.
         Default is to use all models equally frequently.
     cnn_min_layers : int
@@ -365,9 +365,9 @@ def generate_resnet_model(input_shape,
     min_filters_number : int
         Number of filters for first convolutional layer
     max_kernel_size: int,
-        Maximum kernel size for convolutions within Inception modul
+        Maximum kernel size for convolutions within Inception module
     network_depth : int
-        Depth of network, i.e. number of Inception modules to stac
+        Depth of network, i.e. number of Inception modules to stack
     learning_rate : float
         learning rate
     regularization_rate : float
@@ -396,7 +396,7 @@ def generate_resnet_model(input_shape,
             x = layers.BatchNormalization()(x)
             x = layers.ReLU()(x)
 
-        #x = layers.Concatenate()([x, first_x])
+ 
         first_x = layers.Convolution1D(filters, kernel_size=1, padding='same',
                                      kernel_initializer=weightinit,
                                      kernel_regularizer=l2(regularization))(x)
