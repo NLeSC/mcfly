@@ -1,7 +1,7 @@
 #
 # mcfly
 #
-# Copyright 2017 Netherlands eScience Center
+# Copyright 2020 Netherlands eScience Center
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ from . import modelgen
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             nr_epochs=5, subset_size=100, verbose=True, outputfile=None,
-                            model_path=None, early_stopping=False,
+                            model_path=None, early_stopping_patience='auto',
                             batch_size=20, metric='accuracy', class_weight=None):
     """
     Given a list of compiled models, this function trains
@@ -63,15 +63,20 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     nr_epochs : int, optional
         nr of epochs to use for training one model
     subset_size :
-        The number of samples used from the complete train set
+        The number of samples used from the complete train set. If set to 'None'
+        use the entire dataset. Default is 100, but should be adjusted depending 
+        on the type ans size of the dataset.
     verbose : bool, optional
         flag for displaying verbose output
     outputfile: str, optional
         Filename to store the model training results
     model_path : str, optional
         Directory to store the models as HDF5 files
-    early_stopping: bool
-        Stop when validation loss does not decrease
+    early_stopping_patience: str, int
+        Unless 'None' early Stopping is used for the model training. Set to integer
+        to define how many epochs without improvement to wait for before stopping.
+        Default is 'auto' in which case the patience will be set to number of epochs/10 
+        (and not bigger than 5).
     batch_size : int
         nr of samples per batch
     metric : str
@@ -88,6 +93,13 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     val_losses : list of floats
         validation losses of the models
     """
+    
+    if subset_size is None:
+        subset_size = -1
+    if subset_size != -1:
+        print("Generated models will be trained on subset of the data (subset size: {})."
+              .format(str(subset_size)))
+
     X_train_sub = X_train[:subset_size, :, :]
     y_train_sub = y_train[:subset_size, :]
 
@@ -99,13 +111,15 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     for i, (model, params, model_types) in enumerate(models):
         if verbose:
             print('Training model %d' % i, model_types)
-        model_metrics = [_get_metric_name(metric.name) for metric in model.metrics]
+        model_metrics = [_get_metric_name(metric) for metric in model.metrics_names]
         if metric_name not in model_metrics:
             raise ValueError('Invalid metric: "{}" is not among the metrics the models was compiled with ({}).'
                              .format(metric_name, model_metrics))
-        if early_stopping:
-            callbacks = [
-                EarlyStopping(monitor='val_loss', patience=0, verbose=verbose, mode='auto')]
+        if early_stopping_patience is not None:
+            if early_stopping_patience == 'auto':
+                callbacks = [EarlyStopping(monitor='val_loss', patience=min(nr_epochs//10, 5), verbose=verbose, mode='auto')]
+            else:
+                callbacks = [EarlyStopping(monitor='val_loss', patience=early_stopping_patience, verbose=verbose, mode='auto')]
         else:
             callbacks = []
         history = model.fit(X_train_sub, y_train_sub,
@@ -120,7 +134,8 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         val_metrics.append(_get_from_history('val_' + metric_name, history.history)[-1])
         val_losses.append(_get_from_history('val_loss', history.history)[-1])
         if outputfile is not None:
-            store_train_hist_as_json(params, model_types, history.history, outputfile)
+            store_train_hist_as_json(params, model_types, history.history,
+                                     outputfile, metric_name)
         if model_path is not None:
             model.save(os.path.join(model_path, 'model_{}.h5'.format(i)))
 
@@ -228,7 +243,7 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
         The number of epochs that each model is trained
     subset_size : int, optional
         The size of the subset of the data that is used for finding
-        the optimal architecture
+        the optimal architecture. Default is 100.
     outputpath : str, optional
         File location to store the model results
     model_path: str, optional

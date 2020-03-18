@@ -1,3 +1,4 @@
+Please cite the software if you are using it in your scientific publication.
 <p align="left">
   <img src="https://raw.githubusercontent.com/NLeSC/mcfly/master/mcflylogo.png" width="200"/>
 </p>
@@ -14,10 +15,10 @@ The goal of mcfly is to ease the use of deep learning technology for time series
 
 ## Installation
 Prerequisites:
-- Python 2.7, 3.5 or 3.6
+- Python 3.5, 3.6 or 3.7
 - pip
 
-Installing all dependencies in sparate conda environment:
+Installing all dependencies in separate conda environment:
 ```sh
 conda env create -f environment.yml
 
