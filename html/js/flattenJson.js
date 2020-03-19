@@ -14,12 +14,19 @@ var flattenModels = function(obj){
             modeldict.modeltype = model.modeltype;
             modeldict.learning_rate = model.learning_rate;
             modeldict.regularization_rate = model.regularization_rate;
-            modeldict.nr_convlayers = model.filters.length;
-            if(model.lstm_dims===undefined){
-                modeldict.nr_lstmlayers = 0;
+
+            // Calculate number of layers:
+            if(model.modeltype==='CNN'){
+              modeldict.nr_layers = model.filters.length;
             }
-            else {
-                modeldict.nr_lstmlayers = model.lstm_dims.length;
+            if(model.modeltype==='DeepConvLSTM'){
+              modeldict.nr_layers = model.filters.length + model.lstm_dims.length;
+            }
+            if(model.modeltype==='ResNet'){
+              modeldict.nr_layers = model.network_depth*3;
+            }
+            if(model.modeltype==='InceptionTime'){
+              modeldict.nr_layers = model.network_depth*2;
             }
 
             modeldict.final_val_acc = val_metric[val_metric.length-1];
