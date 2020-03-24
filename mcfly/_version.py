@@ -1,7 +1,7 @@
 #
 # mcfly
 #
-# Copyright 2017 Netherlands eScience Center
+# Copyright 2020 Netherlands eScience Center
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,4 +15,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-__version__ = '2.1.0'
+__version__ = '3.0.0'

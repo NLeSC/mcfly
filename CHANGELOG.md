@@ -1,5 +1,14 @@
 # Change Log
 
+## v3.0.0
+- Add ResNet architecture
+- Add InceptionTime architecture
+- Tensorflow dependency to 2.0
+- Dropped support for Python 2.7 and added support for Python 3.7
+- Early_stopping argument for train_models_on_samples() changed to early_stopping_patience
+- Fix metric name issue in visualization
+- Lower level functions arguments have changed by using keyword arguments dic
+
 ## v2.1.0
 - Add class weight support
 
