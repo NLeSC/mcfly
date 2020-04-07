@@ -64,7 +64,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         nr of epochs to use for training one model
     subset_size :
         The number of samples used from the complete train set. If set to 'None'
-        use the entire dataset. Default is 100, but should be adjusted depending 
+        use the entire dataset. Default is 100, but should be adjusted depending
         on the type ans size of the dataset.
     verbose : bool, optional
         flag for displaying verbose output
@@ -75,7 +75,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     early_stopping_patience: str, int
         Unless 'None' early Stopping is used for the model training. Set to integer
         to define how many epochs without improvement to wait for before stopping.
-        Default is 'auto' in which case the patience will be set to number of epochs/10 
+        Default is 'auto' in which case the patience will be set to number of epochs/10
         (and not bigger than 5).
     batch_size : int
         nr of samples per batch
@@ -93,7 +93,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     val_losses : list of floats
         validation losses of the models
     """
-    
+
     if subset_size is None:
         subset_size = -1
     if subset_size != -1:
@@ -117,9 +117,13 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                              .format(metric_name, model_metrics))
         if early_stopping_patience is not None:
             if early_stopping_patience == 'auto':
-                callbacks = [EarlyStopping(monitor='val_loss', patience=min(nr_epochs//10, 5), verbose=verbose, mode='auto')]
+                callbacks = [EarlyStopping(monitor='val_loss',
+                                           patience=min(nr_epochs//10, 5),
+                                           verbose=verbose, mode='auto')]
             else:
-                callbacks = [EarlyStopping(monitor='val_loss', patience=early_stopping_patience, verbose=verbose, mode='auto')]
+                callbacks = [EarlyStopping(monitor='val_loss',
+                                           patience=early_stopping_patience,
+                                           verbose=verbose, mode='auto')]
         else:
             callbacks = []
         history = model.fit(X_train_sub, y_train_sub,
@@ -143,8 +147,11 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
 
 
 def _get_from_history(metric_name, history_history):
-    """Gets the metric from the history object. Tries to solve inconsistencies in abbreviation of accuracy between
-    Tensorflow/Keras versions. """
+    """Get the metric from the history object.
+
+    Tries to solve inconsistencies in abbreviation of accuracy between
+    Tensorflow/Keras versions.
+    """
     if metric_name == 'val_accuracy':
         return _get_either_from_history('val_accuracy', 'val_acc', history_history)
     elif metric_name == 'accuracy':
@@ -306,7 +313,7 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
 
 def _get_metric_name(name):
     """
-    Gives the keras name for a metric
+    Gives the keras name for a metric.
 
     Parameters
     ----------
