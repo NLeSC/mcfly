@@ -70,6 +70,10 @@ We use numpy-style docstrings for code documentation.
 ```python -m twine upload --repository-url https://upload.pypi.org/legacy/ dist/*```  
 (or ```python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*``` to test first)
 * Check doi on zenodo
+* If the visualization has changed, deploy it to github pages:
+```
+git subtree push --prefix html origin gh-pages 
+```
 
 ## Licensing
 Source code and data of mcfly are licensed under the Apache License, version 2.0.
