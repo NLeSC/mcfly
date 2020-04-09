@@ -6,28 +6,33 @@ var trainChart = dc.seriesChart("#train-chart"),
     filterChart = dc.rowChart("#chart-filters"),
     lrRegChart = dc.heatMap("#heatmap"),
     ndx,
-    data;
+    data,
+    metric;
 
 var visualizationsCreated = false;
 
 var isModelValid = function(model){
 	/// Returns true when a model is valid, and false otherwise. Checks can be added
-	/// later. They include at least checkin for the presence of NaN or null values 
+	/// later. They include at least checkin for the presence of NaN or null values
 	/// in loss or accuracy arrays.
-    var floatArrayKeys = ["train_acc", "train_loss", "val_acc", "val_loss"];    
+    var floatArrayKeys = ["train_metric", "train_loss", "train_acc", "train_accuracy",
+                          "val_metric", "val_loss", "val_acc", "val_accuracy"];
     for (var key of floatArrayKeys){
-        var floatArray = model[key];
-        for (var float of floatArray){
-            if (float == null || float == "NaN"){                
-                return false;
+        if(key in model){
+            var floatArray = model[key];
+            for (var float of floatArray){
+                if (float == null || float == "NaN"){
+                    return false;
+                }
             }
         }
+
     }
     return true;
 }
 
 var getValidModels = function(data){
-    validModels = [];    
+    validModels = [];
     for (model of data){
         if(isModelValid(model)){
             validModels.push(model);
@@ -45,13 +50,14 @@ var onNewDataEvent = function(e) {
 var loadNewDataText = function (txt) {
   	var allModels = JSON.parse(txt.replace(/\bNaN\b/g, '"NaN"'));
     var validModels = getValidModels(allModels);
-  		
-  	d3.select("#missing-models-warning")
-  	 .classed("hidden", allModels.length == validModels.length);
-  	
-    var data = flattenModels(validModels);	
+
+	d3.select("#missing-models-warning")
+	.classed("hidden", allModels.length == validModels.length);
+
+    var data = flattenModels(validModels);
+    metric = validModels[0].metric? validModels[0].metric : 'accuracy';
     if (!visualizationsCreated) {
-      createVisualizations(data);
+      createVisualizations(data, metric);
       visualizationsCreated = true;
     }
     ndx.remove();
@@ -60,7 +66,7 @@ var loadNewDataText = function (txt) {
     dc.renderAll();
 };
 
-var loadData = function(){    
+var loadData = function(){
     if(document.getElementById("json-file")) {
         var jsonfile = document.getElementById("json-file").files[0];
         var fileReader = new FileReader();
@@ -75,7 +81,7 @@ var loadExampleData = function() {
       .then(jsontext => loadNewDataText(jsontext));
 };
 
-var createVisualizations = function(data){	
+var createVisualizations = function(data){
   d3.select("#visualizations").classed("hidden", false);
 
 	ndx = crossfilter(data);
@@ -84,8 +90,8 @@ var createVisualizations = function(data){
     var runDimension1 = ndx.dimension(function(d) {return [+d.model, +d.iteration]; });
     var runDimension2 = ndx.dimension(function(d) {return [+d.model, +d.iteration]; });
     //var runGroup = runDimension.group();
-    var runValAcc = runDimension1.group().reduceSum(function(d) { return +d.val_acc; });
-    var runTrainAcc = runDimension2.group().reduceSum(function(d) { return +d.train_acc; });
+    var runValAcc = runDimension1.group().reduceSum(function(d) { return +d.val_metric; });
+    var runTrainAcc = runDimension2.group().reduceSum(function(d) { return +d.train_metric; });
 
     //Second plot: select model
     var modelDimension = ndx.dimension(function(d) {return +d.model; });
@@ -99,14 +105,14 @@ var createVisualizations = function(data){
                             .exceptionCount(true)(modelTypeGroup);
     //var accPerModeltype = modelTypeGroup.reduceSum(function(d) {return d.final_val_acc;});
 
-    //Fourth plot: Nr of  conv layers
-    var nrconvlayersDim = ndx.dimension(function(d) {return +d.nr_convlayers;});
-    var convLayerGroup = nrconvlayersDim.group();
-    var accPerConvlayer = reductio()
+    //Fourth plot: Nr of   layers
+    var nrlayersDim = ndx.dimension(function(d) {return +d.nr_layers;});
+    var layerGroup = nrlayersDim.group();
+    var accPerlayer = reductio()
                             .exception(function(d) {return d.model;})
                             .exceptionCount(true)
                             .exceptionSum(function(d) {return d.final_val_acc;})
-                            (convLayerGroup);
+                            (layerGroup);
 
     // Fifth plot: Learning rates/Regularization rate heat map
     function roundLog10(x) { return Math.round(Math.log(x)/Math.log(10)); }
@@ -131,15 +137,15 @@ var createVisualizations = function(data){
     var avgAccHeatmapFiltered = remove_empty_bins(avgAccHeatmap);
 
 	var curveMargin = {top: 10, left: 50, right: 10, bottom: 30};
-	
+
 	valChart
 	.margins(curveMargin)
 	.chart(dc.lineChart)
 	.width("300")
 	.x(d3.scale.linear())
 	.brushOn(false)
-  .yAxisLabel("Validation accuracy")
-  .xAxisLabel("Iteration")
+	.yAxisLabel("Validation "+metric)
+	.xAxisLabel("Iteration")
 	.colors(d3.scale.category20())
 	.elasticX(true)
 	.dimension(runDimension1)
@@ -155,7 +161,7 @@ var createVisualizations = function(data){
 	.width("300")
     .x(d3.scale.linear())
     .brushOn(false)
-    .yAxisLabel("Train accuracy")
+    .yAxisLabel("Train "+metric)
     .xAxisLabel("Iteration")
     .colors(d3.scale.category20())
     .elasticX(true)
@@ -185,8 +191,8 @@ var createVisualizations = function(data){
 
 	filterChart
     .margins({top: 0, left: 10, right: 10, bottom: 20})
-      .dimension(nrconvlayersDim)
-      .group(accPerConvlayer)
+      .dimension(nrlayersDim)
+      .group(accPerlayer)
       .valueAccessor(function(d) {
           if(d.value.exceptionCount === 0){return 0;}
           else {return +(d.value.exceptionSum / d.value.exceptionCount);}
