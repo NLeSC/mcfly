@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Charts on flat data</title>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+	<link rel="stylesheet" type="text/css" href="css/dc.css" />
+	<link rel="stylesheet" type="text/css" href="css/mcfly.css" />
+</head>
+
+<body>
+
+
+	<div id="header" class="container">
+		<div class="row">
+			<img src="images/mcfly_logo.png" class="logo"></img>
+		</div>
+	</div>
+	<div id="visualizations" class="container hidden">
+		<div class="row">
+			<div id="missing-models-warning" class="alert alert-warning hidden">
+				<strong>Warning!</strong> One or more models are not visualized.
+				<p>Models are not visualized when they contain NaN (not a number) values in their learning history. The presence of such
+					values indicate that hyper parameters of the model are not optimal. The result can be an invalid model.
+				</p>
+			</div>
+			<div class="col-md-6">
+				<div id="val-chart">
+					<h4>
+						Performance on validation set
+					</h4>
+					<div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
+						<a href="javascript:valChart.filterAll();dc.redrawAll();">reset</a>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div id="train-chart">
+					<h4>
+						Performance on train set
+					</h4>
+					<div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
+						<a href="javascript:trainChart.filterAll();dc.redrawAll();">reset</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="row" style="padding-top:20px">
+			<div class="col-md-6">
+				<div id="model-chart">
+					<h4>
+						Select model
+					</h4>
+					<div class="reset" style="visibility: hidden;">range: <span class="filter"></span>
+						<a href="javascript:modelChart.filterAll();dc.redrawAll();">reset</a>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-md-6">
+				<div id="chart-modeltype">
+					<h4>
+						Nr of models
+					</h4>
+					<div class="reset" style="visibility: hidden;">range: <span class="filter"></span>
+						<a href="javascript:modeltypeChart.filterAll();dc.redrawAll();">reset</a>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-md-6">
+				<div id="chart-filters">
+					<h4>
+						Average performance  per network depth (number of meaningful layers)
+					</h4>
+					<div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
+						<a href="javascript:filterChart.filterAll();dc.redrawAll();">reset</a>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div id="heatmap">
+					<h4>
+						Learning rate and regularization rate
+					</h4>
+					<div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
+						<a href="javascript:lrRegChart.filterAll();dc.redrawAll();">reset</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="data-selection" class="container">
+		<div class="row">
+			<div class="alert alert-info">
+				<h5>
+					Select a model history file.
+				</h5>
+				<p>
+					A model history file holds the models trained by mcfly. A model history is created with either mcfly function <span class="code">find_best_architecture</span>					or <span class="code">train_models_on_samples</span>. The location of the model history file can be speficied in
+					either of these functions using the <span class="code">outputpath</span> argument.
+				</p>
+				<p>
+					A model history file is a json file that contains all information needed to visualize the training results.
+				</p>
+				<form enctype="multipart/form-data" method="post">
+					<label class="btn btn-default">Browse for model history file
+						<input id="json-file" type="file" onchange="loadData()" hidden />
+					</label>
+					<input id="example-json-file" type="button" class="btn btn-default btn-file" onclick="loadExampleData()" value="Load example model history file" />
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript" src="js/d3.js"></script>
+	<script type="text/javascript" src="js/crossfilter.js"></script>
+	<script type="text/javascript" src="js/dc.js"></script>
+	<script type="text/javascript" src="js/reductio.js"></script>
+	<script type="text/javascript" src="js/flattenJson.js"></script>
+	<script type="text/javascript" src="js/plots.js"></script>
+
+</body>
+
+</html>
