@@ -13,6 +13,14 @@ and it has been shown to be competitive with conventional machine learning techn
 As an example, you can apply mcfly on, accelerometer data for activity classification, 
 as shown in the mcfly `tutorial <https://github.com/NLeSC/mcfly-tutorial>`_.
 
+If you use mcfly in your reserach, please cite the following software paper:
+
+D. van Kuppevelt, C. Meijer, F. Huber, A. van der Ploeg, S. Georgievska, V.T. van Hees. Mcfly: Automated deep learning on time series.
+SoftwareX,
+Volume 12,
+2020.
+`doi: 10.1016/j.softx.2020.100548 <https://doi.org/10.1016/j.softx.2020.100548>`_
+
 Contents:
 
 .. toctree::
