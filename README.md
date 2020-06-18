@@ -1,4 +1,3 @@
-Please cite the software if you are using it in your scientific publication.
 <p align="left">
   <img src="https://raw.githubusercontent.com/NLeSC/mcfly/master/mcflylogo.png" width="200"/>
 </p>
@@ -12,6 +11,14 @@ Please cite the software if you are using it in your scientific publication.
 <!-- The first 12 lines are skipped while generating 'long description' (see setup.py)) -->
 
 The goal of mcfly is to ease the use of deep learning technology for time series classification. The advantage of deep learning is that it can handle raw data directly, without the need to compute signal features. Deep learning does not require  expert domain knowledge about the data, and has been shown to be competitive with conventional machine learning techniques. As an example, you can apply mcfly on accelerometer data for activity classification, as shown in [the tutorial](https://github.com/NLeSC/mcfly-tutorial).
+
+If you use mcfly in your research, please cite the following software paper:
+
+D. van Kuppevelt, C. Meijer, F. Huber, A. van der Ploeg, S. Georgievska, V.T. van Hees. _Mcfly: Automated deep learning on time series._
+SoftwareX,
+Volume 12,
+2020.
+[doi: 10.1016/j.softx.2020.100548](https://doi.org/10.1016/j.softx.2020.100548)
 
 ## Installation
 Prerequisites:
