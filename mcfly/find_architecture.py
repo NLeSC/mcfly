@@ -51,21 +51,43 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
 
     Parameters
     ----------
-    X_train : numpy array of shape (num_samples, num_timesteps, num_channels)
-        The input dataset for training
-    y_train : numpy array of shape (num_samples, num_classes)
-        The output classes for the train data, in binary format
-    X_val : numpy array of shape (num_samples_val, num_timesteps, num_channels)
-        The input dataset for validation
-    y_val : numpy array of shape (num_samples_val, num_classes)
-        The output classes for the validation data, in binary format
+    X_train : Supported types:
+        - numpy array
+        - `tf.data` dataset. Should return a tuple of `(inputs, targets)`
+          or `(inputs, targets, sample_weights)`
+        - generator or `keras.utils.Sequence`. Should return a tuple of
+          `(inputs, targets)` or `(inputs, targets, sample_weights)`
+        The input dataset for training of shape
+        (num_samples, num_timesteps, num_channels)
+        More details can be found in the documentation for the Keras
+        function Model.fit() [1]
+    y_train : numpy array
+        The output classes for the train data, in binary format of shape
+        (num_samples, num_classes)
+        If the training data is a dataset, generator or
+        `keras.utils.Sequence`, y_train should not be specified.
+    X_val : Supported types:
+        - numpy array
+        - `tf.data` dataset. Should return a tuple of `(inputs, targets)`
+          or `(inputs, targets, sample_weights)`
+        - generator or `keras.utils.Sequence`. Should return a tuple of
+          `(inputs, targets)` or `(inputs, targets, sample_weights)`
+        The input dataset for validation of shape
+        (num_samples_val, num_timesteps, num_channels)
+        More details can be found in the documentation for the Keras
+        function Model.fit() [1]
+    y_val : numpy array
+        The output classes for the validation data, in binary format of shape
+        (num_samples_val, num_classes)
+        If the validation data is a dataset, generator or
+        `keras.utils.Sequence`, y_val should not be specified.
     models : list of model, params, modeltypes
         List of keras models to train
     nr_epochs : int, optional
         nr of epochs to use for training one model
     subset_size :
         The number of samples used from the complete train set. If set to 'None'
-        use the entire dataset. Default is 100, but should be adjusted depending 
+        use the entire dataset. Default is 100, but should be adjusted depending
         on the type ans size of the dataset.
     verbose : bool, optional
         flag for displaying verbose output
@@ -76,7 +98,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     early_stopping_patience: str, int
         Unless 'None' early Stopping is used for the model training. Set to integer
         to define how many epochs without improvement to wait for before stopping.
-        Default is 'auto' in which case the patience will be set to number of epochs/10 
+        Default is 'auto' in which case the patience will be set to number of epochs/10
         (and not bigger than 5).
     batch_size : int
         nr of samples per batch
@@ -93,8 +115,10 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         validation accuraracies of the models
     val_losses : list of floats
         validation losses of the models
+
+    [1]: https://www.tensorflow.org/api_docs/python/tf/keras/Model#fit
     """
-    
+
     if subset_size is None:
         subset_size = -1
     if subset_size != -1:
@@ -239,18 +263,36 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
 
     Parameters
     ----------
-    X_train : numpy array
+    X_train : Supported types:
+        - numpy array
+        - `tf.data` dataset. Should return a tuple of `(inputs, targets)`
+          or `(inputs, targets, sample_weights)`
+        - generator or `keras.utils.Sequence`. Should return a tuple of
+          `(inputs, targets)` or `(inputs, targets, sample_weights)`
         The input dataset for training of shape
         (num_samples, num_timesteps, num_channels)
+        More details can be found in the documentation for the Keras
+        function Model.fit() [1]
     y_train : numpy array
         The output classes for the train data, in binary format of shape
         (num_samples, num_classes)
-    X_val : numpy array
+        If the training data is a dataset, generator or
+        `keras.utils.Sequence`, y_train should not be specified.
+    X_val : Supported types:
+        - numpy array
+        - `tf.data` dataset. Should return a tuple of `(inputs, targets)`
+          or `(inputs, targets, sample_weights)`
+        - generator or `keras.utils.Sequence`. Should return a tuple of
+          `(inputs, targets)` or `(inputs, targets, sample_weights)`
         The input dataset for validation of shape
         (num_samples_val, num_timesteps, num_channels)
+        More details can be found in the documentation for the Keras
+        function Model.fit() [1]
     y_val : numpy array
         The output classes for the validation data, in binary format of shape
         (num_samples_val, num_classes)
+        If the validation data is a dataset, generator or
+        `keras.utils.Sequence`, y_val should not be specified.
     verbose : bool, optional
         flag for displaying verbose output
     number_of_models : int, optiona
@@ -283,6 +325,9 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
         Type of the best model
     knn_acc : float
         accuaracy for kNN prediction on validation set
+
+
+    [1]: https://www.tensorflow.org/api_docs/python/tf/keras/Model#fit
     """
     models = modelgen.generate_models(X_train.shape, y_train.shape[1],
                                       number_of_models=number_of_models,
