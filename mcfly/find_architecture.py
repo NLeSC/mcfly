@@ -65,7 +65,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         nr of epochs to use for training one model
     subset_size :
         The number of samples used from the complete train set. If set to 'None'
-        use the entire dataset. Default is 100, but should be adjusted depending
+        use the entire dataset. Default is 100, but should be adjusted depending 
         on the type ans size of the dataset.
     verbose : bool, optional
         flag for displaying verbose output
@@ -76,7 +76,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     early_stopping_patience: str, int
         Unless 'None' early Stopping is used for the model training. Set to integer
         to define how many epochs without improvement to wait for before stopping.
-        Default is 'auto' in which case the patience will be set to number of epochs/10
+        Default is 'auto' in which case the patience will be set to number of epochs/10 
         (and not bigger than 5).
     batch_size : int
         nr of samples per batch
@@ -94,7 +94,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     val_losses : list of floats
         validation losses of the models
     """
-
+    
     if subset_size is None:
         subset_size = -1
     if subset_size != -1:
