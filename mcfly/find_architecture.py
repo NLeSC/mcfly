@@ -35,6 +35,7 @@ import numpy as np
 from sklearn import neighbors, metrics as sklearnmetrics
 from tensorflow.keras import metrics
 from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.data import Dataset
 
 from . import modelgen
 
@@ -64,7 +65,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         nr of epochs to use for training one model
     subset_size :
         The number of samples used from the complete train set. If set to 'None'
-        use the entire dataset. Default is 100, but should be adjusted depending 
+        use the entire dataset. Default is 100, but should be adjusted depending
         on the type ans size of the dataset.
     verbose : bool, optional
         flag for displaying verbose output
@@ -75,7 +76,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     early_stopping_patience: str, int
         Unless 'None' early Stopping is used for the model training. Set to integer
         to define how many epochs without improvement to wait for before stopping.
-        Default is 'auto' in which case the patience will be set to number of epochs/10 
+        Default is 'auto' in which case the patience will be set to number of epochs/10
         (and not bigger than 5).
     batch_size : int
         nr of samples per batch
@@ -93,17 +94,32 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     val_losses : list of floats
         validation losses of the models
     """
-    
+
     if subset_size is None:
         subset_size = -1
     if subset_size != -1:
         print("Generated models will be trained on subset of the data (subset size: {})."
               .format(str(subset_size)))
 
-    X_train_sub = X_train[:subset_size, :, :]
-    y_train_sub = y_train[:subset_size, :]
-
     metric_name = _get_metric_name(metric)
+
+    # Create dataset for training data
+    if y_train is not None:
+        X_train_sub = X_train[:subset_size, :, :]
+        y_train_sub = y_train[:subset_size, :]
+
+        data_train = Dataset.from_tensor_slices((X_train_sub, y_train_sub))
+        data_train = data_train.batch(batch_size)
+    else:
+        # TODO Subset (is it possible?)
+        data_train = X_train
+
+    # Create dataset for validation data
+    if y_val is not None:
+        data_val = Dataset.from_tensor_slices((X_val, y_val))
+        data_val = data_val.batch(batch_size)
+    else:
+        data_val = X_val
 
     histories = []
     val_metrics = []
@@ -122,10 +138,10 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                 callbacks = [EarlyStopping(monitor='val_loss', patience=early_stopping_patience, verbose=verbose, mode='auto')]
         else:
             callbacks = []
-        history = model.fit(X_train_sub, y_train_sub,
-                            epochs=nr_epochs, batch_size=batch_size,
+        history = model.fit(x = data_train,
+                            epochs=nr_epochs,
                             # see comment on subsize_set
-                            validation_data=(X_val, y_val),
+                            validation_data=data_val,
                             verbose=verbose,
                             callbacks=callbacks,
                             class_weight=class_weight)
