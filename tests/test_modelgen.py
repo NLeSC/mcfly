@@ -43,6 +43,11 @@ class ModelGenerationSuite(unittest.TestCase):
                    'high_reg' : 4}
         return settings
 
+    def _generate_train_data(self, x_shape, nr_classes):
+        X_train = np.random.rand(1, *x_shape[1:])
+        y_train = np.random.randint(0, 1, size=(1, nr_classes))
+        return X_train, y_train
+
     def test_regularization_is_float(self):
         """ Regularization should be a float. """
         reg = modelgen.get_regularization(0, 5)
@@ -55,9 +60,9 @@ class ModelGenerationSuite(unittest.TestCase):
 
     def test_base_hyper_parameters_reg(self):
         """ Base hyper parameter set should contain regularization. """
-        hyper_parameter_set = modelgen.generate_base_hyper_parameter_set(low_lr=1, 
-                                                                         high_lr=4, 
-                                                                         low_reg=1, 
+        hyper_parameter_set = modelgen.generate_base_hyper_parameter_set(low_lr=1,
+                                                                         high_lr=4,
+                                                                         low_reg=1,
                                                                          high_reg=3)
         assert 'regularization_rate' in hyper_parameter_set.keys()
 
@@ -90,9 +95,14 @@ class ModelGenerationSuite(unittest.TestCase):
     def test_cnn_metrics(self):
         """CNN model should be compiled with the metrics that we give it"""
         metrics = ['accuracy', 'mae']
-        model = modelgen.generate_CNN_model((None, 20, 3), 2, [32, 32], 100, metrics=metrics)
+        x_shape = (None, 20, 3)
+        nr_classes = 2
+        X_train, y_train = self._generate_train_data(x_shape, nr_classes)
+        model = modelgen.generate_CNN_model(x_shape, nr_classes, [32, 32], 100, metrics=metrics)
+        model.fit(X_train, y_train, epochs=1)
         model_metrics = [m.name for m in model.metrics]
-        assert model_metrics == metrics or model_metrics == ['acc', 'mean_absolute_error']
+        for metric in metrics:
+            assert metric in model_metrics
 
     def test_CNN_hyperparameters_nrlayers(self):
         """ Number of Conv layers from range [4, 4] should be 4. """
@@ -182,13 +192,18 @@ class ModelGenerationSuite(unittest.TestCase):
     def test_ResNet_metrics(self):
         """ResNet model should be compiled with the metrics that we give it"""
         metrics = ['accuracy', 'mae']
-        model = modelgen.generate_resnet_model((None, 20, 3), 2, 16, 20, metrics=metrics)
+        x_shape = (None, 20, 3)
+        nr_classes = 2
+        X_train, y_train = self._generate_train_data(x_shape, nr_classes)
+        model = modelgen.generate_resnet_model(x_shape, nr_classes, 16, 20, metrics=metrics)
+        model.fit(X_train, y_train, epochs=1)
         model_metrics = [m.name for m in model.metrics]
-        assert model_metrics == metrics or model_metrics == ['acc', 'mean_absolute_error']
+        for metric in metrics:
+            assert metric in model_metrics
 
     def test_ResNet_hyperparameters(self):
         """ Network depth from range [4,4] should be 4.
-        Maximum kernal size from range [10, 10] should be 10. 
+        Maximum kernal size from range [10, 10] should be 10.
         Minimum filter number from range [16, 16] should be 16.  """
         custom_settings = self.get_default()
         kwargs = {'resnet_min_network_depth' : 4,
@@ -211,7 +226,7 @@ class ModelGenerationSuite(unittest.TestCase):
         """ InceptionTime models should always start with a batch normalization layer. """
         model = modelgen.generate_InceptionTime_model((None, 20, 3), 2, 16)
         assert 'BatchNormalization' in str(type(model.layers[1])), 'Wrong layer type.'
-        
+
     def test_InceptionTime_first_inception_module(self):
         """ Test layers of first inception module. """
         model = modelgen.generate_InceptionTime_model((None, 20, 3), 2, 16)
@@ -244,7 +259,7 @@ class ModelGenerationSuite(unittest.TestCase):
 
     def test_InceptionTime_hyperparameters(self):
         """ Network depth from range [5,5] should be 5.
-        Maximum kernal size from range [12, 12] should be 12. 
+        Maximum kernal size from range [12, 12] should be 12.
         Minimum filter number from range [32, 32] should be 32.  """
         custom_settings = self.get_default()
         kwargs = {'IT_min_network_depth' : 5,
@@ -261,7 +276,7 @@ class ModelGenerationSuite(unittest.TestCase):
         assert hyperparams.get('network_depth') == 5, 'Wrong network depth'
         assert hyperparams.get('max_kernel_size') == 10, 'Wrong kernel'
         assert hyperparams.get('filters_number') == 32, 'Wrong filter number'
-        
+
     # Tests for general mcfly functionality:
     def test_generate_models_metrics(self):
         """ "Test if correct number of models is generated and if metrics is correct. """
