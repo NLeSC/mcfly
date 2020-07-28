@@ -1,8 +1,8 @@
-from . import model_cnn
+from .model_cnn import Model_CNN
 # from . import model_lstm
 
 
 __all__ = [
-    "model_cnn",
-    "model_lstm",
+    "Model_CNN",
+    # "model_lstm",
 ]
