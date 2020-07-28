@@ -1,4 +1,6 @@
 from mcfly import modelgen
+from mcfly.models import Model_ResNet
+
 import numpy as np
 
 import unittest
@@ -180,32 +182,39 @@ class ModelGenerationSuite(unittest.TestCase):
     # Tests for ResNet model:
     def test_ResNet_starts_with_batchnorm(self):
         """ ResNet models should always start with a batch normalization layer. """
-        model = modelgen.generate_resnet_model((None, 20, 3), 2, 16, 20)
+        model_type = Model_ResNet((None, 20, 3), 2)
+        model = model_type.create_model(16, 20)
 
         assert 'BatchNormalization' in str(type(model.layers[1])), 'Wrong layer type.'
 
+
     def test_ResNet_first_sandwich_layers(self):
         """ ResNet models should always start with a residual module. """
-        model = modelgen.generate_resnet_model((None, 20, 3), 2, 16, 20)
+        model_type = Model_ResNet((None, 20, 3), 2)
+        model = model_type.create_model(16, 20)
 
         assert 'Conv1D' or 'Convolution1D' in str(type(model.layers[2])), 'Wrong layer type.'
         assert 'BatchNormalization' in str(type(model.layers[3])), 'Wrong layer type.'
         assert 'ReLU' in str(type(model.layers[4])), 'Wrong layer type.'
 
+
     def test_ResNet_depth(self):
         """ ResNet model should have depth (number of residual modules) as defined by user. """
         depths = 2
 
-        model = modelgen.generate_resnet_model((None, 20, 3), 2, 16, 20, network_depth=depths)
+        model_type = Model_ResNet((None, 20, 3), 2)
+        model = model_type.create_model(16, 20, network_depth=depths)
 
         add_layers = [str(type(l)) for l in model.layers if 'Add' in str(type(l))]
         assert len(add_layers) == depths, 'Wrong number of residual modules (network depths).'
+
 
     def test_ResNet_first_module_dim(self):
         """"The output shape throughout the first residual module should be (None, nr_timesteps, min_filters_number)"""
         min_filters_number = 16
 
-        model = modelgen.generate_resnet_model((None, 30, 5), 2, min_filters_number, 20)
+        model_type = Model_ResNet((None, 30, 5), 2)
+        model = model_type.create_model(min_filters_number, 20)
 
         firstConvlayer = model.layers[2]
         firstAddlayer = model.layers[12]
@@ -219,7 +228,8 @@ class ModelGenerationSuite(unittest.TestCase):
         nr_classes = 2
         X_train, y_train = self._generate_train_data(x_shape, nr_classes)
 
-        model = modelgen.generate_resnet_model(x_shape, nr_classes, 16, 20, metrics=metrics)
+        model_type = Model_ResNet(x_shape, nr_classes, metrics=metrics)
+        model = model_type.create_model(16, 20)
         model.fit(X_train, y_train, epochs=1)
 
         model_metrics = [m.name for m in model.metrics]
@@ -242,7 +252,8 @@ class ModelGenerationSuite(unittest.TestCase):
             if key in custom_settings:
                 custom_settings[key] = value
 
-        hyperparams = modelgen.generate_resnet_hyperparameter_set(custom_settings)
+        model_type = Model_ResNet(None, None, **custom_settings)
+        hyperparams = model_type.generate_hyperparameters()
 
         assert hyperparams.get('network_depth') == 4, 'Wrong network depth'
         assert hyperparams.get('max_kernel_size') == 10, 'Wrong kernel'
@@ -252,7 +263,7 @@ class ModelGenerationSuite(unittest.TestCase):
     def test_InceptionTime_starts_with_batchnorm(self):
         """ InceptionTime models should always start with a batch normalization layer. """
         model = modelgen.generate_InceptionTime_model((None, 20, 3), 2, 16)
-        
+
         assert 'BatchNormalization' in str(type(model.layers[1])), 'Wrong layer type.'
 
     def test_InceptionTime_first_inception_module(self):
