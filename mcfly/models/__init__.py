@@ -1,5 +1,5 @@
 from .model_cnn import Model_CNN
-# from . import model_lstm
+from .model_conv_lstm import Model_ConvLSTM
 from . import model_inception_time
 from .model_resnet import Model_ResNet
 

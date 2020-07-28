@@ -1,9 +1,6 @@
 from tensorflow.keras.models import Sequential
-from tensorflow.keras import layers
-from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Dense, Activation, Convolution1D, Lambda, \
-    Convolution2D, Flatten,\
-    Reshape, Dropout, BatchNormalization
+from tensorflow.keras.layers import Dense, Activation, Convolution1D, \
+    Flatten, BatchNormalization
 from tensorflow.keras.regularizers import l2
 from tensorflow.keras.optimizers import Adam
 import numpy as np
@@ -75,9 +72,9 @@ class Model_CNN:
         """
         params = Namespace(**self.settings)
         hyperparameters = generate_base_hyperparameter_set(params.low_lr,
-                                                            params.high_lr,
-                                                            params.low_reg,
-                                                            params.high_reg)
+                                                           params.high_lr,
+                                                           params.low_reg,
+                                                           params.high_reg)
         number_of_layers = np.random.randint(params.cnn_min_layers,
                                              params.cnn_max_layers + 1)
         hyperparameters['filters'] = np.random.randint(params.cnn_min_filters,
