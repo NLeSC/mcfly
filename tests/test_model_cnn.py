@@ -48,17 +48,25 @@ def test_cnn_enough_batchnorm():
 def test_CNN_hyperparameters_nrlayers():
     """ Number of Conv layers from range [4, 4] should be 4. """
     settings = {'cnn_min_layers' : 4,
-                'cnn_max_layers' : 4}
+                'cnn_max_layers' : 4,
+                'low_lr': 1,
+                'high_lr': 4,
+                'low_reg': 1,
+                'high_reg': 4}
 
     model_type = Model_CNN((None, 20, 3), 2, **settings)
-    hyperparams = Model_CNN.generate_hyperparameters()
+    hyperparams = model_type.generate_hyperparameters()
     assert len(hyperparams.get('filters')) == 4
 
 def test_CNN_hyperparameters_fcnodes():
     """ Number of fc nodes from range [123, 123] should be 123. """
     settings = {'cnn_min_fc_nodes' : 123,
-                'cnn_max_fc_nodes' : 123}
+                'cnn_max_fc_nodes' : 123,
+                'low_lr': 1,
+                'high_lr': 4,
+                'low_reg': 1,
+                'high_reg': 4}
 
     model_type = Model_CNN((None, 20, 3), 2, **settings)
-    hyperparams = Model_CNN.generate_hyperparameters()
+    hyperparams = model_type.generate_hyperparameters()
     assert hyperparams.get('fc_hidden_nodes') == 123
