@@ -31,7 +31,7 @@ def test_DeepConvLSTM_hyperparameters_nrconvlayers():
                 'low_reg': 1,
                 'high_reg': 4}
     model_type = Model_ConvLSTM((None, 20, 3), 2, **settings)
-    hyperparams = modelgen.generate_DeepConvLSTM_hyperparameter_set(custom_settings)
+    hyperparams = model_type.generate_hyperparameters()
     assert len(hyperparams.get('filters')) == 4, "Expected different filter number"
 
 
