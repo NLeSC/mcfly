@@ -64,30 +64,36 @@ class ModelGenerationSuite(unittest.TestCase):
                                                                          high_lr=4,
                                                                          low_reg=1,
                                                                          high_reg=3)
+
         assert 'regularization_rate' in hyper_parameter_set.keys()
 
     # Tests for CNN model:
     def test_cnn_starts_with_batchnorm(self):
         """ CNN models should always start with a batch normalization layer. """
         model = modelgen.generate_CNN_model((None, 20, 3), 2, [32, 32], 100)
+
         assert 'BatchNormalization' in str(type(model.layers[0])), 'Wrong layer type.'
 
     def test_cnn_fc_nodes(self):
         """ CNN model should have number of dense nodes defined by user. """
         fc_hidden_nodes = 101
+
         model = modelgen.generate_CNN_model((None, 20, 3), 2, [32, 32], fc_hidden_nodes)
+
         dense_layer = [l for l in model.layers if 'Dense' in str(l)][0]
         assert dense_layer.output_shape[1] == fc_hidden_nodes, 'Wrong number of fc nodes.'
 
     def test_cnn_batchnorm_dim(self):
         """"The output shape of the batchnorm should be (None, nr_timesteps, nr_filters)"""
         model = modelgen.generate_CNN_model((None, 20, 3), 2, [32, 32], 100)
+
         batchnormlay = model.layers[2]
         assert batchnormlay.output_shape == (None, 20, 32)
 
     def test_cnn_enough_batchnorm(self):
         """CNN model should contain as many batch norm layers as it has activations layers"""
         model = modelgen.generate_CNN_model((None, 20, 3), 2, [32, 32], 100)
+
         batch_norm_layers = len([l for l in model.layers if 'BatchNormalization' in str(l)])
         activation_layers = len([l for l in model.layers if 'Activation' in str(l)])
         assert batch_norm_layers == activation_layers
@@ -98,8 +104,10 @@ class ModelGenerationSuite(unittest.TestCase):
         x_shape = (None, 20, 3)
         nr_classes = 2
         X_train, y_train = self._generate_train_data(x_shape, nr_classes)
+
         model = modelgen.generate_CNN_model(x_shape, nr_classes, [32, 32], 100, metrics=metrics)
         model.fit(X_train, y_train, epochs=1)
+
         model_metrics = [m.name for m in model.metrics]
         for metric in metrics:
             assert metric in model_metrics
@@ -113,7 +121,9 @@ class ModelGenerationSuite(unittest.TestCase):
         for key, value in kwargs.items():
             if key in custom_settings:
                 custom_settings[key] = value
+
         hyperparams = modelgen.generate_CNN_hyperparameter_set(custom_settings)
+
         assert len(hyperparams.get('filters')) == 4
 
     def test_CNN_hyperparameters_fcnodes(self):
@@ -125,13 +135,16 @@ class ModelGenerationSuite(unittest.TestCase):
         for key, value in kwargs.items():
             if key in custom_settings:
                 custom_settings[key] = value
+
         hyperparams = modelgen.generate_CNN_hyperparameter_set(custom_settings)
+
         assert hyperparams.get('fc_hidden_nodes') == 123
 
     # Tests for DeepconvLSTM model:
     def test_deepconvlstm_batchnorm_dim(self):
         """The output shape of the batchnorm should be (None, nr_timesteps, nr_channels, nr_filters)"""
         model = modelgen.generate_DeepConvLSTM_model((None, 20, 3), 2, [32, 32], [32, 32])
+
         batchnormlay = model.layers[3]
         assert batchnormlay.output_shape == (None, 20, 3, 32)
 
@@ -139,6 +152,7 @@ class ModelGenerationSuite(unittest.TestCase):
         """LSTM model should contain as many batch norm layers as it has activations layers"""
         model = modelgen.generate_DeepConvLSTM_model(
             (None, 20, 3), 2, [32, 32, 32], [32, 32, 32])
+
         batch_norm_layers = len([l for l in model.layers if 'BatchNormalization' in str(l)])
         activation_layers = len([l for l in model.layers if 'Activation' in str(l)])
         assert batch_norm_layers == activation_layers
@@ -152,23 +166,28 @@ class ModelGenerationSuite(unittest.TestCase):
         for key, value in kwargs.items():
             if key in custom_settings:
                 custom_settings[key] = value
+
         hyperparams = modelgen.generate_DeepConvLSTM_hyperparameter_set(custom_settings)
+
         assert len(hyperparams.get('filters')) == 4
 
     def test_deepconvlstm_starts_with_batchnorm(self):
         """ DeepConvLSTM models should always start with a batch normalization layer. """
         model = modelgen.generate_DeepConvLSTM_model((None, 20, 3), 2, [32, 32], [32, 32])
+
         assert 'BatchNormalization' in str(type(model.layers[0])), 'Wrong layer type.'
 
     # Tests for ResNet model:
     def test_ResNet_starts_with_batchnorm(self):
         """ ResNet models should always start with a batch normalization layer. """
         model = modelgen.generate_resnet_model((None, 20, 3), 2, 16, 20)
+
         assert 'BatchNormalization' in str(type(model.layers[1])), 'Wrong layer type.'
 
     def test_ResNet_first_sandwich_layers(self):
         """ ResNet models should always start with a residual module. """
         model = modelgen.generate_resnet_model((None, 20, 3), 2, 16, 20)
+
         assert 'Conv1D' or 'Convolution1D' in str(type(model.layers[2])), 'Wrong layer type.'
         assert 'BatchNormalization' in str(type(model.layers[3])), 'Wrong layer type.'
         assert 'ReLU' in str(type(model.layers[4])), 'Wrong layer type.'
@@ -176,14 +195,18 @@ class ModelGenerationSuite(unittest.TestCase):
     def test_ResNet_depth(self):
         """ ResNet model should have depth (number of residual modules) as defined by user. """
         depths = 2
+
         model = modelgen.generate_resnet_model((None, 20, 3), 2, 16, 20, network_depth=depths)
+
         add_layers = [str(type(l)) for l in model.layers if 'Add' in str(type(l))]
         assert len(add_layers) == depths, 'Wrong number of residual modules (network depths).'
 
     def test_ResNet_first_module_dim(self):
         """"The output shape throughout the first residual module should be (None, nr_timesteps, min_filters_number)"""
         min_filters_number = 16
+
         model = modelgen.generate_resnet_model((None, 30, 5), 2, min_filters_number, 20)
+
         firstConvlayer = model.layers[2]
         firstAddlayer = model.layers[12]
         assert firstConvlayer.output_shape == (None, 30, min_filters_number)
@@ -195,8 +218,10 @@ class ModelGenerationSuite(unittest.TestCase):
         x_shape = (None, 20, 3)
         nr_classes = 2
         X_train, y_train = self._generate_train_data(x_shape, nr_classes)
+
         model = modelgen.generate_resnet_model(x_shape, nr_classes, 16, 20, metrics=metrics)
         model.fit(X_train, y_train, epochs=1)
+
         model_metrics = [m.name for m in model.metrics]
         for metric in metrics:
             assert metric in model_metrics
@@ -216,7 +241,9 @@ class ModelGenerationSuite(unittest.TestCase):
         for key, value in kwargs.items():
             if key in custom_settings:
                 custom_settings[key] = value
+
         hyperparams = modelgen.generate_resnet_hyperparameter_set(custom_settings)
+
         assert hyperparams.get('network_depth') == 4, 'Wrong network depth'
         assert hyperparams.get('max_kernel_size') == 10, 'Wrong kernel'
         assert hyperparams.get('min_filters_number') == 16, 'Wrong filter number'
@@ -225,11 +252,13 @@ class ModelGenerationSuite(unittest.TestCase):
     def test_InceptionTime_starts_with_batchnorm(self):
         """ InceptionTime models should always start with a batch normalization layer. """
         model = modelgen.generate_InceptionTime_model((None, 20, 3), 2, 16)
+        
         assert 'BatchNormalization' in str(type(model.layers[1])), 'Wrong layer type.'
 
     def test_InceptionTime_first_inception_module(self):
         """ Test layers of first inception module. """
         model = modelgen.generate_InceptionTime_model((None, 20, 3), 2, 16)
+
         assert 'Conv1D' or 'Convolution1D' in str(type(model.layers[2])), 'Wrong layer type.'
         assert 'MaxPooling1D' in str(type(model.layers[3])), 'Wrong layer type.'
         assert 'Concatenate' in str(type(model.layers[8])), 'Wrong layer type.'
@@ -237,14 +266,18 @@ class ModelGenerationSuite(unittest.TestCase):
     def test_InceptionTime_depth(self):
         """ ResNet model should have depth (number of residual modules) as defined by user. """
         depths = 3
+
         model = modelgen.generate_InceptionTime_model((None, 20, 3), 2, 16, network_depth=depths)
+
         concat_layers = [str(type(l)) for l in model.layers if 'concatenate' in str(type(l)).lower()]
         assert len(concat_layers) == depths, 'Wrong number of inception modules (network depths).'
 
     def test_InceptionTime_first_module_dim(self):
         """"The output shape throughout the first residual module should be (None, nr_timesteps, min_filters_number)"""
         min_filters_number = 16
+
         model = modelgen.generate_InceptionTime_model((None, 30, 5), 2, min_filters_number)
+
         secondConvlayer = model.layers[5]
         firstConcatlayer = model.layers[8]
         assert secondConvlayer.output_shape == (None, 30, min_filters_number)
@@ -256,8 +289,10 @@ class ModelGenerationSuite(unittest.TestCase):
         x_shape = (None, 20, 3)
         nr_classes = 2
         X_train, y_train = self._generate_train_data(x_shape, nr_classes)
+
         model = modelgen.generate_InceptionTime_model(x_shape, nr_classes, 16, metrics=metrics)
         model.fit(X_train, y_train)
+
         model_metrics = [m.name for m in model.metrics]
         for metric in metrics:
             assert metric in model_metrics
@@ -277,7 +312,9 @@ class ModelGenerationSuite(unittest.TestCase):
         for key, value in kwargs.items():
             if key in custom_settings:
                 custom_settings[key] = value
+
         hyperparams = modelgen.generate_InceptionTime_hyperparameter_set(custom_settings)
+
         assert hyperparams.get('network_depth') == 5, 'Wrong network depth'
         assert hyperparams.get('max_kernel_size') == 10, 'Wrong kernel'
         assert hyperparams.get('filters_number') == 32, 'Wrong filter number'
@@ -288,9 +325,11 @@ class ModelGenerationSuite(unittest.TestCase):
         x_shape = (None, 20, 10)
         nr_classes = 2
         X_train, y_train = self._generate_train_data(x_shape, nr_classes)
+
         models = modelgen.generate_models(x_shape, nr_classes, 5)
         for model in models:
             model[0].fit(X_train, y_train)
+
         model, hyperparams, modeltype = models[0]
         model_metrics = [m.name for m in model.metrics]
         assert "accuracy" in model_metrics
