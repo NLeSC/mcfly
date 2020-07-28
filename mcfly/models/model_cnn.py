@@ -60,7 +60,7 @@ class model_cnn:
                 print("The value of {} is set from {} (default) to {}".format(key, self.defaults[key], value))
 
         # Add missing parameters from default
-        for key, value in defaults.items():
+        for key, value in self.defaults.items():
             if key not in self.settings:
                 self.settings[key] = value
 
@@ -73,7 +73,7 @@ class model_cnn:
             parameters for a CNN model
         """
         params = Namespace(**self.settings)
-        hyperparameters = generate_base_hyper_parameter_set(params.low_lr,
+        hyperparameters = generate_base_hyperparameter_set(params.low_lr,
                                                             params.high_lr,
                                                             params.low_reg,
                                                             params.high_reg)
