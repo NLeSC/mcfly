@@ -11,10 +11,10 @@ from argparse import Namespace
 from .base_hyperparameter_generator import generate_base_hyperparameter_set
 
 
-class model_cnn:
+class Model_CNN:
     """Generate CNN model and hyperparameters.
     """
-    def __init__(self, x_shape, number_of_classes, **settings):
+    def __init__(self, x_shape, number_of_classes, metrics=['accuracy'], **settings):
         """
 
         Parameters
@@ -42,10 +42,10 @@ class model_cnn:
         self.model_name = "CNN"
         self.x_shape = x_shape
         self.number_of_classes = number_of_classes
+        self.metrics = metrics
 
         # Set default parameters
         self.defaults = {
-            'metrics': ['accuracy'],
             'cnn_min_layers': 1,
             'cnn_max_layers': 10,
             'cnn_min_filters': 10,
