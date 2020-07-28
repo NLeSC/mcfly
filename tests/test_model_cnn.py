@@ -1,5 +1,5 @@
 import numpy as np
-from mcfly.models import Model_CNN
+from mcfly.models.model_cnn import Model_CNN
 
 
 # Tests for CNN model:
@@ -10,6 +10,7 @@ def test_cnn_starts_with_batchnorm():
                                        "fc_hidden_nodes": 100})
     assert 'BatchNormalization' in str(type(model.layers[0])), 'Wrong layer type.'
 
+
 def test_cnn_fc_nodes():
     """ CNN model should have number of dense nodes defined by user. """
     fc_hidden_nodes = 101
@@ -19,6 +20,7 @@ def test_cnn_fc_nodes():
     dense_layer = [l for l in model.layers if 'Dense' in str(l)][0]
     assert dense_layer.output_shape[1] == fc_hidden_nodes, 'Wrong number of fc nodes.'
 
+
 def test_cnn_batchnorm_dim():
     """"The output shape of the batchnorm should be (None, nr_timesteps, nr_filters)"""
     model_type = Model_CNN((None, 20, 3), 2)
@@ -26,6 +28,7 @@ def test_cnn_batchnorm_dim():
                                        "fc_hidden_nodes": 100})
     batchnormlay = model.layers[2]
     assert batchnormlay.output_shape == (None, 20, 32)
+
 
 def test_cnn_enough_batchnorm():
     """CNN model should contain as many batch norm layers as it has activations layers"""
@@ -56,7 +59,8 @@ def test_CNN_hyperparameters_nrlayers():
 
     model_type = Model_CNN((None, 20, 3), 2, **settings)
     hyperparams = model_type.generate_hyperparameters()
-    assert len(hyperparams.get('filters')) == 4
+    assert len(hyperparams.get('filters')) == 4, "Expected different filter number"
+
 
 def test_CNN_hyperparameters_fcnodes():
     """ Number of fc nodes from range [123, 123] should be 123. """
