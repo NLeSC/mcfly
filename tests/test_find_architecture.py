@@ -78,6 +78,29 @@ class FindArchitectureBasicSuite(unittest.TestCase):
                 batch_size=20, metric='accuracy')
         assert len(histories) == 0
 
+
+    def train_models_on_samples_generator(self):
+        num_timesteps = 100
+        num_channels = 2
+        num_samples_train = 5
+        num_samples_val = 3
+        X_train = np.random.rand(
+            num_samples_train,
+            num_timesteps,
+            num_channels)
+        y_train = to_categorical(np.array([0, 0, 1, 1, 1]))
+        X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
+        y_val = to_categorical(np.array([0, 1, 1]))
+
+        histories, val_metrics, val_losses = \
+            find_architecture.train_models_on_samples(
+                train_data, None, val_data, None, [],
+                nr_epochs=1, subset_size=10, verbose=False,
+                outputfile=None, early_stopping=False,
+                batch_size=20, metric='accuracy')
+        assert len(histories) == 0
+
+
     @unittest.skip('Needs tensorflow API v2. Also, quite a slow test of 15s.')
     def test_find_best_architecture_with_class_weights(self):
         """Model should not ignore tiny class with huge class weight. Note that this test is non-deterministic,
