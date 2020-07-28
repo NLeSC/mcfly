@@ -109,7 +109,7 @@ class Model_CNN:
         """
         dim_length = self.x_shape[1]  # number of samples in a time series
         dim_channels = self.x_shape[2]  # number of channels
-        outputdim = self.number_of_classes
+        dim_output = self.number_of_classes
         weightinit = 'lecun_uniform'  # weight initialization
         model = Sequential()
         model.add(
@@ -128,7 +128,7 @@ class Model_CNN:
                         kernel_regularizer=l2(regularization_rate),
                         kernel_initializer=weightinit))  # Fully connected layer
         model.add(Activation('relu'))  # Relu activation
-        model.add(Dense(units=outputdim, kernel_initializer=weightinit))
+        model.add(Dense(units=dim_output, kernel_initializer=weightinit))
         model.add(BatchNormalization())
         model.add(Activation("softmax"))  # Final classification layer
 

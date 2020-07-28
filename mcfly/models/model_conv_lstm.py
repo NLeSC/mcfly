@@ -122,7 +122,7 @@ class Model_ConvLSTM:
         """
         dim_length = self.x_shape[1]  # number of samples in a time series
         dim_channels = self.x_shape[2]  # number of channels
-        outputdim = self.number_of_classes
+        dim_output = self.number_of_classes
         weightinit = 'lecun_uniform'  # weight initialization
         model = Sequential()  # initialize model
         model.add(BatchNormalization(input_shape=(dim_length, dim_channels)))
@@ -151,10 +151,10 @@ class Model_ConvLSTM:
         # classification
         model.add(
             TimeDistributed(
-                Dense(units=output_dim, kernel_regularizer=l2(regularization_rate))))
+                Dense(units=dim_output, kernel_regularizer=l2(regularization_rate))))
         model.add(Activation("softmax"))
         # Final classification layer - per timestep
-        model.add(Lambda(lambda x: x[:, -1, :], output_shape=[output_dim]))
+        model.add(Lambda(lambda x: x[:, -1, :], output_shape=[dim_output]))
 
         model.compile(loss='categorical_crossentropy',
                       optimizer=Adam(lr=learning_rate),
