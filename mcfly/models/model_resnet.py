@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
 
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Convolution1D, BatchNormalization, ReLU, Add, \
+    Input, GlobalAvgPool1D, Dense
+from tensorflow.keras.regularizers import l2
+from tensorflow.keras.optimizers import Adam
+import numpy as np
+from argparse import Namespace
+from .base_hyperparameter_generator import generate_base_hyperparameter_set
+
 class Model_ResNet:
     """Generate ResNet model and hyperparameters.
     """
@@ -15,32 +24,32 @@ class Model_ResNet:
         metrics : list
             Metrics to calculate on the validation set.
             See https://keras.io/metrics/ for possible values.
-        cnn_min_layers : int
-            minimum of Conv layers in CNN model
-        cnn_max_layers : int
-            maximum of Conv layers in CNN model
-        cnn_min_filters : int
-            minimum number of filters per Conv layer in CNN model
-        cnn_max_filters : int
-            maximum number of filters per Conv layer in CNN model
-        cnn_min_fc_nodes : int
-            minimum number of hidden nodes per Dense layer in CNN model
-        cnn_max_fc_nodes : int
-            maximum number of hidden nodes per Dense layer in CNN model
+        resnet_min_network_dept : int
+            minimum number of Inception modules in ResNet model
+        resnet_max_network_dept : int
+            maximum number of Inception modules in ResNet model
+        resnet_min_filters_number : int
+            minimum number of filters per Conv layer in ResNet model
+        resnet_max_filters_number : int
+            maximum number of filters per Conv layer in ResNet model
+        resnet_min_max_kernel_size : int
+            minimum size of CNN kernels in ResNet model
+        resnet_max_max_kernel_size : int
+            maximum size of CNN kernels in ResNet model
         """
-        self.model_name = "CNN"
+        self.model_name = "ResNet"
         self.x_shape = x_shape
         self.number_of_classes = number_of_classes
 
         # Set default parameters
         self.defaults = {
             'metrics': ['accuracy'],
-            'cnn_min_layers': 1,
-            'cnn_max_layers': 10,
-            'cnn_min_filters': 10,
-            'cnn_max_filters': 100,
-            'cnn_min_fc_nodes': 10,
-            'cnn_max_fc_nodes': 2000
+            'resnet_min_network_depth': 2,
+            'resnet_max_network_depth': 5,
+            'resnet_min_filters_number': 32,
+            'resnet_max_filters_number': 128,
+            'resnet_min_max_kernel_size': 8,
+            'resnet_max_max_kernel_size': 32,
             }
 
         # Replace default parameters with input
@@ -55,46 +64,63 @@ class Model_ResNet:
         self.settings = settings
 
 
-    def generate_hyperparameters(self):
-        """Generate a hyperparameter set that define a CNN model.
+    def generate_resnet_hyperparameter_set(self):
+        """Generate a hyperparameter set that define a ResNet model.
+
+        Parameters
+        ----------
+        settings : dict
+            Dictionary containing all mcfly settings.
 
         Returns
         ----------
         hyperparameters : dict
-            parameters for a CNN model
+            parameters for a ResNet model
         """
         params = Namespace(**self.settings)
         hyperparameters = generate_base_hyperparameter_set(params.low_lr,
                                                             params.high_lr,
                                                             params.low_reg,
                                                             params.high_reg)
-        number_of_layers = np.random.randint(params.cnn_min_layers,
-                                             params.cnn_max_layers + 1)
-        hyperparameters['filters'] = np.random.randint(params.cnn_min_filters,
-                                                       params.cnn_max_filters + 1,
-                                                       number_of_layers)
-        hyperparameters['fc_hidden_nodes'] = np.random.randint(params.cnn_min_fc_nodes,
-                                                               params.cnn_max_fc_nodes + 1)
+        hyperparameters['network_depth'] = np.random.randint(params.resnet_min_network_depth,
+                                                              params.resnet_max_network_depth + 1)
+        hyperparameters['min_filters_number'] = np.random.randint(params.resnet_min_filters_number,
+                                                                  params.resnet_max_filters_number + 1)
+        hyperparameters['max_kernel_size'] = np.random.randint(params.resnet_min_max_kernel_size,
+                                                                params.resnet_max_max_kernel_size + 1)
         return hyperparameters
 
-
-    def create_model(self, filters, fc_hidden_nodes,
-                     learning_rate=0.01, regularization_rate=0.01):
+    def create_model(
+            self,
+            min_filters_number,
+            max_kernel_size,
+            network_depth=3,
+            learning_rate=0.01,
+            regularization_rate=0.01):
         """
-        Generate a convolutional neural network (CNN) model.
+        Generate a ResNet model (see also https://arxiv.org/pdf/1611.06455.pdf).
 
         The compiled Keras model is returned.
 
         Parameters
         ----------
-        filters : list of ints
-            number of filters for each convolutional layer
-        fc_hidden_nodes : int
-            number of hidden nodes for the hidden dense layer
+        input_shape : tuple
+            Shape of the input dataset: (num_samples, num_timesteps, num_channels)
+        class_number : int
+            Number of classes for classification task
+        min_filters_number : int
+            Number of filters for first convolutional layer
+        max_kernel_size: int,
+            Maximum kernel size for convolutions within Inception module
+        network_depth : int
+            Depth of network, i.e. number of Inception modules to stack
         learning_rate : float
             learning rate
         regularization_rate : float
             regularization rate
+        metrics : list
+            Metrics to calculate on the validation set.
+            See https://keras.io/metrics/ for possible values.
 
         Returns
         -------
@@ -103,31 +129,46 @@ class Model_ResNet:
         """
         dim_length = self.x_shape[1]  # number of samples in a time series
         dim_channels = self.x_shape[2]  # number of channels
-        outputdim = self.number_of_classes
-        weightinit = 'lecun_uniform'  # weight initialization
-        model = Sequential()
-        model.add(
-            BatchNormalization(
-                input_shape=(
-                    dim_length,
-                    dim_channels)))
-        for filter_number in filters:
-            model.add(Convolution1D(filter_number, kernel_size=3, padding='same',
-                                    kernel_regularizer=l2(regularization_rate),
-                                    kernel_initializer=weightinit))
-            model.add(BatchNormalization())
-            model.add(Activation('relu'))
-        model.add(Flatten())
-        model.add(Dense(units=fc_hidden_nodes,
-                        kernel_regularizer=l2(regularization_rate),
-                        kernel_initializer=weightinit))  # Fully connected layer
-        model.add(Activation('relu'))  # Relu activation
-        model.add(Dense(units=outputdim, kernel_initializer=weightinit))
-        model.add(BatchNormalization())
-        model.add(Activation("softmax"))  # Final classification layer
+        weightinit = 'lecun_uniform'
+        regularization = 0
+        metrics = self.settings["metrics"]
+
+        def conv_bn_relu_3_sandwich(x, filters, kernel_size):
+            first_x = x
+            for i in range(3):
+                x = Convolution1D(filters, kernel_size, padding='same',
+                                         kernel_initializer=weightinit,
+                                         kernel_regularizer=l2(regularization))(x)
+                x = BatchNormalization()(x)
+                x = ReLU()(x)
+
+            first_x = Convolution1D(filters, kernel_size=1, padding='same',
+                                           kernel_initializer=weightinit,
+                                           kernel_regularizer=l2(regularization))(x)
+            x = Add()([x, first_x])
+            return x
+
+        x = Input((dim_length, dim_channels))
+        inputs = x
+
+        x = BatchNormalization()(inputs)  # Added batchnorm (not in original paper)
+
+        # Define/guess filter sizes and kernel sizes
+        # Logic here is that kernals become smaller while the number of filters increases
+        kernel_sizes = [max(3, int(max_kernel_size // (1.41 ** i))) for i in range(network_depth)]
+        filter_numbers = [int(min_filters_number * (1.41 ** i)) for i in range(network_depth)]
+
+        for i in range(network_depth):
+            x = conv_bn_relu_3_sandwich(x, filter_numbers[i], kernel_sizes[i])
+
+        x = GlobalAvgPool1D()(x)
+        output_layer = Dense(self.number_of_classes, activation='softmax')(x)
+
+        # Create model and compile
+        model = Model(inputs=inputs, outputs=output_layer)
 
         model.compile(loss='categorical_crossentropy',
                       optimizer=Adam(lr=learning_rate),
-                      metrics=self.metrics)
+                      metrics=metrics)
 
         return model
