@@ -1,5 +1,6 @@
 from mcfly import modelgen
-from mcfly.models import Model_ResNet
+from mcfly.models import Model_ResNet, Model_InceptionTime
+
 
 import numpy as np
 
@@ -262,13 +263,15 @@ class ModelGenerationSuite(unittest.TestCase):
     # Tests for InceptionTime model:
     def test_InceptionTime_starts_with_batchnorm(self):
         """ InceptionTime models should always start with a batch normalization layer. """
-        model = modelgen.generate_InceptionTime_model((None, 20, 3), 2, 16)
+        model_type = Model_InceptionTime((None, 20, 3), 2)
+        model = model_type.create_model(16)
 
         assert 'BatchNormalization' in str(type(model.layers[1])), 'Wrong layer type.'
 
     def test_InceptionTime_first_inception_module(self):
         """ Test layers of first inception module. """
-        model = modelgen.generate_InceptionTime_model((None, 20, 3), 2, 16)
+        model_type = Model_InceptionTime((None, 20, 3), 2)
+        model = model_type.create_model(16)
 
         assert 'Conv1D' or 'Convolution1D' in str(type(model.layers[2])), 'Wrong layer type.'
         assert 'MaxPooling1D' in str(type(model.layers[3])), 'Wrong layer type.'
@@ -278,7 +281,8 @@ class ModelGenerationSuite(unittest.TestCase):
         """ ResNet model should have depth (number of residual modules) as defined by user. """
         depths = 3
 
-        model = modelgen.generate_InceptionTime_model((None, 20, 3), 2, 16, network_depth=depths)
+        model_type = Model_InceptionTime((None, 20, 3), 2)
+        model = model_type.create_model(16, network_depth=depths)
 
         concat_layers = [str(type(l)) for l in model.layers if 'concatenate' in str(type(l)).lower()]
         assert len(concat_layers) == depths, 'Wrong number of inception modules (network depths).'
@@ -287,7 +291,8 @@ class ModelGenerationSuite(unittest.TestCase):
         """"The output shape throughout the first residual module should be (None, nr_timesteps, min_filters_number)"""
         min_filters_number = 16
 
-        model = modelgen.generate_InceptionTime_model((None, 30, 5), 2, min_filters_number)
+        model_type = Model_InceptionTime((None, 30, 5), 2)
+        model = model_type.create_model(min_filters_number)
 
         secondConvlayer = model.layers[5]
         firstConcatlayer = model.layers[8]
@@ -301,7 +306,8 @@ class ModelGenerationSuite(unittest.TestCase):
         nr_classes = 2
         X_train, y_train = self._generate_train_data(x_shape, nr_classes)
 
-        model = modelgen.generate_InceptionTime_model(x_shape, nr_classes, 16, metrics=metrics)
+        model_type = Model_InceptionTime(x_shape, nr_classes, metrics=metrics)
+        model = model_type.create_model(16)
         model.fit(X_train, y_train)
 
         model_metrics = [m.name for m in model.metrics]
@@ -324,7 +330,8 @@ class ModelGenerationSuite(unittest.TestCase):
             if key in custom_settings:
                 custom_settings[key] = value
 
-        hyperparams = modelgen.generate_InceptionTime_hyperparameter_set(custom_settings)
+        model_type = Model_InceptionTime(None, None, **custom_settings)
+        hyperparams = model_type.generate_hyperparameters()
 
         assert hyperparams.get('network_depth') == 5, 'Wrong network depth'
         assert hyperparams.get('max_kernel_size') == 10, 'Wrong kernel'
