@@ -6,6 +6,8 @@ import tensorflow as tf
 import os
 import unittest
 
+from tensorflow.data import Dataset
+
 from test_tools import safe_remove
 
 
@@ -80,11 +82,13 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         assert len(histories) == 0
 
 
-    def train_models_on_samples_generator(self):
+    def train_models_on_samples_with_dataset(self):
+        """Model should be able to train using a dataset as an input"""
         num_timesteps = 100
         num_channels = 2
         num_samples_train = 5
         num_samples_val = 3
+        batch_size = 20
         X_train = np.random.rand(
             num_samples_train,
             num_timesteps,
@@ -93,12 +97,18 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
         y_val = to_categorical(np.array([0, 1, 1]))
 
+        data_train = Dataset.from_tensor_slices((X_train, y_train))
+        data_train.batch(batch_size)
+
+        data_val = Dataset.from_tensor_slices((X_val, y_val))
+        data_val.batch(batch_size)
+
         histories, val_metrics, val_losses = \
             find_architecture.train_models_on_samples(
-                train_data, None, val_data, None, [],
+                data_train, None, data_val, None, [],
                 nr_epochs=1, subset_size=10, verbose=False,
                 outputfile=None, early_stopping=False,
-                batch_size=20, metric='accuracy')
+                batch_size=batch_size, metric='accuracy')
         assert len(histories) == 0
 
 
