@@ -9,6 +9,7 @@ var trainChart = dc.seriesChart("#train-chart"),
     data,
     metric;
 
+var visualizationsCreated = false;
 
 var isModelValid = function(model){
 	/// Returns true when a model is valid, and false otherwise. Checks can be added
@@ -43,7 +44,11 @@ var getValidModels = function(data){
 //If new data is read, replace the data in the crossfilter
 var onNewDataEvent = function(e) {
     var filetxt = e.target.result;
-	var allModels = JSON.parse(filetxt.replace(/\bNaN\b/g, '"NaN"'));
+    loadNewDataText(filetxt);
+};
+
+var loadNewDataText = function (txt) {
+  	var allModels = JSON.parse(txt.replace(/\bNaN\b/g, '"NaN"'));
     var validModels = getValidModels(allModels);
 
 	d3.select("#missing-models-warning")
@@ -51,7 +56,10 @@ var onNewDataEvent = function(e) {
 
     var data = flattenModels(validModels);
     metric = validModels[0].metric? validModels[0].metric : 'accuracy';
-	createVisualizations(data, metric);
+    if (!visualizationsCreated) {
+      createVisualizations(data, metric);
+      visualizationsCreated = true;
+    }
     ndx.remove();
     ndx.add(data);
     dc.filterAll();
@@ -67,9 +75,14 @@ var loadData = function(){
     }
 };
 
-var createVisualizations = function(data, metric){
-	d3.select("#visualizations").classed("hidden", false);
-	d3.select("#data-selection").classed("hidden", true);
+var loadExampleData = function() {
+    fetch("https://raw.githubusercontent.com/NLeSC/mcfly/gh-pages/example_modelcomparsion.json")
+      .then(res => res.text()) // Gets the response and returns it as a file
+      .then(jsontext => loadNewDataText(jsontext));
+};
+
+var createVisualizations = function(data){
+  d3.select("#visualizations").classed("hidden", false);
 
 	ndx = crossfilter(data);
 
@@ -227,6 +240,4 @@ var createVisualizations = function(data, metric){
                 .calculateColorDomain()
                 .yBorderRadius(20)
         .controlsUseVisibility(true);
-
-	dc.renderAll();
 }
