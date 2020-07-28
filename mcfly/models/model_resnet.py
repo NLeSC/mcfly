@@ -64,7 +64,7 @@ class Model_ResNet:
         self.settings = settings
 
 
-    def generate_resnet_hyperparameter_set(self):
+    def generate_hyperparameters(self):
         """Generate a hyperparameter set that define a ResNet model.
 
         Parameters

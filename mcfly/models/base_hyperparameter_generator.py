@@ -1,3 +1,5 @@
+import numpy as np
+
 def generate_base_hyperparameter_set(low_lr, high_lr, low_reg, high_reg):
     """Generate a base set of hyperparameters that are necessary for any
     model, but sufficient for none.
