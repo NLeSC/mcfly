@@ -1,5 +1,5 @@
-from .models import model_cnn
-from .models import model_lstm
+from . import model_cnn
+# from . import model_lstm
 
 
 __all__ = [

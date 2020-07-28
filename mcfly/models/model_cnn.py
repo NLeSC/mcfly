@@ -8,7 +8,7 @@ from tensorflow.keras.regularizers import l2
 from tensorflow.keras.optimizers import Adam
 import numpy as np
 from argparse import Namespace
-from .models.base_hyperparameter_generator import generate_base_hyperparameter_set
+from .base_hyperparameter_generator import generate_base_hyperparameter_set
 
 
 class model_cnn:
