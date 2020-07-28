@@ -1,5 +1,5 @@
 import numpy as np
-from mcfly.models.model_conv_lstm import Model_ConvLSTM
+from mcfly.models import Model_ConvLSTM
 
 
 def test_deepconvlstm_batchnorm_dim():

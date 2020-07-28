@@ -1,5 +1,5 @@
 import numpy as np
-from mcfly.models.model_cnn import Model_CNN
+from mcfly.models import Model_CNN
 
 
 # Tests for CNN model:
