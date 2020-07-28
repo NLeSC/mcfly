@@ -79,7 +79,7 @@ class Model_ConvLSTM:
             parameters for a CNN model
         """
         params = Namespace(**self.settings)
-        hyperparameters = generate_base_hyper_parameter_set(params.low_lr,
+        hyperparameters = generate_base_hyperparameter_set(params.low_lr,
                                                             params.high_lr,
                                                             params.low_reg,
                                                             params.high_reg)
