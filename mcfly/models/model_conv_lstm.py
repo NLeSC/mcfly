@@ -122,6 +122,7 @@ class Model_ConvLSTM:
         """
         dim_length = self.x_shape[1]  # number of samples in a time series
         dim_channels = self.x_shape[2]  # number of channels
+        outputdim = self.number_of_classes
         weightinit = 'lecun_uniform'  # weight initialization
         model = Sequential()  # initialize model
         model.add(BatchNormalization(input_shape=(dim_length, dim_channels)))

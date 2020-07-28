@@ -24,7 +24,6 @@ def test_deepconvlstm_enough_batchnorm():
 
 def test_DeepConvLSTM_hyperparameters_nrconvlayers():
     """ Number of Conv layers from range [4, 4] should be 4. """
-    custom_settings = self.get_default()
     settings = {'deepconvlstm_min_conv_layers': 4,
                 'deepconvlstm_max_conv_layers': 4,
                 'low_lr': 1,
