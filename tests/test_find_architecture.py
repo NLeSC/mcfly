@@ -57,6 +57,7 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         self.assertIsNotNone(best_model_type)
         assert 1 >= knn_acc >= 0
 
+    # %TODO add test with metric other than accuracy
     def train_models_on_samples_empty(self):
         num_timesteps = 100
         num_channels = 2
