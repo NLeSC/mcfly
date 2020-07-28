@@ -61,8 +61,9 @@ class model_cnn:
 
         # Add missing parameters from default
         for key, value in self.defaults.items():
-            if key not in self.settings:
-                self.settings[key] = value
+            if key not in settings:
+                settings[key] = value
+        self.settings = settings
 
     def generate_hyperparameters(self):
         """Generate a hyperparameter set that define a CNN model.
