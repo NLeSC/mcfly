@@ -9,11 +9,15 @@ import numpy as np
 from argparse import Namespace
 from .base_hyperparameter_generator import generate_base_hyperparameter_set
 
+
 class Model_ResNet:
     """Generate ResNet model and hyperparameters.
     """
-    def __init__(self, x_shape, number_of_classes, **settings):
-
+    def __init__(self,
+                 x_shape,
+                 number_of_classes,
+                 metrics = ['accuracy'],
+                 **settings):
         """
         Parameters
         ----------
@@ -40,10 +44,10 @@ class Model_ResNet:
         self.model_name = "ResNet"
         self.x_shape = x_shape
         self.number_of_classes = number_of_classes
+        self.metrics = metrics
 
         # Set default parameters
         self.defaults = {
-            'metrics': ['accuracy'],
             'resnet_min_network_depth': 2,
             'resnet_max_network_depth': 5,
             'resnet_min_filters_number': 32,
@@ -90,6 +94,7 @@ class Model_ResNet:
                                                                 params.resnet_max_max_kernel_size + 1)
         return hyperparameters
 
+
     def create_model(
             self,
             min_filters_number,
@@ -131,7 +136,6 @@ class Model_ResNet:
         dim_channels = self.x_shape[2]  # number of channels
         weightinit = 'lecun_uniform'
         regularization = 0
-        metrics = self.settings["metrics"]
 
         def conv_bn_relu_3_sandwich(x, filters, kernel_size):
             first_x = x
@@ -169,6 +173,6 @@ class Model_ResNet:
 
         model.compile(loss='categorical_crossentropy',
                       optimizer=Adam(lr=learning_rate),
-                      metrics=metrics)
+                      metrics=self.metrics)
 
         return model
