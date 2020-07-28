@@ -15,8 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+from . import models
 from .modelgen import generate_models, generate_DeepConvLSTM_model, generate_CNN_model
 from .find_architecture import train_models_on_samples, find_best_architecture, kNN_accuracy
 
 from ._version import __version__
+
+
+__all__ = [
+    "models",
+]
