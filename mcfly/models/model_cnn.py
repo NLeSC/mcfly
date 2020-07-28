@@ -14,7 +14,7 @@ from .models.base_hyperparameter_generator import generate_base_hyperparameter_s
 class model_cnn:
     """Generate CNN model and hyperparameters.
     """
-    def __init__(self, x_shape, number_of_classes, **kwargs):
+    def __init__(self, x_shape, number_of_classes, **settings):
         """
 
         Parameters
@@ -40,9 +40,11 @@ class model_cnn:
             maximum number of hidden nodes per Dense layer in CNN model
         """
         self.model_name = "CNN"
+        self.x_shape = x_shape
+        self.number_of_classes = number_of_classes
 
         # Set default parameters
-        self.settings = {
+        self.defaults = {
             'metrics': ['accuracy'],
             'cnn_min_layers': 1,
             'cnn_max_layers': 10,
@@ -53,9 +55,13 @@ class model_cnn:
             }
 
         # Replace default parameters with input
-        for key, value in kwargs.items():
-            if key in self.settings:
-                print("The value of {} is set from {} (default) to {}".format(key, self.settings[key], value))
+        for key, value in settings.items():
+            if key in self.defaults:
+                print("The value of {} is set from {} (default) to {}".format(key, self.defaults[key], value))
+
+        # Add missing parameters from default
+        for key, value in defaults.items():
+            if key not in self.settings:
                 self.settings[key] = value
 
     def generate_hyperparameters(self):
@@ -80,8 +86,8 @@ class model_cnn:
                                                                params.cnn_max_fc_nodes + 1)
         return hyperparameters
 
-    def create_model(self, x_shape, class_number, filters, fc_hidden_nodes,
-                     learning_rate=0.01, regularization_rate=0.01, metrics=['accuracy']):
+    def create_model(self, filters, fc_hidden_nodes,
+                     learning_rate=0.01, regularization_rate=0.01):
         """
         Generate a convolutional neural network (CNN) model.
 
@@ -89,10 +95,6 @@ class model_cnn:
 
         Parameters
         ----------
-        x_shape : tuple
-            Shape of the input dataset: (num_samples, num_timesteps, num_channels)
-        class_number : int
-            Number of classes for classification task
         filters : list of ints
             number of filters for each convolutional layer
         fc_hidden_nodes : int
@@ -101,18 +103,15 @@ class model_cnn:
             learning rate
         regularization_rate : float
             regularization rate
-        metrics : list
-            Metrics to calculate on the validation set.
-            See https://keras.io/metrics/ for possible values.
 
         Returns
         -------
         model : Keras model
             The compiled Keras model
         """
-        dim_length = x_shape[1]  # number of samples in a time series
-        dim_channels = x_shape[2]  # number of channels
-        outputdim = class_number  # number of classes
+        dim_length = self.x_shape[1]  # number of samples in a time series
+        dim_channels = self.x_shape[2]  # number of channels
+        outputdim = self.number_of_classes
         weightinit = 'lecun_uniform'  # weight initialization
         model = Sequential()
         model.add(
@@ -137,6 +136,6 @@ class model_cnn:
 
         model.compile(loss='categorical_crossentropy',
                       optimizer=Adam(lr=learning_rate),
-                      metrics=metrics)
+                      metrics=self.metrics)
 
         return model
