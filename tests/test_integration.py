@@ -14,9 +14,11 @@ class IntegrationSuite(unittest.TestCase):
         X_train, X_val, y_train, y_val = self.generate_random_data_sets()
 
         num_classes = y_train.shape[1]
+        metric = 'accuracy'
         models = modelgen.generate_models(X_train.shape,
                                           number_of_classes=num_classes,
                                           number_of_models=2,
+                                          metrics=[metric],
                                           model_type='CNN')  # Because CNNs are quick to train.
         histories, val_accuracies, val_losses = find_architecture.train_models_on_samples(X_train, y_train,
                                                                                           X_val, y_val,
@@ -24,7 +26,7 @@ class IntegrationSuite(unittest.TestCase):
                                                                                           subset_size=150,
                                                                                           verbose=True,
                                                                                           outputfile=self.outputfile)
-        best_model_index = np.argmax(val_accuracies)
+        best_model_index = np.argmax(val_accuracies[metric])
         best_model, best_params, best_model_types = models[best_model_index]
         history = best_model.fit(X_train[:200, :, :], y_train[:200, :],
                                  epochs=2, validation_data=(X_val, y_val))

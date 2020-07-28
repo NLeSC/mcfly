@@ -35,6 +35,7 @@ import numpy as np
 from sklearn import neighbors, metrics as sklearnmetrics
 from tensorflow.keras import metrics
 from tensorflow.keras.callbacks import EarlyStopping
+from collections import defaultdict
 
 from . import modelgen
 
@@ -42,7 +43,7 @@ from . import modelgen
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             nr_epochs=5, subset_size=100, verbose=True, outputfile=None,
                             model_path=None, early_stopping_patience='auto',
-                            batch_size=20, metric='accuracy', class_weight=None):
+                            batch_size=20, metric=None, class_weight=None):
     """
     Given a list of compiled models, this function trains
     them all on a subset of the train data. If the given size of the subset is
@@ -80,7 +81,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     batch_size : int
         nr of samples per batch
     metric : str
-        metric to store in the history object
+        DEPRECATED: metric to store in the history object
     class_weight: dict, optional
         Dictionary containing class weights (example: {0: 0.5, 1: 2.})
 
@@ -103,18 +104,15 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     X_train_sub = X_train[:subset_size, :, :]
     y_train_sub = y_train[:subset_size, :]
 
-    metric_name = _get_metric_name(metric)
+    if metric is not None:
+        warnings.warn("Argument 'metric' is deprecated and will be ignored.")
 
     histories = []
-    val_metrics = []
+    val_metrics = defaultdict(list)
     val_losses = []
     for i, (model, params, model_types) in enumerate(models):
         if verbose:
             print('Training model %d' % i, model_types)
-        model_metrics = [_get_metric_name(metric) for metric in model.metrics_names]
-        if metric_name not in model_metrics:
-            raise ValueError('Invalid metric: "{}" is not among the metrics the models was compiled with ({}).'
-                             .format(metric_name, model_metrics))
         if early_stopping_patience is not None:
             if early_stopping_patience == 'auto':
                 callbacks = [EarlyStopping(monitor='val_loss',
@@ -135,14 +133,16 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             class_weight=class_weight)
         histories.append(history)
 
-        val_metrics.append(_get_from_history('val_' + metric_name, history.history)[-1])
-        val_losses.append(_get_from_history('val_loss', history.history)[-1])
+        for metric_name in model.metrics_names:
+            val_metrics[metric_name].append(_get_from_history('val_' + metric_name, history.history)[-1])
+
         if outputfile is not None:
             store_train_hist_as_json(params, model_types, history.history,
-                                     outputfile, metric_name)
+                                     outputfile, model.metrics_names[0])
         if model_path is not None:
             model.save(os.path.join(model_path, 'model_{}.h5'.format(i)))
 
+    val_losses = val_metrics['loss']
     return histories, val_metrics, val_losses
 
 
@@ -170,7 +170,7 @@ def _get_either_from_history(option1, option2, history_history):
             raise KeyError('No {} or {} in history.'.format(option1, option2))
 
 
-def store_train_hist_as_json(params, model_type, history, outputfile, metric_name='accuracy'):
+def store_train_hist_as_json(params, model_type, history, outputfile, metric_name=None):
     """
     This function stores the model parameters, the loss and accuracy history
     of one model in a JSON file. It appends the model information to the
@@ -187,15 +187,16 @@ def store_train_hist_as_json(params, model_type, history, outputfile, metric_nam
     outputfile : str
         path where the json file needs to be stored
     metric_name : str, optional
-        name of metric from history to store
+        DEPRECATED: name of metric from history to store
     """
+    if metric_name is not None:
+        warnings.warn("Argument 'metric' is deprecated and will be ignored.")
     jsondata = params.copy()
-    jsondata['train_metric'] = _get_from_history(metric_name, history)
-    jsondata['train_loss'] = _get_from_history('loss', history)
-    jsondata['val_metric'] = _get_from_history('val_' + metric_name, history)
-    jsondata['val_loss'] = _get_from_history('val_loss', history)
+
+    jsondata['metrics'] = {}
+    for metric in history:
+        jsondata['metrics'] = [_cast_to_primitive_type(val) for val in history[metric]]
     jsondata['modeltype'] = model_type
-    jsondata['metric'] = metric_name
     for k in jsondata.keys():
         if isinstance(jsondata[k], np.ndarray) or isinstance(jsondata[k], list):
             jsondata[k] = [_cast_to_primitive_type(element) for element in jsondata[k]]
@@ -289,9 +290,8 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                                                                     verbose=verbose,
                                                                     outputfile=outputpath,
                                                                     model_path=model_path,
-                                                                    metric=metric,
                                                                     class_weight=class_weight)
-    best_model_index = np.argmax(val_accuracies)
+    best_model_index = np.argmax(val_accuracies[metric])
     best_model, best_params, best_model_type = models[best_model_index]
     knn_acc = kNN_accuracy(
         X_train[:subset_size, :, :], y_train[:subset_size, :], X_val, y_val)
@@ -300,10 +300,10 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
         print('Model type: ', best_model_type)
         print('Hyperparameters: ', best_params)
         print(str(metric) + ' on validation set: ',
-              val_accuracies[best_model_index])
+              val_accuracies[metric][best_model_index])
         print('Accuracy of kNN on validation set', knn_acc)
 
-    if val_accuracies[best_model_index] < knn_acc:
+    if val_accuracies[metric][best_model_index] < knn_acc:
         warnings.warn('Best model not better than kNN: ' +
                       str(val_accuracies[best_model_index]) + ' vs  ' +
                       str(knn_acc)
