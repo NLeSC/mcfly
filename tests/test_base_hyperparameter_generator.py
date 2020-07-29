@@ -14,9 +14,9 @@ def test_regularization_0size_interval():
 
 def test_base_hyper_parameters_reg():
     """ Base hyper parameter set should contain regularization. """
-    hyper_parameter_set = generate_base_hyper_parameter_set(low_lr=1,
-                                                            high_lr=4,
-                                                            low_reg=1,
-                                                            high_reg=3)
+    hyper_parameter_set = generate_base_hyperparameter_set(low_lr=1,
+                                                           high_lr=4,
+                                                           low_reg=1,
+                                                           high_reg=3)
 
     assert 'regularization_rate' in hyper_parameter_set.keys()
