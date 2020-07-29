@@ -15,19 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# import models # This didn't work for any python version
+
 from .modelgen import generate_models
 from .find_architecture import train_models_on_samples, find_best_architecture, kNN_accuracy
 
 from ._version import __version__
-
-
-# __all__ = [
-#     "models",
-#     "generate_models",
-#     "generate_DeepConvLSTM_model",
-#     "generate_CNN_model",
-#     "train_models_on_samples",
-#     "find_best_architecture",
-#     "kNN_accuracy",
-# ]
