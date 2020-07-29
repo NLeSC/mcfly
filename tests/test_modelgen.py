@@ -55,9 +55,9 @@ class ModelGenerationSuite(unittest.TestCase):
     # Tests for CNN model:
     def test_cnn_starts_with_batchnorm(self):
         """ CNN models should always start with a batch normalization layer. """
-        model_type = Model_ConvLSTM((None, 20, 3), 2)
+        model_type = Model_CNN((None, 20, 3), 2)
         model = model_type.create_model(**{"filters": [32, 32],
-                                           "lstm_dims": [32, 32]})
+                                           "fc_hidden_nodes": 100})
         assert 'BatchNormalization' in str(type(model.layers[0])), 'Wrong layer type.'
 
     def test_cnn_fc_nodes(self):
