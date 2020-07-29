@@ -147,8 +147,8 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
 
     # Create dataset for validation data
     if y_val is not None:
-        data_val = tf.data.Dataset.from_tensor_slices((X_val, y_val))
-        data_val = data_val.batch(batch_size)
+        data_val = tf.data.Dataset.from_tensor_slices(
+            (X_val, y_val)).batch(batch_size)
     else:
         data_val = X_val
 
