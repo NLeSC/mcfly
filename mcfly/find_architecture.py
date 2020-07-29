@@ -91,6 +91,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         The number of samples used from the complete train set. If set to 'None'
         use the entire dataset. Default is 100, but should be adjusted depending
         on the type ans size of the dataset.
+        Subset is not supported for tf.data.Dataset objects or generators
     verbose : bool, optional
         flag for displaying verbose output
     outputfile: str, optional
@@ -130,9 +131,6 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     if metric is not None:
         warnings.warn("Argument 'metric' is deprecated and will be ignored.")
 
-    X_train_sub = X_train[:subset_size, :, :]
-    y_train_sub = y_train[:subset_size, :]
-
     # Create dataset for training data
     if y_train is not None:
         X_train_sub = X_train[:subset_size, :, :]
@@ -143,6 +141,9 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         data_train = data_train.batch(batch_size)
     else:
         # TODO Subset (is it possible?)
+        if subset_size != -1:
+            warnings.warn("Argument 'subset_size' is not supported for tf.data.Dataset or generators and will be ignored")
+
         data_train = X_train
 
     # Create dataset for validation data
