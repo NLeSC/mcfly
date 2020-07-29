@@ -1,6 +1,7 @@
 # Change Log
 
 ## Unreleased
+- Added support for training with Datasets, generators, and other data types supported by Keras
 
 ## v3.0.0
 - Add ResNet architecture

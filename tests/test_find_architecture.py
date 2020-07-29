@@ -1,15 +1,20 @@
-from mcfly import find_architecture
+from mcfly import find_architecture, modelgen
+from test_modelgen import get_default as get_default_settings
 import numpy as np
 from pytest import approx, raises
-from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.utils import to_categorical, Sequence
 import tensorflow as tf
 import os
 import unittest
+import math
+
+
 
 from test_tools import safe_remove
 
 
 class FindArchitectureBasicSuite(unittest.TestCase):
+
     def test_kNN_accuracy_1(self):
         """
         The accuracy for this single-point dataset should be 1.
@@ -58,6 +63,7 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         assert 1 >= knn_acc >= 0
 
     # %TODO add test with metric other than accuracy
+    # TODO: Is this a test? It's not set up as one
     def train_models_on_samples_empty(self):
         num_timesteps = 100
         num_channels = 2
@@ -78,6 +84,121 @@ class FindArchitectureBasicSuite(unittest.TestCase):
                 outputfile=None, early_stopping=False,
                 batch_size=20, metric='accuracy')
         assert len(histories) == 0
+
+
+    def test_train_models_on_samples_with_x_and_y(self):
+        """
+        Model should be able to train using separated x and y values
+        """
+        num_timesteps = 100
+        num_channels = 2
+        num_samples_train = 5
+        num_samples_val = 3
+        X_train = np.random.rand(
+            num_samples_train,
+            num_timesteps,
+            num_channels)
+        y_train = to_categorical(np.array([0, 0, 1, 1, 1]))
+        X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
+        y_val = to_categorical(np.array([0, 1, 1]))
+        batch_size = 20
+
+        hyperparams = modelgen.generate_CNN_hyperparameter_set(
+            get_default_settings())
+        model = modelgen.generate_CNN_model(X_train.shape, 2, **hyperparams)
+        models = [(model, hyperparams, "CNN")]
+
+        histories, val_metrics, val_losses = \
+            find_architecture.train_models_on_samples(
+                X_train, y_train, X_val, y_val, models,
+                nr_epochs=1, subset_size=10, verbose=False,
+                outputfile=None, early_stopping_patience='auto',
+                batch_size=batch_size)
+
+
+    def test_train_models_on_samples_with_dataset(self):
+        """
+        Model should be able to train using a dataset as an input
+        """
+        num_timesteps = 100
+        num_channels = 2
+        num_samples_train = 5
+        num_samples_val = 3
+        X_train = np.random.rand(
+            num_samples_train,
+            num_timesteps,
+            num_channels)
+        y_train = to_categorical(np.array([0, 0, 1, 1, 1]))
+        X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
+        y_val = to_categorical(np.array([0, 1, 1]))
+        batch_size = 20
+
+        data_train = tf.data.Dataset.from_tensor_slices(
+            (X_train, y_train)).batch(batch_size)
+
+        data_val = tf.data.Dataset.from_tensor_slices(
+            (X_val, y_val)).batch(batch_size)
+
+        hyperparams = modelgen.generate_CNN_hyperparameter_set(
+            get_default_settings())
+        model = modelgen.generate_CNN_model(X_train.shape, 2, **hyperparams)
+        models = [(model, hyperparams, "CNN")]
+
+        histories, val_metrics, val_losses = \
+            find_architecture.train_models_on_samples(
+                data_train, None, data_val, None, models,
+                nr_epochs=1, subset_size=None, verbose=False,
+                outputfile=None, early_stopping_patience='auto',
+                batch_size=batch_size)
+
+
+    def test_train_models_on_samples_with_generators(self):
+        """
+        Model should be able to train using a generator as an input
+        """
+        num_timesteps = 100
+        num_channels = 2
+        num_samples_train = 5
+        num_samples_val = 3
+        X_train = np.random.rand(
+            num_samples_train,
+            num_timesteps,
+            num_channels)
+        y_train = to_categorical(np.array([0, 0, 1, 1, 1]))
+        X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
+        y_val = to_categorical(np.array([0, 1, 1]))
+        batch_size = 20
+
+        class DataGenerator(Sequence):
+            def __init__(self, x_set, y_set, batch_size):
+                self.x, self.y = x_set, y_set
+                self.batch_size = batch_size
+
+            def __len__(self):
+                return math.ceil(len(self.x) / self.batch_size)
+
+            def __getitem__(self, idx):
+                batch_x = self.x[idx * self.batch_size:(idx + 1) *
+                self.batch_size]
+                batch_y = self.y[idx * self.batch_size:(idx + 1) *
+                self.batch_size]
+                return batch_x, batch_y
+
+        data_train = DataGenerator(X_train, y_train, batch_size)
+        data_val = DataGenerator(X_val, y_val, batch_size)
+
+        hyperparams = modelgen.generate_CNN_hyperparameter_set(
+            get_default_settings())
+        model = modelgen.generate_CNN_model(X_train.shape, 2, **hyperparams)
+        models = [(model, hyperparams, "CNN")]
+
+        histories, val_metrics, val_losses = \
+            find_architecture.train_models_on_samples(
+                data_train, None, data_val, None, models,
+                nr_epochs=1, subset_size=None, verbose=False,
+                outputfile=None, early_stopping_patience='auto',
+                batch_size=batch_size)
+
 
     @unittest.skip('Needs tensorflow API v2. Also, quite a slow test of 15s.')
     def test_find_best_architecture_with_class_weights(self):
