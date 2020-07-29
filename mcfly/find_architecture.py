@@ -35,7 +35,7 @@ import numpy as np
 from sklearn import neighbors, metrics as sklearnmetrics
 from tensorflow.keras import metrics
 from tensorflow.keras.callbacks import EarlyStopping
-from tensorflow.data import Dataset
+import tensorflow as tf
 from collections import defaultdict
 
 
@@ -138,7 +138,8 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         X_train_sub = X_train[:subset_size, :, :]
         y_train_sub = y_train[:subset_size, :]
 
-        data_train = Dataset.from_tensor_slices((X_train_sub, y_train_sub))
+        data_train = tf.data.Dataset.from_tensor_slices(
+            (X_train_sub, y_train_sub))
         data_train = data_train.batch(batch_size)
     else:
         # TODO Subset (is it possible?)
@@ -146,7 +147,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
 
     # Create dataset for validation data
     if y_val is not None:
-        data_val = Dataset.from_tensor_slices((X_val, y_val))
+        data_val = tf.data.Dataset.from_tensor_slices((X_val, y_val))
         data_val = data_val.batch(batch_size)
     else:
         data_val = X_val
