@@ -137,8 +137,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         y_train_sub = y_train[:subset_size, :]
 
         data_train = tf.data.Dataset.from_tensor_slices(
-            (X_train_sub, y_train_sub))
-        data_train = data_train.batch(batch_size)
+            (X_train_sub, y_train_sub)).batch(batch_size)
     else:
         # TODO Subset (is it possible?)
         if subset_size != -1:

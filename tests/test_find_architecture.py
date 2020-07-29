@@ -136,8 +136,8 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         data_train = tf.data.Dataset.from_tensor_slices((X_train, y_train))
         data_train = data_train.batch(batch_size)
 
-        data_val = tf.data.Dataset.from_tensor_slices((X_val, y_val))
-        data_val = data_val.batch(batch_size)
+        data_val = tf.data.Dataset.from_tensor_slices(
+            (X_val, y_val)).batch(batch_size)
 
         hyperparams = modelgen.generate_CNN_hyperparameter_set(
             get_default_settings())
