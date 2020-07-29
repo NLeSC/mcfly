@@ -95,7 +95,7 @@ class ModelGenerationSuite(unittest.TestCase):
         x_shape = (None, 20, 3)
         nr_classes = 2
         X_train, y_train = self._generate_train_data(x_shape, nr_classes)
-    
+
         model_type = Model_CNN(x_shape, nr_classes, metrics=metrics)
         model = model_type.create_model(**{"filters": [32, 32],
                                            "fc_hidden_nodes": 100})
@@ -317,6 +317,7 @@ class ModelGenerationSuite(unittest.TestCase):
         Maximum kernal size from range [12, 12] should be 12.
         Minimum filter number from range [32, 32] should be 32.  """
         custom_settings = get_default()
+        x_shape = (None, 20, 3)
         kwargs = {'IT_min_network_depth': 5,
                   'IT_max_network_depth': 5,
                   'IT_min_max_kernel_size': 10,
@@ -328,7 +329,7 @@ class ModelGenerationSuite(unittest.TestCase):
             if key in custom_settings:
                 custom_settings[key] = value
 
-        model_type = Model_InceptionTime(None, None, **custom_settings)
+        model_type = Model_InceptionTime(x_shape, None, **custom_settings)
         hyperparams = model_type.generate_hyperparameters()
 
         assert hyperparams.get('network_depth') == 5, 'Wrong network depth'
