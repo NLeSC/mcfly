@@ -104,7 +104,7 @@ def generate_models(x_shape,
             model_type = default_models[current_model_type](x_shape, number_of_classes,
                                                             metrics, **hyperparameter_ranges)
             hyperparameters = model_type.generate_hyperparameters()
-            model = model_type.create_model(hyperparameters)
+            model = model_type.create_model(**hyperparameters)
         elif isinstance(current_model_type, str):
             print("Unknown model name given.")
             break
@@ -112,7 +112,7 @@ def generate_models(x_shape,
             model_type = current_model_type(x_shape, number_of_classes,
                                             metrics, **hyperparameter_ranges)
             hyperparameters = model_type.generate_hyperparameters()
-            model = model_type.create_model(hyperparameters)
+            model = model_type.create_model(**hyperparameters)
 
         models.append((model, hyperparameters, str(current_model_type)))
     return models
