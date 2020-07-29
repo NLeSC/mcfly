@@ -1,5 +1,5 @@
 from mcfly import modelgen
-from mcfly.models import Model_ResNet, Model_InceptionTime
+from mcfly.models import Model_CNN, Model_ConvLSTM, Model_ResNet, Model_InceptionTime
 
 
 import numpy as np
@@ -73,29 +73,35 @@ class ModelGenerationSuite(unittest.TestCase):
     # Tests for CNN model:
     def test_cnn_starts_with_batchnorm(self):
         """ CNN models should always start with a batch normalization layer. """
-        model = modelgen.generate_CNN_model((None, 20, 3), 2, [32, 32], 100)
-
+        model_type = Model_ConvLSTM((None, 20, 3), 2)
+        model = model_type.create_model(**{"filters": [32, 32],
+                                           "lstm_dims": [32, 32]})
         assert 'BatchNormalization' in str(type(model.layers[0])), 'Wrong layer type.'
 
     def test_cnn_fc_nodes(self):
         """ CNN model should have number of dense nodes defined by user. """
         fc_hidden_nodes = 101
-
-        model = modelgen.generate_CNN_model((None, 20, 3), 2, [32, 32], fc_hidden_nodes)
+        model_type = Model_CNN((None, 20, 3), 2)
+        model = model_type.create_model(**{"filters": [32, 32],
+                                           "fc_hidden_nodes": fc_hidden_nodes})
 
         dense_layer = [l for l in model.layers if 'Dense' in str(l)][0]
         assert dense_layer.output_shape[1] == fc_hidden_nodes, 'Wrong number of fc nodes.'
 
     def test_cnn_batchnorm_dim(self):
         """"The output shape of the batchnorm should be (None, nr_timesteps, nr_filters)"""
-        model = modelgen.generate_CNN_model((None, 20, 3), 2, [32, 32], 100)
+        model_type = Model_CNN((None, 20, 3), 2)
+        model = model_type.create_model(**{"filters": [32, 32],
+                                           "fc_hidden_nodes": 100})
 
         batchnormlay = model.layers[2]
         assert batchnormlay.output_shape == (None, 20, 32)
 
     def test_cnn_enough_batchnorm(self):
         """CNN model should contain as many batch norm layers as it has activations layers"""
-        model = modelgen.generate_CNN_model((None, 20, 3), 2, [32, 32], 100)
+        model_type = Model_CNN((None, 20, 3), 2)
+        model = model_type.create_model(**{"filters": [32, 32],
+                                           "fc_hidden_nodes": 100})
 
         batch_norm_layers = len([l for l in model.layers if 'BatchNormalization' in str(l)])
         activation_layers = len([l for l in model.layers if 'Activation' in str(l)])
@@ -107,8 +113,10 @@ class ModelGenerationSuite(unittest.TestCase):
         x_shape = (None, 20, 3)
         nr_classes = 2
         X_train, y_train = self._generate_train_data(x_shape, nr_classes)
-
-        model = modelgen.generate_CNN_model(x_shape, nr_classes, [32, 32], 100, metrics=metrics)
+    
+        model_type = Model_CNN(x_shape, nr_classes, metrics=metrics)
+        model = model_type.create_model(**{"filters": [32, 32],
+                                           "fc_hidden_nodes": 100})
         model.fit(X_train, y_train, epochs=1)
 
         model_metrics = [m.name for m in model.metrics]
@@ -125,7 +133,8 @@ class ModelGenerationSuite(unittest.TestCase):
             if key in custom_settings:
                 custom_settings[key] = value
 
-        hyperparams = modelgen.generate_CNN_hyperparameter_set(custom_settings)
+        model_type = Model_CNN(None, None, **custom_settings)
+        hyperparams = model_type.generate_hyperparameters()
 
         assert len(hyperparams.get('filters')) == 4
 
@@ -139,22 +148,26 @@ class ModelGenerationSuite(unittest.TestCase):
             if key in custom_settings:
                 custom_settings[key] = value
 
-        hyperparams = modelgen.generate_CNN_hyperparameter_set(custom_settings)
+        model_type = Model_CNN(None, None, **custom_settings)
+        hyperparams = model_type.generate_hyperparameters()
 
         assert hyperparams.get('fc_hidden_nodes') == 123
 
     # Tests for DeepconvLSTM model:
     def test_deepconvlstm_batchnorm_dim(self):
         """The output shape of the batchnorm should be (None, nr_timesteps, nr_channels, nr_filters)"""
-        model = modelgen.generate_DeepConvLSTM_model((None, 20, 3), 2, [32, 32], [32, 32])
+        model_type = Model_ConvLSTM((None, 20, 3), 2)
+        model = model_type.create_model(**{"filters": [32, 32],
+                                           "lstm_dims": [32, 32]})
 
         batchnormlay = model.layers[3]
         assert batchnormlay.output_shape == (None, 20, 3, 32)
 
     def test_deepconvlstm_enough_batchnorm(self):
         """LSTM model should contain as many batch norm layers as it has activations layers"""
-        model = modelgen.generate_DeepConvLSTM_model(
-            (None, 20, 3), 2, [32, 32, 32], [32, 32, 32])
+        model_type = Model_ConvLSTM((None, 20, 3), 2)
+        model = model_type.create_model(**{"filters": [32, 32, 32],
+                                           "lstm_dims": [32, 32, 32]})
 
         batch_norm_layers = len([l for l in model.layers if 'BatchNormalization' in str(l)])
         activation_layers = len([l for l in model.layers if 'Activation' in str(l)])
@@ -170,13 +183,16 @@ class ModelGenerationSuite(unittest.TestCase):
             if key in custom_settings:
                 custom_settings[key] = value
 
-        hyperparams = modelgen.generate_DeepConvLSTM_hyperparameter_set(custom_settings)
+        model_type = Model_ConvLSTM(None, None, **custom_settings)
+        hyperparams = model_type.generate_hyperparameters()
 
         assert len(hyperparams.get('filters')) == 4
 
     def test_deepconvlstm_starts_with_batchnorm(self):
         """ DeepConvLSTM models should always start with a batch normalization layer. """
-        model = modelgen.generate_DeepConvLSTM_model((None, 20, 3), 2, [32, 32], [32, 32])
+        model_type = Model_ConvLSTM((None, 20, 3), 2)
+        model = model_type.create_model(**{"filters": [32, 32],
+                                           "lstm_dims": [32, 32]})
 
         assert 'BatchNormalization' in str(type(model.layers[0])), 'Wrong layer type.'
 
