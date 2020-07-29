@@ -338,19 +338,35 @@ class ModelGenerationSuite(unittest.TestCase):
 
     # Tests for general mcfly functionality:
     def test_generate_models_metrics(self):
-        """ "Test if correct number of models is generated and if metrics is correct. """
+        """ Test if correct number of models is generated and if metrics is correct. """
         x_shape = (None, 20, 10)
         nr_classes = 2
         X_train, y_train = self._generate_train_data(x_shape, nr_classes)
+        n_models = 4
 
-        models = modelgen.generate_models(x_shape, nr_classes, 5)
+        models = modelgen.generate_models(x_shape, nr_classes, n_models)
         for model in models:
-            model[0].fit(X_train, y_train)
+            model[0].fit(X_train, y_train, epochs = 0)
 
         model, hyperparams, modeltype = models[0]
         model_metrics = [m.name for m in model.metrics]
         assert "accuracy" in model_metrics
-        assert len(models) == 5
+        assert len(models) == n_models, "Expecting {} models, found {} models".format(
+            n_models, len(models))
+
+
+    def test_generate_models_increased_number_models(self):
+        """ Test if the number of models is increased correctly"""
+        x_shape = (None, 20, 10)
+        nr_classes = 2
+        X_train, y_train = self._generate_train_data(x_shape, nr_classes)
+        n_models = 5
+
+        models = modelgen.generate_models(x_shape, nr_classes, n_models)
+
+        assert len(models) == 8, "Expected number of models increased from 5 to 8, found {}".format(
+            len(models))
+
 
     def setUp(self):
         np.random.seed(1234)
