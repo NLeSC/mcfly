@@ -89,10 +89,11 @@ def generate_models(x_shape,
     model_types_selected = []
 
     if number_of_models%len(model_types) > 0:
-        number_of_models = int(np.ceil(number_of_models/len(model_types)))
+        number_of_models = \
+            int(np.ceil(number_of_models/len(model_types)))*len(model_types)
         print("To have equal number of models for all types, number of models was changed to {}".format(number_of_models))
 
-    for i in range(number_of_models):
+    for i in range(number_of_models // len(model_types)):
         np.random.shuffle(model_types)
         model_types_selected.extend(model_types)
 
