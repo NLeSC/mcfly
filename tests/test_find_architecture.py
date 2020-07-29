@@ -147,7 +147,7 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         histories, val_metrics, val_losses = \
             find_architecture.train_models_on_samples(
                 data_train, None, data_val, None, models,
-                nr_epochs=1, subset_size=10, verbose=False,
+                nr_epochs=1, subset_size=None, verbose=False,
                 outputfile=None, early_stopping_patience='auto',
                 batch_size=batch_size)
 
@@ -195,7 +195,7 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         histories, val_metrics, val_losses = \
             find_architecture.train_models_on_samples(
                 data_train, None, data_val, None, models,
-                nr_epochs=1, subset_size=10, verbose=False,
+                nr_epochs=1, subset_size=None, verbose=False,
                 outputfile=None, early_stopping_patience='auto',
                 batch_size=batch_size)
 
