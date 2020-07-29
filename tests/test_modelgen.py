@@ -350,7 +350,8 @@ class ModelGenerationSuite(unittest.TestCase):
 
         model, hyperparams, modeltype = models[0]
         model_metrics = [m.name for m in model.metrics]
-        assert "accuracy" in model_metrics
+        assert "accuracy" in model_metrics, "Not found accuracy for model {}. Found {}".format(
+            modeltype, model_metrics)
         assert len(models) == n_models, "Expecting {} models, found {} models".format(
             n_models, len(models))
 
