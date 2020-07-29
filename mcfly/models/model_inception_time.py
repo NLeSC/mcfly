@@ -63,6 +63,12 @@ class Model_InceptionTime:
         for key, value in self.defaults.items():
             if key not in settings:
                 settings[key] = value
+                
+        # Limit parameter space based on input
+        if settings['IT_max_max_kernel_size'] > self.x_shape[1]:
+            print("Set maximum kernel size for InceptionTime models to number of timesteps.")
+            settings['IT_max_max_kernel_size'] = self.x_shape[1]
+            
         self.settings = settings
 
 
