@@ -133,8 +133,8 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         y_val = to_categorical(np.array([0, 1, 1]))
         batch_size = 20
 
-        data_train = tf.data.Dataset.from_tensor_slices((X_train, y_train))
-        data_train = data_train.batch(batch_size)
+        data_train = tf.data.Dataset.from_tensor_slices(
+            (X_train, y_train)).batch(batch_size)
 
         data_val = tf.data.Dataset.from_tensor_slices(
             (X_val, y_val)).batch(batch_size)
@@ -154,7 +154,7 @@ class FindArchitectureBasicSuite(unittest.TestCase):
 
     def test_train_models_on_samples_with_generators(self):
         """
-        Model should be able to train using a dataset as an input
+        Model should be able to train using a generator as an input
         """
         num_timesteps = 100
         num_channels = 2
