@@ -1,4 +1,4 @@
-from mcfly import find_architecture
+from mcfly import find_architecture, modelgen
 import numpy as np
 from pytest import approx, raises
 from tensorflow.keras.utils import to_categorical
@@ -11,6 +11,45 @@ from test_tools import safe_remove
 
 
 class FindArchitectureBasicSuite(unittest.TestCase):
+
+    # TODO: Move this to an utils file, or obtain it from other source?
+    def get_default_settings(self):
+        """ "Define mcflu default parameters as dictionary. """
+        settings = {'metrics': ['accuracy'],
+                    'model_types': ['CNN', 'DeepConvLSTM', 'ResNet', 'InceptionTime'],
+                    'cnn_min_layers': 1,
+                    'cnn_max_layers': 10,
+                    'cnn_min_filters': 10,
+                    'cnn_max_filters': 100,
+                    'cnn_min_fc_nodes': 10,
+                    'cnn_max_fc_nodes': 2000,
+                    'deepconvlstm_min_conv_layers': 1,
+                    'deepconvlstm_max_conv_layers': 10,
+                    'deepconvlstm_min_conv_filters': 10,
+                    'deepconvlstm_max_conv_filters': 100,
+                    'deepconvlstm_min_lstm_layers': 1,
+                    'deepconvlstm_max_lstm_layers': 5,
+                    'deepconvlstm_min_lstm_dims': 10,
+                    'deepconvlstm_max_lstm_dims': 100,
+                    'resnet_min_network_depth': 2,
+                    'resnet_max_network_depth': 5,
+                    'resnet_min_filters_number': 32,
+                    'resnet_max_filters_number': 128,
+                    'resnet_min_max_kernel_size': 8,
+                    'resnet_max_max_kernel_size': 32,
+                    'IT_min_network_depth': 3,
+                    'IT_max_network_depth': 6,
+                    'IT_min_filters_number': 32,
+                    'IT_max_filters_number': 96,
+                    'IT_min_max_kernel_size': 10,
+                    'IT_max_max_kernel_size': 100,
+                    'low_lr': 1,
+                    'high_lr': 4,
+                    'low_reg': 1,
+                    'high_reg': 4}
+        return settings
+
+
     def test_kNN_accuracy_1(self):
         """
         The accuracy for this single-point dataset should be 1.
@@ -82,13 +121,14 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         assert len(histories) == 0
 
 
-    def test_train_models_on_samples_with_dataset(self):
-        """Model should be able to train using a dataset as an input"""
+    def test_train_models_on_samples_with_x_and_y(self):
+        """
+        Model should be able to train using separated x and y values
+        """
         num_timesteps = 100
         num_channels = 2
         num_samples_train = 5
         num_samples_val = 3
-        batch_size = 20
         X_train = np.random.rand(
             num_samples_train,
             num_timesteps,
@@ -96,21 +136,59 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         y_train = to_categorical(np.array([0, 0, 1, 1, 1]))
         X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
         y_val = to_categorical(np.array([0, 1, 1]))
+        batch_size = 20
 
-        data_train = tf.data.Dataset.from_tensor_slices((X_train, y_train))
-        data_train.batch(batch_size)
-
-        data_val = tf.data.Dataset.from_tensor_slices((X_val, y_val))
-        data_val.batch(batch_size)
+        hyperparams = modelgen.generate_CNN_hyperparameter_set(
+            self.get_default_settings())
+        model = modelgen.generate_CNN_model(X_train.shape, 2, **hyperparams)
+        models = [(model, hyperparams, "CNN")]
 
         histories, val_metrics, val_losses = \
             find_architecture.train_models_on_samples(
-                data_train, None, data_val, None, [],
+                X_train, y_train, X_val, y_val, models,
                 nr_epochs=1, subset_size=10, verbose=False,
-                outputfile=None, early_stopping=False,
-                batch_size=batch_size, metric='accuracy')
-        assert len(histories) == 0
+                outputfile=None, early_stopping_patience='auto',
+                batch_size=batch_size)
 
+        assert True # TODO Assertion
+
+
+    def test_train_models_on_samples_with_dataset(self):
+        """
+        Model should be able to train using a dataset as an input
+        """
+        num_timesteps = 100
+        num_channels = 2
+        num_samples_train = 5
+        num_samples_val = 3
+        X_train = np.random.rand(
+            num_samples_train,
+            num_timesteps,
+            num_channels)
+        y_train = to_categorical(np.array([0, 0, 1, 1, 1]))
+        X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
+        y_val = to_categorical(np.array([0, 1, 1]))
+        batch_size = 20
+
+        data_train = tf.data.Dataset.from_tensor_slices((X_train, y_train))
+        data_train = data_train.batch(batch_size)
+
+        data_val = tf.data.Dataset.from_tensor_slices((X_val, y_val))
+        data_val = data_val.batch(batch_size)
+
+        hyperparams = modelgen.generate_CNN_hyperparameter_set(
+            self.get_default_settings())
+        model = modelgen.generate_CNN_model(X_train.shape, 2, **hyperparams)
+        models = [(model, hyperparams, "CNN")]
+
+        histories, val_metrics, val_losses = \
+            find_architecture.train_models_on_samples(
+                data_train, None, data_val, None, models,
+                nr_epochs=1, subset_size=10, verbose=False,
+                outputfile=None, early_stopping_patience='auto',
+                batch_size=batch_size)
+
+        assert True # TODO Assertion
 
 
     @unittest.skip('Needs tensorflow API v2. Also, quite a slow test of 15s.')
