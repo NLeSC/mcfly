@@ -16,7 +16,6 @@
 # limitations under the License.
 #
 # import models # This didn't work for any python version
-from . import models
 from .modelgen import generate_models, generate_DeepConvLSTM_model, generate_CNN_model
 from .find_architecture import train_models_on_samples, find_best_architecture, kNN_accuracy
 
