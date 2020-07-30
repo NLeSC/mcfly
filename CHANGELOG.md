@@ -2,6 +2,7 @@
 
 ## Unreleased
 - Added support for training with Datasets, generators, and other data types supported by Keras
+- Droped support for Python 3.5 (supported are: Python 3.6, 3.7 and 3.8)
 
 ## v3.0.0
 - Add ResNet architecture
