@@ -109,23 +109,17 @@ class Model_ResNet:
 
         Parameters
         ----------
-        input_shape : tuple
-            Shape of the input dataset: (num_samples, num_timesteps, num_channels)
-        class_number : int
-            Number of classes for classification task
         min_filters_number : int
             Number of filters for first convolutional layer
         max_kernel_size: int,
             Maximum kernel size for convolutions within Inception module
         network_depth : int
-            Depth of network, i.e. number of Inception modules to stack
+            Depth of network, i.e. number of Inception modules to stack.
+            Default is 3.
         learning_rate : float
-            learning rate
+            Set learning rate. Default is 0.01.
         regularization_rate : float
-            regularization rate
-        metrics : list
-            Metrics to calculate on the validation set.
-            See https://keras.io/metrics/ for possible values.
+            Set regularization rate. Default is 0.01.
 
         Returns
         -------
