@@ -109,8 +109,7 @@ def generate_models(x_shape,
             model = model_type.create_model(**hyperparameters)
             model_name = current_model_type
         elif isinstance(current_model_type, str):
-            print("Unknown model name given.")
-            break
+            raise NameError("Unknown model name given.")
         else: # Assume model class was passed
             model_type = current_model_type(x_shape, number_of_classes,
                                             metrics, **hyperparameter_ranges)

@@ -1,5 +1,6 @@
 import numpy as np
 import unittest
+import pytest
 from tensorflow.keras.models import Model
 from mcfly import modelgen
 from mcfly.models import Model_CNN, Model_ConvLSTM, Model_ResNet, Model_InceptionTime
@@ -369,6 +370,17 @@ class ModelGenerationSuite(unittest.TestCase):
         for model in models:
             assert isinstance(model[0], Model), "Expected keras model."
 
+    def test_generate_models_exception(self):
+        """ Test expected generate_models exception."""
+        x_shape = (None, 20, 10)
+        nr_classes = 2
+        X_train, y_train = self._generate_train_data(x_shape, nr_classes)
+        n_models = 2
+        
+        with pytest.raises(NameError, match="Unknown model name given."):
+            models = modelgen.generate_models(x_shape, nr_classes, n_models,
+                                              model_types=['CNN', "wrong_entry"])
+                                                                
     def setUp(self):
         np.random.seed(1234)
 
