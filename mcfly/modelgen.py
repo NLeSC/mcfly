@@ -16,6 +16,7 @@
 # limitations under the License.
 #
 
+import warnings
 import numpy as np
 from mcfly.models import Model_CNN, Model_ConvLSTM, Model_ResNet, Model_InceptionTime
 
@@ -34,7 +35,8 @@ def generate_models(x_shape,
     x_shape : tuple
         Shape of the input dataset: (num_samples, num_timesteps, num_channels)
     number_of_classes : int
-        Number of classes for classification task
+        Number of classes for classification task. Should at least be >= the number
+        of given model types.
     number_of_models : int
         Number of models to generate
     model_types : list, optional
@@ -64,6 +66,9 @@ def generate_models(x_shape,
     models : list
         List of compiled models
     """
+    if number_of_models < len(model_types):
+        warnings.warn("Specified number_of_models is smaller than the given number of model types.")
+    
     # Set default hyperparameter ranges
     defaults = {'low_lr': 1,
                 'high_lr': 4,
@@ -88,19 +93,15 @@ def generate_models(x_shape,
 
     model_types_selected = []
 
-    if number_of_models%len(model_types) > 0:
-        number_of_models = \
-            int(np.ceil(number_of_models/len(model_types)))*len(model_types)
-        print("To have equal number of models for all types, number of models was changed to {}".format(number_of_models))
-
-    for i in range(number_of_models // len(model_types)):
+    for i in range(int(np.ceil(number_of_models/len(model_types)))):
         np.random.shuffle(model_types)
         model_types_selected.extend(model_types)
 
     # Create list of Keras models and their hyperparameters
     # -------------------------------------------------------------------------
     models = []
-    for current_model_type in model_types_selected:
+    for i in range(number_of_models):
+        current_model_type = model_types_selected[i]
         if current_model_type in default_models:
             model_type = default_models[current_model_type](x_shape, number_of_classes,
                                                             metrics, **hyperparameter_ranges)

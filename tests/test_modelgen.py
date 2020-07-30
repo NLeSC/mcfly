@@ -340,7 +340,7 @@ class ModelGenerationSuite(unittest.TestCase):
         x_shape = (None, 20, 10)
         nr_classes = 2
         X_train, y_train = self._generate_train_data(x_shape, nr_classes)
-        n_models = 4
+        n_models = 5
 
         models = modelgen.generate_models(x_shape, nr_classes, n_models)
         for model in models:
@@ -352,18 +352,6 @@ class ModelGenerationSuite(unittest.TestCase):
             modeltype, model_metrics)
         assert len(models) == n_models, "Expecting {} models, found {} models".format(
             n_models, len(models))
-
-    def test_generate_models_increased_number_models(self):
-        """ Test if the number of models is increased correctly"""
-        x_shape = (None, 20, 10)
-        nr_classes = 2
-        X_train, y_train = self._generate_train_data(x_shape, nr_classes)
-        n_models = 5
-
-        models = modelgen.generate_models(x_shape, nr_classes, n_models)
-
-        assert len(models) == 8, "Expected number of models increased from 5 to 8, found {}".format(
-            len(models))
 
     def test_generate_models_pass_model_object(self):
         """ Test if model class can be passed as model_types input."""
