@@ -8,7 +8,7 @@ import numpy as np
 from argparse import Namespace
 from .base_hyperparameter_generator import generate_base_hyperparameter_set
 
-class Model_InceptionTime:
+class InceptionTime:
 
 
     def __init__(self,

@@ -10,7 +10,7 @@ from argparse import Namespace
 from .base_hyperparameter_generator import generate_base_hyperparameter_set
 
 
-class Model_ConvLSTM:
+class ConvLSTM:
     """Generate CNN model and hyperparameters.
     """
     def __init__(self, x_shape, number_of_classes, metrics=['accuracy'], **settings):

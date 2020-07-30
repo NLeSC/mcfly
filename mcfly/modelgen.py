@@ -18,7 +18,7 @@
 
 import warnings
 import numpy as np
-from mcfly.models import Model_CNN, Model_ConvLSTM, Model_ResNet, Model_InceptionTime
+from mcfly.models import CNN, ConvLSTM, ResNet, InceptionTime
 
 
 def generate_models(x_shape,
@@ -78,10 +78,10 @@ def generate_models(x_shape,
                 'low_reg': 1,
                 'high_reg': 4}
 
-    default_models = {'CNN': Model_CNN,
-                      'DeepConvLSTM': Model_ConvLSTM,
-                      'ResNet': Model_ResNet,
-                      'InceptionTime': Model_InceptionTime}
+    default_models = {'CNN': CNN,
+                      'DeepConvLSTM': ConvLSTM,
+                      'ResNet': ResNet,
+                      'InceptionTime': InceptionTime}
 
     # Replace default hyperparameter ranges with input
     for key, value in hyperparameter_ranges.items():
