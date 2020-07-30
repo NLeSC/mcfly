@@ -36,10 +36,10 @@ def generate_models(x_shape,
     x_shape : tuple
         Shape of the input dataset: (num_samples, num_timesteps, num_channels)
     number_of_classes : int
-        Number of classes for classification task. Should at least be >= the number
-        of given model types.
+        Number of classes for classification task.
     number_of_models : int
-        Number of models to generate
+        Number of models to generate. Should at least be >= the number
+        of given model types.
     model_types : list, optional
         Expects list containg names of mcfly default models ('CNN' 'DeepConvLSTM',
         'ResNet', or 'InceptionTime'), or custom model classes (see mcfly.models
