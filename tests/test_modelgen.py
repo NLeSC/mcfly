@@ -46,9 +46,9 @@ def get_default():
 
 # TODO: Move this to an utils file?
 def generate_train_data(x_shape, nr_classes):
-        X_train = np.random.rand(1, *x_shape[1:])
-        y_train = np.random.randint(0, 1, size=(1, nr_classes))
-        return X_train, y_train
+    X_train = np.random.rand(1, *x_shape[1:])
+    y_train = np.random.randint(0, 1, size=(1, nr_classes))
+    return X_train, y_train
 
 
 class ModelGenerationSuite(unittest.TestCase):
