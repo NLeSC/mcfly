@@ -3,7 +3,7 @@ import unittest
 import pytest
 from tensorflow.keras.models import Model
 from mcfly import modelgen
-from mcfly.models import CNN, ConvLSTM, ResNet, InceptionTime
+from mcfly.models import ResNet
 
 
 # TODO: Move this to an utils file, or obtain it from other source?
