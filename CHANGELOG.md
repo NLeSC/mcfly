@@ -3,6 +3,7 @@
 ## Unreleased
 - Added support for training with Datasets, generators, and other data types supported by Keras
 - Added separate classes for each model type, also allowing easier extension by own custom models [#239](https://github.com/NLeSC/mcfly/pull/239)
+- The number of models may be increased to guarantee that the same number of tests is done for each model type
 
 ## v3.0.0
 - Add ResNet architecture
