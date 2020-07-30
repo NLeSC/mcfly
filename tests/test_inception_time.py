@@ -91,3 +91,7 @@ class InceptionTimeSuite(unittest.TestCase):
         assert hyperparams.get('network_depth') == 5, 'Wrong network depth'
         assert hyperparams.get('max_kernel_size') == 10, 'Wrong kernel'
         assert hyperparams.get('filters_number') == 32, 'Wrong filter number'
+
+
+if __name__ == '__main__':
+    unittest.main()

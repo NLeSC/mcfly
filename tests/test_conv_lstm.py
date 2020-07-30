@@ -49,3 +49,7 @@ class ConvLSTMSuite(unittest.TestCase):
                                            "lstm_dims": [32, 32]})
 
         assert 'BatchNormalization' in str(type(model.layers[0])), 'Wrong layer type.'
+
+
+if __name__ == '__main__':
+    unittest.main()

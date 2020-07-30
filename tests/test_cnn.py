@@ -96,3 +96,8 @@ class CNNSuite(unittest.TestCase):
         hyperparams = model_type.generate_hyperparameters()
 
         assert hyperparams.get('fc_hidden_nodes') == 123
+
+
+
+if __name__ == '__main__':
+    unittest.main()

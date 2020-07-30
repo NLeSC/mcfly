@@ -87,3 +87,7 @@ class ResNetSuite(unittest.TestCase):
         assert hyperparams.get('network_depth') == 4, 'Wrong network depth'
         assert hyperparams.get('max_kernel_size') == 10, 'Wrong kernel'
         assert hyperparams.get('min_filters_number') == 16, 'Wrong filter number'
+
+
+if __name__ == '__main__':
+    unittest.main()
