@@ -55,7 +55,6 @@ class ModelGenerationSuite(unittest.TestCase):
     """Basic test cases."""
 
 
-
     # Tests for InceptionTime model:
     def test_InceptionTime_starts_with_batchnorm(self):
         """ InceptionTime models should always start with a batch normalization layer. """
@@ -63,6 +62,7 @@ class ModelGenerationSuite(unittest.TestCase):
         model = model_type.create_model(16)
 
         assert 'BatchNormalization' in str(type(model.layers[1])), 'Wrong layer type.'
+
 
     def test_InceptionTime_first_inception_module(self):
         """ Test layers of first inception module. """
@@ -73,8 +73,9 @@ class ModelGenerationSuite(unittest.TestCase):
         assert 'MaxPooling1D' in str(type(model.layers[3])), 'Wrong layer type.'
         assert 'Concatenate' in str(type(model.layers[8])), 'Wrong layer type.'
 
+
     def test_InceptionTime_depth(self):
-        """ ResNet model should have depth (number of residual modules) as defined by user. """
+        """ InceptionTime model should have depth (number of residual modules) as defined by user. """
         depths = 3
 
         model_type = InceptionTime((None, 20, 3), 2)
@@ -82,6 +83,7 @@ class ModelGenerationSuite(unittest.TestCase):
 
         concat_layers = [str(type(l)) for l in model.layers if 'concatenate' in str(type(l)).lower()]
         assert len(concat_layers) == depths, 'Wrong number of inception modules (network depths).'
+
 
     def test_InceptionTime_first_module_dim(self):
         """"The output shape throughout the first residual module should be (None, nr_timesteps, min_filters_number)"""
@@ -95,8 +97,9 @@ class ModelGenerationSuite(unittest.TestCase):
         assert secondConvlayer.output_shape == (None, 30, min_filters_number)
         assert firstConcatlayer.output_shape == (None, 30, min_filters_number * 4)
 
+
     def test_InceptionTime_metrics(self):
-        """ResNet model should be compiled with the metrics that we give it"""
+        """InceptionTime model should be compiled with the metrics that we give it"""
         metrics = ['accuracy', 'mae']
         x_shape = (None, 20, 3)
         nr_classes = 2
@@ -109,6 +112,7 @@ class ModelGenerationSuite(unittest.TestCase):
         model_metrics = [m.name for m in model.metrics]
         for metric in metrics:
             assert metric in model_metrics
+
 
     def test_InceptionTime_hyperparameters(self):
         """ Network depth from range [5,5] should be 5.
@@ -133,6 +137,7 @@ class ModelGenerationSuite(unittest.TestCase):
         assert hyperparams.get('network_depth') == 5, 'Wrong network depth'
         assert hyperparams.get('max_kernel_size') == 10, 'Wrong kernel'
         assert hyperparams.get('filters_number') == 32, 'Wrong filter number'
+
 
     # Tests for general mcfly functionality:
     def test_generate_models_metrics(self):
