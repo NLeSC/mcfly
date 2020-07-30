@@ -128,9 +128,6 @@ class Model_InceptionTime:
             learning rate
         regularization_rate : float
             regularization rate
-        metrics : list
-            Metrics to calculate on the validation set.
-            See https://keras.io/metrics/ for possible values.
 
         Returns
         -------
