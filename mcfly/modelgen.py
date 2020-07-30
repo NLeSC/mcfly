@@ -61,7 +61,7 @@ def generate_models(x_shape,
         sampled between `10**(-low_reg)` and `10**(-high_reg)`
 
     Further hyperparameter ranges can be specified according to the respective
-    model types used. #TODO: add link to model class docstrings
+    model types used.
 
     Returns
     -------
