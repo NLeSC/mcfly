@@ -91,9 +91,3 @@ class InceptionTimeSuite(unittest.TestCase):
         assert hyperparams.get('network_depth') == 5, 'Wrong network depth'
         assert hyperparams.get('max_kernel_size') == 10, 'Wrong kernel'
         assert hyperparams.get('filters_number') == 32, 'Wrong filter number'
-
-
-    def test_InceptionTime_travis(self):
-        """Not sure if Travis's pytest is picking up these files"""
-        assert False
-

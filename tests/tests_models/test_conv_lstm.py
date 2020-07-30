@@ -49,9 +49,3 @@ class ConvLSTMSuite(unittest.TestCase):
                                            "lstm_dims": [32, 32]})
 
         assert 'BatchNormalization' in str(type(model.layers[0])), 'Wrong layer type.'
-
-
-
-    def test_deepconvlstm_travis(self):
-        """Not sure if Travis's pytest is picking up these files"""
-        assert False
