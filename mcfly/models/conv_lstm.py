@@ -13,7 +13,7 @@ from .base_hyperparameter_generator import generate_base_hyperparameter_set
 class ConvLSTM:
     """Generate DeepConvLSTM model and hyperparameters.
     """
-    def __init__(self, x_shape, number_of_classes, metrics=['accuracy'], 
+    def __init__(self, x_shape, number_of_classes, metrics=['accuracy'],
                  deepconvlstm_min_conv_layers=1,
                  deepconvlstm_max_conv_layers=10,
                  deepconvlstm_min_conv_filters=10,

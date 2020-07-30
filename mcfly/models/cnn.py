@@ -51,8 +51,8 @@ class CNN:
                          'cnn_min_filters': cnn_min_filters,
                          'cnn_max_filters': cnn_max_filters,
                          'cnn_min_fc_nodes': cnn_min_fc_nodes,
-                         'cnn_max_fc_nodes', cnn_max_fc_nodes}
-        
+                         'cnn_max_fc_nodes': cnn_max_fc_nodes}
+
         # Add missing parameters from default
         for key, value in self.base_parameters.items():
             if key not in self.settings:
