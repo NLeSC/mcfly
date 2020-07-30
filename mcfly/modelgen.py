@@ -102,8 +102,7 @@ def generate_models(x_shape,
     # Create list of Keras models and their hyperparameters
     # -------------------------------------------------------------------------
     models = []
-    for i in range(number_of_models):
-        current_model_type = model_types_selected[i]
+    for current_model_type in model_types_selected[:number_of_models]:
         if current_model_type in default_models:
             model_type = default_models[current_model_type](x_shape, number_of_classes,
                                                             metrics, **hyperparameter_ranges)
