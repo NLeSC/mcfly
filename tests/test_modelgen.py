@@ -1,10 +1,8 @@
+import numpy as np
+import unittest
+from tensorflow.keras.models import Model
 from mcfly import modelgen
 from mcfly.models import Model_CNN, Model_ConvLSTM, Model_ResNet, Model_InceptionTime
-
-
-import numpy as np
-
-import unittest
 
 
 # TODO: Move this to an utils file, or obtain it from other source?
@@ -355,7 +353,6 @@ class ModelGenerationSuite(unittest.TestCase):
         assert len(models) == n_models, "Expecting {} models, found {} models".format(
             n_models, len(models))
 
-
     def test_generate_models_increased_number_models(self):
         """ Test if the number of models is increased correctly"""
         x_shape = (None, 20, 10)
@@ -368,6 +365,21 @@ class ModelGenerationSuite(unittest.TestCase):
         assert len(models) == 8, "Expected number of models increased from 5 to 8, found {}".format(
             len(models))
 
+    def test_generate_models_pass_model_object(self):
+        """ Test if model class can be passed as model_types input."""
+        x_shape = (None, 20, 10)
+        nr_classes = 2
+        X_train, y_train = self._generate_train_data(x_shape, nr_classes)
+        n_models = 4
+        
+        models = modelgen.generate_models(x_shape, nr_classes, n_models,
+                                          model_types=['CNN', Model_ResNet])
+        created_model_names = list(set([x[2] for x in models]))
+        created_model_names.sort()
+        assert len(models) == 4, "Expected number of models to be 4"
+        assert created_model_names == ["CNN", "ResNet"], "Expected different model names."
+        for model in models:
+            assert isinstance(model[0], Model), "Expected keras model."
 
     def setUp(self):
         np.random.seed(1234)
