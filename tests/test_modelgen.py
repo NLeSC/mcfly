@@ -344,7 +344,7 @@ class ModelGenerationSuite(unittest.TestCase):
 
         models = modelgen.generate_models(x_shape, nr_classes, n_models)
         for model in models:
-            model[0].fit(X_train, y_train, epochs = 0)
+            model[0].fit(X_train, y_train, epochs = 1)
 
         model, hyperparams, modeltype = models[0]
         model_metrics = [m.name for m in model.metrics]
