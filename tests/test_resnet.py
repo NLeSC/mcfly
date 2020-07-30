@@ -71,7 +71,7 @@ class ResNetSuite(unittest.TestCase):
         Minimum filter number from range [16, 16] should be 16.  """
         custom_settings = get_default()
         kwargs = {'resnet_min_network_depth': 4,
-                  'resnet_mmax_network_depth': 4,
+                  'resnet_max_network_depth': 4,
                   'resnet_min_max_kernel_size': 10,
                   'resnet_max_max_kernel_size': 10,
                   'resnet_min_filters_number': 16,
