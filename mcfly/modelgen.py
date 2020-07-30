@@ -44,7 +44,7 @@ def generate_models(x_shape,
         Expects list containg names of mcfly default models ('CNN' 'DeepConvLSTM',
         'ResNet', or 'InceptionTime'), or custom model classes (see mcfly.models
         for examples on how such a class is build and what it must contain).
-        Default is to use all models equally frequently.
+        Default is to use all built-in mcfly models.
     metrics : list
         Metrics to calculate on the validation set.
         See https://keras.io/metrics/ for possible values.
