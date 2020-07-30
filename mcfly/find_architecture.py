@@ -35,7 +35,9 @@ import numpy as np
 from sklearn import neighbors, metrics as sklearnmetrics
 from tensorflow.keras import metrics
 from tensorflow.keras.callbacks import EarlyStopping
+import tensorflow as tf
 from collections import defaultdict
+
 
 from . import modelgen
 
@@ -51,14 +53,36 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
 
     Parameters
     ----------
-    X_train : numpy array of shape (num_samples, num_timesteps, num_channels)
-        The input dataset for training
-    y_train : numpy array of shape (num_samples, num_classes)
-        The output classes for the train data, in binary format
-    X_val : numpy array of shape (num_samples_val, num_timesteps, num_channels)
-        The input dataset for validation
-    y_val : numpy array of shape (num_samples_val, num_classes)
-        The output classes for the validation data, in binary format
+    X_train : Supported types:
+        - numpy array
+        - `tf.data` dataset. Should return a tuple of `(inputs, targets)`
+          or `(inputs, targets, sample_weights)`
+        - generator or `keras.utils.Sequence`. Should return a tuple of
+          `(inputs, targets)` or `(inputs, targets, sample_weights)`
+        The input dataset for training of shape
+        (num_samples, num_timesteps, num_channels)
+        More details can be found in the documentation for the Keras
+        function Model.fit() [1]
+    y_train : numpy array
+        The output classes for the train data, in binary format of shape
+        (num_samples, num_classes)
+        If the training data is a dataset, generator or
+        `keras.utils.Sequence`, y_train should not be specified.
+    X_val : Supported types:
+        - numpy array
+        - `tf.data` dataset. Should return a tuple of `(inputs, targets)`
+          or `(inputs, targets, sample_weights)`
+        - generator or `keras.utils.Sequence`. Should return a tuple of
+          `(inputs, targets)` or `(inputs, targets, sample_weights)`
+        The input dataset for validation of shape
+        (num_samples_val, num_timesteps, num_channels)
+        More details can be found in the documentation for the Keras
+        function Model.fit() [1]
+    y_val : numpy array
+        The output classes for the validation data, in binary format of shape
+        (num_samples_val, num_classes)
+        If the validation data is a dataset, generator or
+        `keras.utils.Sequence`, y_val should not be specified.
     models : list of model, params, modeltypes
         List of keras models to train
     nr_epochs : int, optional
@@ -67,6 +91,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         The number of samples used from the complete train set. If set to 'None'
         use the entire dataset. Default is 100, but should be adjusted depending
         on the type ans size of the dataset.
+        Subset is not supported for tf.data.Dataset objects or generators
     verbose : bool, optional
         flag for displaying verbose output
     outputfile: str, optional
@@ -93,6 +118,8 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         validation accuraracies of the models
     val_losses : list of floats
         validation losses of the models
+
+    [1]: https://www.tensorflow.org/api_docs/python/tf/keras/Model#fit
     """
 
     if subset_size is None:
@@ -101,11 +128,29 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         print("Generated models will be trained on subset of the data (subset size: {})."
               .format(str(subset_size)))
 
-    X_train_sub = X_train[:subset_size, :, :]
-    y_train_sub = y_train[:subset_size, :]
-
     if metric is not None:
         warnings.warn("Argument 'metric' is deprecated and will be ignored.")
+
+    # Create dataset for training data
+    if y_train is not None:
+        X_train_sub = X_train[:subset_size, :, :]
+        y_train_sub = y_train[:subset_size, :]
+
+        data_train = tf.data.Dataset.from_tensor_slices(
+            (X_train_sub, y_train_sub)).batch(batch_size)
+    else:
+        # TODO Subset (is it possible?)
+        if subset_size != -1:
+            warnings.warn("Argument 'subset_size' is not supported for tf.data.Dataset or generators and will be ignored")
+
+        data_train = X_train
+
+    # Create dataset for validation data
+    if y_val is not None:
+        data_val = tf.data.Dataset.from_tensor_slices(
+            (X_val, y_val)).batch(batch_size)
+    else:
+        data_val = X_val
 
     histories = []
     val_metrics = defaultdict(list)
@@ -120,10 +165,10 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                 callbacks = [EarlyStopping(monitor='val_loss', patience=early_stopping_patience, verbose=verbose, mode='auto')]
         else:
             callbacks = []
-        history = model.fit(X_train_sub, y_train_sub,
-                            epochs=nr_epochs, batch_size=batch_size,
+        history = model.fit(x = data_train,
+                            epochs=nr_epochs,
                             # see comment on subsize_set
-                            validation_data=(X_val, y_val),
+                            validation_data=data_val,
                             verbose=verbose,
                             callbacks=callbacks,
                             class_weight=class_weight)
@@ -188,20 +233,14 @@ def store_train_hist_as_json(params, model_type, history, outputfile, metric_nam
 
     jsondata['metrics'] = {}
     for metric in history:
-        jsondata['metrics'] = [_cast_to_primitive_type(val) for val in history[metric]]
+        jsondata['metrics'][metric] = [_cast_to_primitive_type(val) for val in history[metric]]
     jsondata['modeltype'] = model_type
+
     for k in jsondata.keys():
         if isinstance(jsondata[k], np.ndarray) or isinstance(jsondata[k], list):
             jsondata[k] = [_cast_to_primitive_type(element) for element in jsondata[k]]
-    if os.path.isfile(outputfile):
-        with open(outputfile, 'r') as outfile:
-            previousdata = json.load(outfile)
-    else:
-        previousdata = []
-    previousdata.append(jsondata)
-    with open(outputfile, 'w') as outfile:
-        json.dump(previousdata, outfile, sort_keys=True,
-                  indent=4, ensure_ascii=False)
+
+    _create_or_append_to_json(jsondata, outputfile)
 
 
 def _cast_to_primitive_type(obj):
@@ -211,6 +250,18 @@ def _cast_to_primitive_type(obj):
         return int(obj)
     else:
         return obj
+
+
+def _create_or_append_to_json(jsondata, outputfile):
+    if os.path.isfile(outputfile):
+        with open(outputfile, 'r') as outfile:
+            previousdata = json.load(outfile)
+    else:
+        previousdata = []
+    previousdata.append(jsondata)
+    with open(outputfile, 'w') as outfile:
+        json.dump(previousdata, outfile, sort_keys=True,
+                  indent=4, ensure_ascii=False)
 
 
 def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
@@ -224,18 +275,36 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
 
     Parameters
     ----------
-    X_train : numpy array
+    X_train : Supported types:
+        - numpy array
+        - `tf.data` dataset. Should return a tuple of `(inputs, targets)`
+          or `(inputs, targets, sample_weights)`
+        - generator or `keras.utils.Sequence`. Should return a tuple of
+          `(inputs, targets)` or `(inputs, targets, sample_weights)`
         The input dataset for training of shape
         (num_samples, num_timesteps, num_channels)
+        More details can be found in the documentation for the Keras
+        function Model.fit() [1]
     y_train : numpy array
         The output classes for the train data, in binary format of shape
         (num_samples, num_classes)
-    X_val : numpy array
+        If the training data is a dataset, generator or
+        `keras.utils.Sequence`, y_train should not be specified.
+    X_val : Supported types:
+        - numpy array
+        - `tf.data` dataset. Should return a tuple of `(inputs, targets)`
+          or `(inputs, targets, sample_weights)`
+        - generator or `keras.utils.Sequence`. Should return a tuple of
+          `(inputs, targets)` or `(inputs, targets, sample_weights)`
         The input dataset for validation of shape
         (num_samples_val, num_timesteps, num_channels)
+        More details can be found in the documentation for the Keras
+        function Model.fit() [1]
     y_val : numpy array
         The output classes for the validation data, in binary format of shape
         (num_samples_val, num_classes)
+        If the validation data is a dataset, generator or
+        `keras.utils.Sequence`, y_val should not be specified.
     verbose : bool, optional
         flag for displaying verbose output
     number_of_models : int, optiona
@@ -268,6 +337,9 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
         Type of the best model
     knn_acc : float
         accuaracy for kNN prediction on validation set
+
+
+    [1]: https://www.tensorflow.org/api_docs/python/tf/keras/Model#fit
     """
     models = modelgen.generate_models(X_train.shape, y_train.shape[1],
                                       number_of_models=number_of_models,
