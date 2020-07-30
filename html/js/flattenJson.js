@@ -2,9 +2,9 @@ var flattenModels = function(obj){
     var output = [];
     for(var modelNr = 0; modelNr<obj.length; modelNr++) {
         model = obj[modelNr];
-        // For backwards compatibility with data generated with version <=1.0.1
-        let val_metric = model.val_metric ? model.val_metric : model.val_acc;
-        let train_metric = model.train_metric? model.train_metric : model.train_acc;
+
+        let val_metric = model.metrics.val_accuracy;
+        let train_metric = model.metrics.accuracy;
         for(var iteration=0; iteration<val_metric.length; iteration++){
             modeldict = {};
 
@@ -35,8 +35,8 @@ var flattenModels = function(obj){
             modeldict.iteration = iteration;
             modeldict.val_metric = val_metric[iteration];
             modeldict.train_metric = train_metric[iteration];
-            modeldict.val_loss = model.val_loss[iteration];
-            modeldict.train_loss = model.train_loss[iteration];
+            modeldict.val_loss = model.metrics.val_loss[iteration];
+            modeldict.train_loss = model.metrics.loss[iteration];
 
             output.push(modeldict);
         }
