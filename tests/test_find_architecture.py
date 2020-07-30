@@ -1,5 +1,4 @@
 from pytest import approx, raises
-import os
 import unittest
 import math
 import json
@@ -8,7 +7,7 @@ import tensorflow as tf
 from tensorflow.keras.utils import to_categorical, Sequence
 from test_tools import safe_remove
 
-from mcfly import find_architecture, modelgen
+from mcfly import find_architecture
 from mcfly.models import CNN
 from test_modelgen import get_default as get_default_settings
 
