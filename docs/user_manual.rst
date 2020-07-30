@@ -53,11 +53,15 @@ Finding the best architecture
 ---------------------------------
 The function :func:`~mcfly.find_architecture.find_best_architecture` generates a variety of architectures and hyperparameters,
 and returns the best performing model on a subset of the data.
-The following two types of architectures are possible (for more information, see the :doc:`technical_doc`):
+The following four types of architectures are possible (for more information, see the :doc:`technical_doc`):
 
-**CNN**: ``[Conv - Relu]*N - Dense - Relu - Dense - Relu - Softmax``
+**CNN**: A stack ofonvolutional layers, followed by a final dense layer
 
-**DeepConvLSTM**: ``[Conv - Relu]*N - [LSTM]*M - Dropout - TimeDistributedDense - Softmax - TakeLast``
+**DeepConvLSTM**: Convolutional layers, followed by LSTM layers and a final dense layer
+
+**ResNet**: Convolutional layers with skip connections
+
+**InceptionTime**: Convolutional layers ('inception module') with different kernel sizes in parallel, concatenated and then followed by pooling and a dense layer.
 
 The hyperparameters to be optimized are the following:
 
@@ -75,10 +79,25 @@ The hyperparameters to be optimized are the following:
    * number of LSTM layers
    * for each LSTM layer: number of hidden nodes
 
+   * if modeltype=ResNet:
+      * network depth, i.e. number of residual modules
+      * minimum number of filters
+      * maximum kernel size
+
+   * if modeltype=InceptionTime:
+      * number of filters for all convolutional layers
+      * depth of network, i.e. number of Inception modules to stack.
+      * maximum kernel size
+
 
 We designed mcfly to have sensible default values and ranges for each setting.
 However, you have the possibility to influence the behavior of the function with the arguments that you give to it to try other values.
-See the the documentation of :func:`~mcfly.modelgen.generate_models` for all options.
+See the the documentation of :func:`~mcfly.modelgen.generate_models` for all options, among others:
+* **number_of_models**: the number of models that should be generated and tested
+* **nr_epochs**: The models are tested after only a small number of epochs, to limit the time. Setting this number higher will give a better estimate of the performance of the model, but it will take longer
+* **model_types**: List of all model architecture types to choose from
+* Ranges for all of the hyperparameters: The hyperparameters (as described above) are sampled from a uniform or log-uniform distribution. The boundaries of these distributions have default values (see the arguments :func:`~mcfly.modelgen.generate_models`), but can be set custom.
+
 
 
 Visualize the training process
