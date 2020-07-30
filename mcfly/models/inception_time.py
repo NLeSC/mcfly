@@ -15,7 +15,14 @@ class InceptionTime:
                  x_shape,
                  number_of_classes,
                  metrics = ['accuracy'],
-                 **settings):
+                 IT_min_network_depth = 3,
+                 IT_max_network_depth = 6,
+                 IT_min_filters_number = 32,
+                 IT_max_filters_number = 96,
+                 IT_min_max_kernel_size = 10,
+                 IT_max_max_kernel_size = 100,
+                 **_other
+                 ):
         """
         Parameters
         ----------
@@ -44,32 +51,24 @@ class InceptionTime:
         self.number_of_classes = number_of_classes
         self.metrics = metrics
 
-        # Set default parameters
-        self.defaults = {
-            'IT_min_network_depth': 3,
-            'IT_max_network_depth': 6,
-            'IT_min_filters_number': 32,
-            'IT_max_filters_number': 96,
-            'IT_min_max_kernel_size': 10,
-            'IT_max_max_kernel_size': 100,
+        # Limit parameter space based on input
+        if IT_max_max_kernel_size > self.x_shape[1]:
+            print("Set maximum kernel size for InceptionTime models to number of timesteps.")
+            IT_max_max_kernel_size = self.x_shape[1]
+
+        self.settings = {
+            'IT_min_network_depth': IT_min_network_depth,
+            'IT_max_network_depth': IT_max_network_depth,
+            'IT_min_filters_number': IT_min_filters_number,
+            'IT_max_filters_number': IT_max_filters_number,
+            'IT_min_max_kernel_size': IT_min_max_kernel_size,
+            'IT_max_max_kernel_size': IT_max_max_kernel_size
             }
 
-        # Replace default parameters with input
-        for key, value in settings.items():
-            if key in self.defaults:
-                print("The value of {} is set from {} (default) to {}".format(key, self.defaults[key], value))
-
         # Add missing parameters from default
-        for key, value in self.defaults.items():
-            if key not in settings:
-                settings[key] = value
-
-        # Limit parameter space based on input
-        if settings['IT_max_max_kernel_size'] > self.x_shape[1]:
-            print("Set maximum kernel size for InceptionTime models to number of timesteps.")
-            settings['IT_max_max_kernel_size'] = self.x_shape[1]
-
-        self.settings = settings
+        for key, value in _other.items():
+            if key not in self.settings:
+                self.settings[key] = value
 
 
     def generate_hyperparameters(self):

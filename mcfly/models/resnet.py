@@ -17,7 +17,13 @@ class ResNet:
                  x_shape,
                  number_of_classes,
                  metrics = ['accuracy'],
-                 **settings):
+                 resnet_min_network_depth = 2,
+                 resnet_max_network_depth = 5,
+                 resnet_min_filters_number = 32,
+                 resnet_max_filters_number = 128,
+                 resnet_min_max_kernel_size = 8,
+                 resnet_max_max_kernel_size = 32,
+                 **_other):
         """
         Parameters
         ----------
@@ -47,26 +53,19 @@ class ResNet:
         self.metrics = metrics
 
         # Set default parameters
-        self.defaults = {
-            'resnet_min_network_depth': 2,
-            'resnet_max_network_depth': 5,
-            'resnet_min_filters_number': 32,
-            'resnet_max_filters_number': 128,
-            'resnet_min_max_kernel_size': 8,
-            'resnet_max_max_kernel_size': 32,
+        self.settings = {
+            'resnet_min_network_depth': resnet_min_network_depth,
+            'resnet_max_network_depth': resnet_max_network_depth,
+            'resnet_min_filters_number': resnet_min_filters_number,
+            'resnet_max_filters_number': resnet_max_filters_number,
+            'resnet_min_max_kernel_size': resnet_min_max_kernel_size,
+            'resnet_max_max_kernel_size': resnet_max_max_kernel_size,
             }
 
-        # Replace default parameters with input
-        for key, value in settings.items():
-            if key in self.defaults:
-                print("The value of {} is set from {} (default) to {}".format(key, self.defaults[key], value))
-
         # Add missing parameters from default
-        for key, value in self.defaults.items():
-            if key not in settings:
-                settings[key] = value
-        self.settings = settings
-
+        for key, value in _other.items():
+            if key not in self.settings:
+                self.settings[key] = value
 
     def generate_hyperparameters(self):
         """Generate a hyperparameter set that define a ResNet model.
