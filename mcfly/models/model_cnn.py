@@ -11,9 +11,14 @@ from .base_hyperparameter_generator import generate_base_hyperparameter_set
 class CNN:
     """Generate CNN model and hyperparameters.
     """
-    def __init__(self, x_shape, number_of_classes, metrics=['accuracy'], **settings):
+    def __init__(self, x_shape, number_of_classes, metrics=['accuracy'],
+                 cnn_min_layers=1,
+                 cnn_max_layers=10,
+                 cnn_min_filters=10,
+                 cnn_max_filters=100,
+                 cnn_min_fc_nodes=10,
+                 cnn_max_fc_nodes=2000, **base_parameters):
         """
-
         Parameters
         ----------
         x_shape : tuple
@@ -40,27 +45,18 @@ class CNN:
         self.x_shape = x_shape
         self.number_of_classes = number_of_classes
         self.metrics = metrics
-
         # Set default parameters
-        self.defaults = {
-            'cnn_min_layers': 1,
-            'cnn_max_layers': 10,
-            'cnn_min_filters': 10,
-            'cnn_max_filters': 100,
-            'cnn_min_fc_nodes': 10,
-            'cnn_max_fc_nodes': 2000
-            }
-
-        # Replace default parameters with input
-        for key, value in settings.items():
-            if key in self.defaults:
-                print("The value of {} is set from {} (default) to {}".format(key, self.defaults[key], value))
-
+        self.settings = {'cnn_min_layers': cnn_min_layers,
+                         'cnn_max_layers': cnn_max_layers,
+                         'cnn_min_filters': cnn_min_filters,
+                         'cnn_max_filters': cnn_max_filters,
+                         'cnn_min_fc_nodes': cnn_min_fc_nodes,
+                         'cnn_max_fc_nodes', cnn_max_fc_nodes}
+        
         # Add missing parameters from default
-        for key, value in self.defaults.items():
-            if key not in settings:
-                settings[key] = value
-        self.settings = settings
+        for key, value in self.base_parameters.items():
+            if key not in self.settings:
+                self.settings[key] = value
 
     def generate_hyperparameters(self):
         """Generate a hyperparameter set that define a CNN model.
