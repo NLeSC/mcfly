@@ -2,7 +2,7 @@
 
 import unittest
 from mcfly.models import ResNet
-from tests.test_modelgen import get_default, generate_train_data
+from test_modelgen import get_default, generate_train_data
 
 class ResNetSuite(unittest.TestCase):
     """

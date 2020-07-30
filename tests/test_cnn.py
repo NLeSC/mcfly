@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 from mcfly.models import CNN
-from tests.test_modelgen import get_default
+from test_modelgen import get_default
 
 
 class CNNSuite(unittest.TestCase):
