@@ -1,15 +1,21 @@
-from mcfly import find_architecture
+from mcfly import find_architecture, modelgen
+from test_modelgen import get_default as get_default_settings
 import numpy as np
 from pytest import approx, raises
-from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.utils import to_categorical, Sequence
 import tensorflow as tf
 import os
 import unittest
+import math
+import json
+
+
 
 from test_tools import safe_remove
 
 
 class FindArchitectureBasicSuite(unittest.TestCase):
+
     def test_kNN_accuracy_1(self):
         """
         The accuracy for this single-point dataset should be 1.
@@ -58,6 +64,7 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         assert 1 >= knn_acc >= 0
 
     # %TODO add test with metric other than accuracy
+    # TODO: Is this a test? It's not set up as one
     def train_models_on_samples_empty(self):
         num_timesteps = 100
         num_channels = 2
@@ -78,6 +85,121 @@ class FindArchitectureBasicSuite(unittest.TestCase):
                 outputfile=None, early_stopping=False,
                 batch_size=20, metric='accuracy')
         assert len(histories) == 0
+
+
+    def test_train_models_on_samples_with_x_and_y(self):
+        """
+        Model should be able to train using separated x and y values
+        """
+        num_timesteps = 100
+        num_channels = 2
+        num_samples_train = 5
+        num_samples_val = 3
+        X_train = np.random.rand(
+            num_samples_train,
+            num_timesteps,
+            num_channels)
+        y_train = to_categorical(np.array([0, 0, 1, 1, 1]))
+        X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
+        y_val = to_categorical(np.array([0, 1, 1]))
+        batch_size = 20
+
+        hyperparams = modelgen.generate_CNN_hyperparameter_set(
+            get_default_settings())
+        model = modelgen.generate_CNN_model(X_train.shape, 2, **hyperparams)
+        models = [(model, hyperparams, "CNN")]
+
+        histories, val_metrics, val_losses = \
+            find_architecture.train_models_on_samples(
+                X_train, y_train, X_val, y_val, models,
+                nr_epochs=1, subset_size=10, verbose=False,
+                outputfile=None, early_stopping_patience='auto',
+                batch_size=batch_size)
+
+
+    def test_train_models_on_samples_with_dataset(self):
+        """
+        Model should be able to train using a dataset as an input
+        """
+        num_timesteps = 100
+        num_channels = 2
+        num_samples_train = 5
+        num_samples_val = 3
+        X_train = np.random.rand(
+            num_samples_train,
+            num_timesteps,
+            num_channels)
+        y_train = to_categorical(np.array([0, 0, 1, 1, 1]))
+        X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
+        y_val = to_categorical(np.array([0, 1, 1]))
+        batch_size = 20
+
+        data_train = tf.data.Dataset.from_tensor_slices(
+            (X_train, y_train)).batch(batch_size)
+
+        data_val = tf.data.Dataset.from_tensor_slices(
+            (X_val, y_val)).batch(batch_size)
+
+        hyperparams = modelgen.generate_CNN_hyperparameter_set(
+            get_default_settings())
+        model = modelgen.generate_CNN_model(X_train.shape, 2, **hyperparams)
+        models = [(model, hyperparams, "CNN")]
+
+        histories, val_metrics, val_losses = \
+            find_architecture.train_models_on_samples(
+                data_train, None, data_val, None, models,
+                nr_epochs=1, subset_size=None, verbose=False,
+                outputfile=None, early_stopping_patience='auto',
+                batch_size=batch_size)
+
+
+    def test_train_models_on_samples_with_generators(self):
+        """
+        Model should be able to train using a generator as an input
+        """
+        num_timesteps = 100
+        num_channels = 2
+        num_samples_train = 5
+        num_samples_val = 3
+        X_train = np.random.rand(
+            num_samples_train,
+            num_timesteps,
+            num_channels)
+        y_train = to_categorical(np.array([0, 0, 1, 1, 1]))
+        X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
+        y_val = to_categorical(np.array([0, 1, 1]))
+        batch_size = 20
+
+        class DataGenerator(Sequence):
+            def __init__(self, x_set, y_set, batch_size):
+                self.x, self.y = x_set, y_set
+                self.batch_size = batch_size
+
+            def __len__(self):
+                return math.ceil(len(self.x) / self.batch_size)
+
+            def __getitem__(self, idx):
+                batch_x = self.x[idx * self.batch_size:(idx + 1) *
+                self.batch_size]
+                batch_y = self.y[idx * self.batch_size:(idx + 1) *
+                self.batch_size]
+                return batch_x, batch_y
+
+        data_train = DataGenerator(X_train, y_train, batch_size)
+        data_val = DataGenerator(X_val, y_val, batch_size)
+
+        hyperparams = modelgen.generate_CNN_hyperparameter_set(
+            get_default_settings())
+        model = modelgen.generate_CNN_model(X_train.shape, 2, **hyperparams)
+        models = [(model, hyperparams, "CNN")]
+
+        histories, val_metrics, val_losses = \
+            find_architecture.train_models_on_samples(
+                data_train, None, data_val, None, models,
+                nr_epochs=1, subset_size=None, verbose=False,
+                outputfile=None, early_stopping_patience='auto',
+                batch_size=batch_size)
+
 
     @unittest.skip('Needs tensorflow API v2. Also, quite a slow test of 15s.')
     def test_find_best_architecture_with_class_weights(self):
@@ -187,8 +309,26 @@ class MetricNamingSuite(unittest.TestCase):
 
 
 class HistoryStoringSuite(unittest.TestCase):
-    def test_store_train_history_as_json(self):
-        """The code should produce a json file."""
+    def test_store_train_history_as_json_contains_expected_attributes(self):
+        """The code should produce a json file with a number of expected attributes, used by visualization."""
+        self._write_test_history_file(self.history_file_path)
+
+        expected_attributes = ['metrics', 'modeltype', 'regularization_rate', 'learning_rate']
+        log = self._load_history_and_assert_is_list(self.history_file_path)
+        for model_log in log:
+            for attribute in expected_attributes:
+                assert attribute in model_log
+
+    def test_store_train_history_as_json_metrics_is_dict(self):
+        """The log for every model should contain a dict allowing for multiple metrics."""
+        self._write_test_history_file(self.history_file_path)
+
+        log = self._load_history_and_assert_is_list(self.history_file_path)
+        for model_log in log:
+            assert type(model_log['metrics']) is dict
+
+    @staticmethod
+    def _write_test_history_file(history_file_path):
         params = {'fc_hidden_nodes': 1,
                   'learning_rate': 1,
                   'regularization_rate': 0,
@@ -196,11 +336,20 @@ class HistoryStoringSuite(unittest.TestCase):
                   'lstm_dims': np.array([1, 1])
                   }
         history = {'loss': [1, 1], 'accuracy': [np.float64(0), np.float32(0)],
-                   'val_loss': [np.float(1), np.float(1)], 'val_accuracy': [np.float64(0), np.float64(0)]}
+                   'val_loss': [np.float(1), np.float(1)], 'val_accuracy': [np.float64(0), np.float64(0)],
+                   'my_own_custom_metric': [np.float64(0), np.float64(0)]}
         model_type = 'ABC'
+        find_architecture.store_train_hist_as_json(params, model_type, history, history_file_path)
 
-        find_architecture.store_train_hist_as_json(params, model_type, history, self.history_file_path)
-        assert os.path.isfile(self.history_file_path)
+    @staticmethod
+    def _load_history_and_assert_is_list(history_file_path):
+        """ The log contains a list of models with their history. Top level should therefore be type list."""
+        with open(history_file_path) as f:
+            log = json.load(f)
+        # In case any assertion fails, we want to see the complete log printed to console.
+        print(log)
+        assert type(log) is list
+        return log
 
     def setUp(self):
         self.history_file_path = '.generated_models_history_for_storing_test.json'

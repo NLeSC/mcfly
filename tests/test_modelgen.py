@@ -4,44 +4,45 @@ import numpy as np
 import unittest
 
 
+# TODO: Move this to an utils file, or obtain it from other source?
+def get_default():
+    """ "Define mcflu default parameters as dictionary. """
+    settings = {'metrics': ['accuracy'],
+                'model_types': ['CNN', 'DeepConvLSTM', 'ResNet', 'InceptionTime'],
+                'cnn_min_layers': 1,
+                'cnn_max_layers': 10,
+                'cnn_min_filters': 10,
+                'cnn_max_filters': 100,
+                'cnn_min_fc_nodes': 10,
+                'cnn_max_fc_nodes': 2000,
+                'deepconvlstm_min_conv_layers': 1,
+                'deepconvlstm_max_conv_layers': 10,
+                'deepconvlstm_min_conv_filters': 10,
+                'deepconvlstm_max_conv_filters': 100,
+                'deepconvlstm_min_lstm_layers': 1,
+                'deepconvlstm_max_lstm_layers': 5,
+                'deepconvlstm_min_lstm_dims': 10,
+                'deepconvlstm_max_lstm_dims': 100,
+                'resnet_min_network_depth': 2,
+                'resnet_max_network_depth': 5,
+                'resnet_min_filters_number': 32,
+                'resnet_max_filters_number': 128,
+                'resnet_min_max_kernel_size': 8,
+                'resnet_max_max_kernel_size': 32,
+                'IT_min_network_depth': 3,
+                'IT_max_network_depth': 6,
+                'IT_min_filters_number': 32,
+                'IT_max_filters_number': 96,
+                'IT_min_max_kernel_size': 10,
+                'IT_max_max_kernel_size': 100,
+                'low_lr': 1,
+                'high_lr': 4,
+                'low_reg': 1,
+                'high_reg': 4}
+    return settings
+
 class ModelGenerationSuite(unittest.TestCase):
     """Basic test cases."""
-
-    def get_default(self):
-        """ "Define mcflu default parameters as dictionary. """
-        settings = {'metrics': ['accuracy'],
-                    'model_types': ['CNN', 'DeepConvLSTM', 'ResNet', 'InceptionTime'],
-                    'cnn_min_layers': 1,
-                    'cnn_max_layers': 10,
-                    'cnn_min_filters': 10,
-                    'cnn_max_filters': 100,
-                    'cnn_min_fc_nodes': 10,
-                    'cnn_max_fc_nodes': 2000,
-                    'deepconvlstm_min_conv_layers': 1,
-                    'deepconvlstm_max_conv_layers': 10,
-                    'deepconvlstm_min_conv_filters': 10,
-                    'deepconvlstm_max_conv_filters': 100,
-                    'deepconvlstm_min_lstm_layers': 1,
-                    'deepconvlstm_max_lstm_layers': 5,
-                    'deepconvlstm_min_lstm_dims': 10,
-                    'deepconvlstm_max_lstm_dims': 100,
-                    'resnet_min_network_depth': 2,
-                    'resnet_max_network_depth': 5,
-                    'resnet_min_filters_number': 32,
-                    'resnet_max_filters_number': 128,
-                    'resnet_min_max_kernel_size': 8,
-                    'resnet_max_max_kernel_size': 32,
-                    'IT_min_network_depth': 3,
-                    'IT_max_network_depth': 6,
-                    'IT_min_filters_number': 32,
-                    'IT_max_filters_number': 96,
-                    'IT_min_max_kernel_size': 10,
-                    'IT_max_max_kernel_size': 100,
-                    'low_lr': 1,
-                    'high_lr': 4,
-                    'low_reg': 1,
-                    'high_reg': 4}
-        return settings
 
     def _generate_train_data(self, x_shape, nr_classes):
         X_train = np.random.rand(1, *x_shape[1:])
@@ -114,7 +115,7 @@ class ModelGenerationSuite(unittest.TestCase):
 
     def test_CNN_hyperparameters_nrlayers(self):
         """ Number of Conv layers from range [4, 4] should be 4. """
-        custom_settings = self.get_default()
+        custom_settings = get_default()
         kwargs = {'cnn_min_layers': 4,
                   'cnn_max_layers': 4}
         # Replace default parameters with input
@@ -128,7 +129,7 @@ class ModelGenerationSuite(unittest.TestCase):
 
     def test_CNN_hyperparameters_fcnodes(self):
         """ Number of fc nodes from range [123, 123] should be 123. """
-        custom_settings = self.get_default()
+        custom_settings = get_default()
         kwargs = {'cnn_min_fc_nodes': 123,
                   'cnn_max_fc_nodes': 123}
         # Replace default parameters with input
@@ -159,7 +160,7 @@ class ModelGenerationSuite(unittest.TestCase):
 
     def test_DeepConvLSTM_hyperparameters_nrconvlayers(self):
         """ Number of Conv layers from range [4, 4] should be 4. """
-        custom_settings = self.get_default()
+        custom_settings = get_default()
         kwargs = {'deepconvlstm_min_conv_layers': 4,
                   'deepconvlstm_max_conv_layers': 4}
         # Replace default parameters with input
@@ -230,7 +231,7 @@ class ModelGenerationSuite(unittest.TestCase):
         """ Network depth from range [4,4] should be 4.
         Maximum kernal size from range [10, 10] should be 10.
         Minimum filter number from range [16, 16] should be 16.  """
-        custom_settings = self.get_default()
+        custom_settings = get_default()
         kwargs = {'resnet_min_network_depth': 4,
                   'resnet_mmax_network_depth': 4,
                   'resnet_min_max_kernel_size': 10,
@@ -252,7 +253,7 @@ class ModelGenerationSuite(unittest.TestCase):
     def test_InceptionTime_starts_with_batchnorm(self):
         """ InceptionTime models should always start with a batch normalization layer. """
         model = modelgen.generate_InceptionTime_model((None, 20, 3), 2, 16)
-        
+
         assert 'BatchNormalization' in str(type(model.layers[1])), 'Wrong layer type.'
 
     def test_InceptionTime_first_inception_module(self):
@@ -301,7 +302,7 @@ class ModelGenerationSuite(unittest.TestCase):
         """ Network depth from range [5,5] should be 5.
         Maximum kernal size from range [12, 12] should be 12.
         Minimum filter number from range [32, 32] should be 32.  """
-        custom_settings = self.get_default()
+        custom_settings = get_default()
         kwargs = {'IT_min_network_depth': 5,
                   'IT_max_network_depth': 5,
                   'IT_min_max_kernel_size': 10,
