@@ -40,7 +40,9 @@ def generate_models(x_shape,
     number_of_models : int
         Number of models to generate
     model_types : list, optional
-        Type of model to build: 'CNN' 'DeepConvLSTM', 'ResNet', or 'InceptionTime'.
+        Expects list containg names of mcfly default models ('CNN' 'DeepConvLSTM',
+        'ResNet', or 'InceptionTime'), or custom model classes (see mcfly.models
+        for examples on how such a class is build and what it must contain).
         Default is to use all models equally frequently.
     metrics : list
         Metrics to calculate on the validation set.
