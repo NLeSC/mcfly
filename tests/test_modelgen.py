@@ -43,14 +43,16 @@ def get_default():
                 'high_reg': 4}
     return settings
 
-class ModelGenerationSuite(unittest.TestCase):
-    """Basic test cases."""
 
-    def _generate_train_data(self, x_shape, nr_classes):
+# TODO: Move this to an utils file?
+def generate_train_data(x_shape, nr_classes):
         X_train = np.random.rand(1, *x_shape[1:])
         y_train = np.random.randint(0, 1, size=(1, nr_classes))
         return X_train, y_train
 
+
+class ModelGenerationSuite(unittest.TestCase):
+    """Basic test cases."""
 
 
     # Tests for ResNet model:
@@ -100,7 +102,7 @@ class ModelGenerationSuite(unittest.TestCase):
         metrics = ['accuracy', 'mae']
         x_shape = (None, 20, 3)
         nr_classes = 2
-        X_train, y_train = self._generate_train_data(x_shape, nr_classes)
+        X_train, y_train = generate_train_data(x_shape, nr_classes)
 
         model_type = ResNet(x_shape, nr_classes, metrics=metrics)
         model = model_type.create_model(16, 20)
@@ -177,7 +179,7 @@ class ModelGenerationSuite(unittest.TestCase):
         metrics = ['accuracy', 'mae']
         x_shape = (None, 20, 3)
         nr_classes = 2
-        X_train, y_train = self._generate_train_data(x_shape, nr_classes)
+        X_train, y_train = generate_train_data(x_shape, nr_classes)
 
         model_type = InceptionTime(x_shape, nr_classes, metrics=metrics)
         model = model_type.create_model(16)
@@ -216,7 +218,7 @@ class ModelGenerationSuite(unittest.TestCase):
         """ Test if correct number of models is generated and if metrics is correct. """
         x_shape = (None, 20, 10)
         nr_classes = 2
-        X_train, y_train = self._generate_train_data(x_shape, nr_classes)
+        X_train, y_train = generate_train_data(x_shape, nr_classes)
         n_models = 5
 
         models = modelgen.generate_models(x_shape, nr_classes, n_models)
@@ -234,7 +236,7 @@ class ModelGenerationSuite(unittest.TestCase):
         """ Test if model class can be passed as model_types input."""
         x_shape = (None, 20, 10)
         nr_classes = 2
-        X_train, y_train = self._generate_train_data(x_shape, nr_classes)
+        X_train, y_train = generate_train_data(x_shape, nr_classes)
         n_models = 4
 
         models = modelgen.generate_models(x_shape, nr_classes, n_models,
@@ -250,7 +252,7 @@ class ModelGenerationSuite(unittest.TestCase):
         """ Test expected generate_models exception."""
         x_shape = (None, 20, 10)
         nr_classes = 2
-        X_train, y_train = self._generate_train_data(x_shape, nr_classes)
+        X_train, y_train = generate_train_data(x_shape, nr_classes)
         n_models = 2
 
         with pytest.raises(NameError, match="Unknown model name, 'wrong_entry'."):
