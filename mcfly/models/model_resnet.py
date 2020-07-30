@@ -109,10 +109,6 @@ class Model_ResNet:
 
         Parameters
         ----------
-        input_shape : tuple
-            Shape of the input dataset: (num_samples, num_timesteps, num_channels)
-        class_number : int
-            Number of classes for classification task
         min_filters_number : int
             Number of filters for first convolutional layer
         max_kernel_size: int,
