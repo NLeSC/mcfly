@@ -11,9 +11,17 @@ from .base_hyperparameter_generator import generate_base_hyperparameter_set
 
 
 class ConvLSTM:
-    """Generate CNN model and hyperparameters.
+    """Generate DeepConvLSTM model and hyperparameters.
     """
-    def __init__(self, x_shape, number_of_classes, metrics=['accuracy'], **settings):
+    def __init__(self, x_shape, number_of_classes, metrics=['accuracy'], 
+                 deepconvlstm_min_conv_layers=1,
+                 deepconvlstm_max_conv_layers=10,
+                 deepconvlstm_min_conv_filters=10,
+                 deepconvlstm_max_conv_filters=100,
+                 deepconvlstm_min_lstm_layers=1,
+                 deepconvlstm_max_lstm_layers=5,
+                 deepconvlstm_min_lstm_dims=10,
+                 deepconvlstm_max_lstm_dims=100, **base_parameters):
         """
 
         Parameters
@@ -48,27 +56,21 @@ class ConvLSTM:
         self.metrics = metrics
 
         # Set default parameters
-        self.defaults = {
-            'deepconvlstm_min_conv_layers': 1,
-            'deepconvlstm_max_conv_layers': 10,
-            'deepconvlstm_min_conv_filters': 10,
-            'deepconvlstm_max_conv_filters': 100,
-            'deepconvlstm_min_lstm_layers': 1,
-            'deepconvlstm_max_lstm_layers': 5,
-            'deepconvlstm_min_lstm_dims': 10,
-            'deepconvlstm_max_lstm_dims': 100,
+        self.settings = {
+            'deepconvlstm_min_conv_layers': deepconvlstm_min_conv_layers,
+            'deepconvlstm_max_conv_layers': deepconvlstm_max_conv_layers,
+            'deepconvlstm_min_conv_filters': deepconvlstm_min_conv_filters,
+            'deepconvlstm_max_conv_filters': deepconvlstm_max_conv_filters,
+            'deepconvlstm_min_lstm_layers': deepconvlstm_min_lstm_layers,
+            'deepconvlstm_max_lstm_layers': deepconvlstm_max_lstm_layers,
+            'deepconvlstm_min_lstm_dims': deepconvlstm_min_lstm_dims,
+            'deepconvlstm_max_lstm_dims': deepconvlstm_max_lstm_dims,
             }
 
-        # Replace default parameters with input
-        for key, value in settings.items():
-            if key in self.defaults:
-                print("The value of {} is set from {} (default) to {}".format(key, self.defaults[key], value))
-
         # Add missing parameters from default
-        for key, value in self.defaults.items():
-            if key not in settings:
-                settings[key] = value
-        self.settings = settings
+        for key, value in self.base_parameters.items():
+            if key not in self.settings:
+                self.settings[key] = value
 
     def generate_hyperparameters(self):
         """Generate a hyperparameter set that defines a DeepConvLSTM model.
