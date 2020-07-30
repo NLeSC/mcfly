@@ -160,9 +160,13 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
             print('Training model %d' % i, model_types)
         if early_stopping_patience is not None:
             if early_stopping_patience == 'auto':
-                callbacks = [EarlyStopping(monitor='val_loss', patience=min(nr_epochs//10, 5), verbose=verbose, mode='auto')]
+                callbacks = [EarlyStopping(monitor='val_loss',
+                                           patience=min(nr_epochs//10, 5),
+                                           verbose=verbose, mode='auto')]
             else:
-                callbacks = [EarlyStopping(monitor='val_loss', patience=early_stopping_patience, verbose=verbose, mode='auto')]
+                callbacks = [EarlyStopping(monitor='val_loss',
+                                           patience=early_stopping_patience,
+                                           verbose=verbose, mode='auto')]
         else:
             callbacks = []
         history = model.fit(x = data_train,
@@ -188,8 +192,11 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
 
 
 def _get_from_history(metric_name, history_history):
-    """Gets the metric from the history object. Tries to solve inconsistencies in abbreviation of accuracy between
-    Tensorflow/Keras versions. """
+    """Get the metric from the history object.
+
+    Tries to solve inconsistencies in abbreviation of accuracy between
+    Tensorflow/Keras versions.
+    """
     if metric_name == 'val_accuracy':
         return _get_either_from_history('val_accuracy', 'val_acc', history_history)
     elif metric_name == 'accuracy':
@@ -378,7 +385,7 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
 
 def _get_metric_name(name):
     """
-    Gives the keras name for a metric
+    Gives the keras name for a metric.
 
     Parameters
     ----------
