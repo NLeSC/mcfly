@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 from mcfly.models import CNN
-from test_modelgen import get_default
+from test_modelgen import get_default, generate_train_data
 
 
 class CNNSuite(unittest.TestCase):
@@ -54,7 +54,7 @@ class CNNSuite(unittest.TestCase):
         metrics = ['accuracy', 'mae']
         x_shape = (None, 20, 3)
         nr_classes = 2
-        X_train, y_train = self._generate_train_data(x_shape, nr_classes)
+        X_train, y_train = generate_train_data(x_shape, nr_classes)
 
         model_type = CNN(x_shape, nr_classes, metrics=metrics)
         model = model_type.create_model(**{"filters": [32, 32],
