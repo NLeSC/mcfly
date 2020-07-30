@@ -54,7 +54,7 @@ class CNN:
                          'cnn_max_fc_nodes': cnn_max_fc_nodes}
 
         # Add missing parameters from default
-        for key, value in self.base_parameters.items():
+        for key, value in base_parameters.items():
             if key not in self.settings:
                 self.settings[key] = value
 
