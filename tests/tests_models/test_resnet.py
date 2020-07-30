@@ -87,3 +87,9 @@ class ResNetSuite(unittest.TestCase):
         assert hyperparams.get('network_depth') == 4, 'Wrong network depth'
         assert hyperparams.get('max_kernel_size') == 10, 'Wrong kernel'
         assert hyperparams.get('min_filters_number') == 16, 'Wrong filter number'
+
+
+    def test_ResNet_travis(self):
+        """Not sure if Travis's pytest is picking up these files"""
+        assert False
+

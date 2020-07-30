@@ -96,3 +96,7 @@ class CNNSuite(unittest.TestCase):
         hyperparams = model_type.generate_hyperparameters()
 
         assert hyperparams.get('fc_hidden_nodes') == 123
+
+    def test_cnn_travis(self):
+        """Not sure if Travis's pytest is picking up these files"""
+        assert False
