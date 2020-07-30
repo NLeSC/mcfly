@@ -69,9 +69,7 @@ def generate_models(x_shape,
     models : list
         List of compiled models
     """
-    if number_of_models < len(model_types):
-        warnings.warn("Specified number_of_models is smaller than the given number of model types.")
-    
+
     # Set default hyperparameter ranges
     defaults = {'low_lr': 1,
                 'high_lr': 4,
@@ -82,6 +80,13 @@ def generate_models(x_shape,
                       'DeepConvLSTM': Model_ConvLSTM,
                       'ResNet': Model_ResNet,
                       'InceptionTime': Model_InceptionTime}
+
+    for model_type in model_types:
+        if isinstance(model_type, str) and model_type not in default_models:
+            raise NameError("Unknown model name, '{}'.".format(model_type))
+    if number_of_models < len(model_types):
+        warnings.warn("Specified number_of_models is smaller than the given number of model types.")
+
 
     # Replace default hyperparameter ranges with input
     for key, value in hyperparameter_ranges.items():
@@ -107,8 +112,6 @@ def generate_models(x_shape,
         if current_model_type in default_models:
             model_type = default_models[current_model_type](x_shape, number_of_classes,
                                                             metrics, **hyperparameter_ranges)
-        elif isinstance(current_model_type, str):
-            raise NameError("Unknown model name given.")
         else: # Assume model class was passed
             model_type = current_model_type(x_shape, number_of_classes,
                                             metrics, **hyperparameter_ranges)

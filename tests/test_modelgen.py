@@ -360,7 +360,7 @@ class ModelGenerationSuite(unittest.TestCase):
         nr_classes = 2
         X_train, y_train = self._generate_train_data(x_shape, nr_classes)
         n_models = 4
-        
+
         models = modelgen.generate_models(x_shape, nr_classes, n_models,
                                           model_types=['CNN', Model_ResNet])
         created_model_names = list(set([x[2] for x in models]))
@@ -376,11 +376,11 @@ class ModelGenerationSuite(unittest.TestCase):
         nr_classes = 2
         X_train, y_train = self._generate_train_data(x_shape, nr_classes)
         n_models = 2
-        
-        with pytest.raises(NameError, match="Unknown model name given."):
+
+        with pytest.raises(NameError, match="Unknown model name, 'wrong_entry'."):
             models = modelgen.generate_models(x_shape, nr_classes, n_models,
                                               model_types=['CNN', "wrong_entry"])
-                                                                
+
     def setUp(self):
         np.random.seed(1234)
 
