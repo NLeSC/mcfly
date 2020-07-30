@@ -1,8 +1,10 @@
-mcfly package
-=============
+mcfly
+=====
+.. automodule:: mcfly
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
-Submodules
-----------
 
 mcfly.find_architecture module
 ------------------------------
@@ -24,14 +26,6 @@ mcfly.storage module
 --------------------
 
 .. automodule:: mcfly.storage
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: mcfly
     :members:
     :undoc-members:
     :show-inheritance:

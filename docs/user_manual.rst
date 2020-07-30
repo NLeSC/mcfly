@@ -18,24 +18,52 @@ Or follow a complete course on deep learning:
 http://cs231n.stanford.edu/
 
 
-The function findBestArchitecture
+Data preprocessing
+-------------------
+
+The input for the mcfly functions is data that is already preprocessed to be handled for deep learning module Keras.
+In this section we describe what data format is expected and what to think about when preprocessing.
+
+Eligible data sets
+^^^^^^^^^^^^^^^^^^
+Mcfly is a tool for *classification* of single or *multichannel timeseries data*. One (real valued) multi-channel time series is associated with one class label.
+All sequences in the data set should be of equal length.
+
+Data format
+^^^^^^^^^^^
+The data should be split in train, validation and test set. For each of the splits, the input X and the output y are both numpy arrays.
+
+The input data X should be of shape (num_samples, num_timesteps, num_channels). The output data y is of shape (num_samples, num_classes), as a binary array for each sample.
+
+We recommend storing the numpy arrays as binary files with the numpy function ``np.save``.
+
+Data preprocessing
+^^^^^^^^^^^^^^^^^^
+Here are some tips for preprocessing the data:
+
+* For longer, multi-label sequences, we recommend creating subsequences with a sliding window. The length and step of the window can be based on domain knowledge.
+* One label should be associated with a complete time series. In case of multiple labels, often the last label is taken as the label for the complete sequence.
+  Another possibility is to take the majority label.
+* In splitting the data into training, validation and test sets, it might be necessary to make sure that sample subject (such as test persons) for which multiple sequences are available, are not present in both train and validation/test set. The same holds for subsequences that originates from the same original sequence (in case of sliding windows).
+* The Keras function ``keras.utils.np_utils.to_categorical`` can be used to transform an array of class labels to binary class labels.
+* Data doesn't need to be normalized. Every model mcfly produces starts by normalizing data through a Batch Normalization layer.
+  This means that training data is used to learn mean and standard deviation of each channel and timestep.
+
+Finding the best architecture
 ---------------------------------
 The function :func:`~mcfly.find_architecture.find_best_architecture` generates a variety of architectures and hyperparameters,
 and returns the best performing model on a subset of the data.
-The following four types of architectures are possible (for a more detailed description of the models, see the :doc:`technical_doc`):
+The following two types of architectures are possible (for more information, see the :doc:`technical_doc`):
 
-**CNN**: A stack ofonvolutional layers, followed by a final dense layer
+**CNN**: ``[Conv - Relu]*N - Dense - Relu - Dense - Relu - Softmax``
 
-**DeepConvLSTM**: Convolutional layers, followed by LSTM layers and a final dense layer
-
-**ResNet**: Convolutional layers with skip connections
-
-**InceptionTime**: Convolutional layers ('inception module') with different kernel sizes in parallel, concatenated and then followed by pooling and a dense layer.
+**DeepConvLSTM**: ``[Conv - Relu]*N - [LSTM]*M - Dropout - TimeDistributedDense - Softmax - TakeLast``
 
 The hyperparameters to be optimized are the following:
 
 * learning rate
 * regularization rate
+* model_type: *CNN* or *DeepConvLSTM*
 * if modeltype=CNN:
    * number of Conv layers
    * for each Conv layer: number of filters
@@ -47,25 +75,10 @@ The hyperparameters to be optimized are the following:
    * number of LSTM layers
    * for each LSTM layer: number of hidden nodes
 
-* if modeltype=ResNet:
-   * network depth, i.e. number of residual modules
-   * minimum number of filters
-   * maximum kernel size
-
-* if modeltype=InceptionTime:
-   * number of filters for all convolutional layers
-   * depth of network, i.e. number of Inception modules to stack.
-   * maximum kernel size
-
 
 We designed mcfly to have sensible default values and ranges for each setting.
 However, you have the possibility to influence the behavior of the function with the arguments that you give to it to try other values.
-These are the options (see also the documentation of :func:`~mcfly.modelgen.generate_models`):
-
-* **number_of_models**: the number of models that should be generated and tested
-* **nr_epochs**: The models are tested after only a small number of epochs, to limit the time. Setting this number higher will give a better estimate of the performance of the model, but it will take longer
-* **model_type** Specifies which type of model ('CNN' or 'DeepConvLSTM') to generate. With default value None it will generate both CNN and DeepConvLSTM models.
-* Ranges for all of the hyperparameters: The hyperparameters (as described above) are sampled from a uniform or log-uniform distribution. The boundaries of these distributions have default values (see the arguments :func:`~mcfly.modelgen.generate_models`), but can be set custom.
+See the the documentation of :func:`~mcfly.modelgen.generate_models` for all options.
 
 
 Visualize the training process

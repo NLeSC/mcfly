@@ -69,6 +69,7 @@ We use numpy-style docstrings for code documentation.
 ```cffconvert --ignore-suspect-keys --outputformat zenodo --outfile .zenodo.json```
 * Set new version number in mcfly/_version.py
 * Check that documentation uses the correct version
+  * Build documentation with `make html`
 * Edit Changelog (based on commits in https://github.com/NLeSC/mcfly/compare/v1.0.1...master)
 * Test if package can be installed with pip (`pip install .`)
 * Create Github release
@@ -79,7 +80,7 @@ We use numpy-style docstrings for code documentation.
 * Check doi on zenodo
 * If the visualization has changed, deploy it to github pages:
 ```
-git subtree push --prefix html origin gh-pages 
+git subtree push --prefix html origin gh-pages
 ```
 
 ## Licensing
