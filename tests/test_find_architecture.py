@@ -308,8 +308,26 @@ class MetricNamingSuite(unittest.TestCase):
 
 
 class HistoryStoringSuite(unittest.TestCase):
-    def test_store_train_history_as_json(self):
-        """The code should produce a json file."""
+    def test_store_train_history_as_json_contains_expected_attributes(self):
+        """The code should produce a json file with a number of expected attributes, used by visualization."""
+        self._write_test_history_file(self.history_file_path)
+
+        expected_attributes = ['metrics', 'modeltype', 'regularization_rate', 'learning_rate']
+        log = self._load_history_and_assert_is_list(self.history_file_path)
+        for model_log in log:
+            for attribute in expected_attributes:
+                assert attribute in model_log
+
+    def test_store_train_history_as_json_metrics_is_dict(self):
+        """The log for every model should contain a dict allowing for multiple metrics."""
+        self._write_test_history_file(self.history_file_path)
+
+        log = self._load_history_and_assert_is_list(self.history_file_path)
+        for model_log in log:
+            assert type(model_log['metrics']) is dict
+
+    @staticmethod
+    def _write_test_history_file(history_file_path):
         params = {'fc_hidden_nodes': 1,
                   'learning_rate': 1,
                   'regularization_rate': 0,
@@ -317,11 +335,20 @@ class HistoryStoringSuite(unittest.TestCase):
                   'lstm_dims': np.array([1, 1])
                   }
         history = {'loss': [1, 1], 'accuracy': [np.float64(0), np.float32(0)],
-                   'val_loss': [np.float(1), np.float(1)], 'val_accuracy': [np.float64(0), np.float64(0)]}
+                   'val_loss': [np.float(1), np.float(1)], 'val_accuracy': [np.float64(0), np.float64(0)],
+                   'my_own_custom_metric': [np.float64(0), np.float64(0)]}
         model_type = 'ABC'
+        find_architecture.store_train_hist_as_json(params, model_type, history, history_file_path)
 
-        find_architecture.store_train_hist_as_json(params, model_type, history, self.history_file_path)
-        assert os.path.isfile(self.history_file_path)
+    @staticmethod
+    def _load_history_and_assert_is_list(history_file_path):
+        """ The log contains a list of models with their history. Top level should therefore be type list."""
+        with open(history_file_path) as f:
+            log = json.load(f)
+        # In case any assertion fails, we want to see the complete log printed to console.
+        print(log)
+        assert type(log) is list
+        return log
 
     def setUp(self):
         self.history_file_path = '.generated_models_history_for_storing_test.json'
