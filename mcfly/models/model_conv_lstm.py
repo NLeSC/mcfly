@@ -76,7 +76,7 @@ class Model_ConvLSTM:
         Returns
         ----------
         hyperparameters : dict
-            parameters for a CNN model
+            parameters for a DeepConvLSTM model
         """
         params = Namespace(**self.settings)
         hyperparameters = generate_base_hyperparameter_set(params.low_lr,
