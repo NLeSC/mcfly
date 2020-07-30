@@ -107,17 +107,15 @@ def generate_models(x_shape,
         if current_model_type in default_models:
             model_type = default_models[current_model_type](x_shape, number_of_classes,
                                                             metrics, **hyperparameter_ranges)
-            hyperparameters = model_type.generate_hyperparameters()
-            model = model_type.create_model(**hyperparameters)
-            model_name = current_model_type
         elif isinstance(current_model_type, str):
             raise NameError("Unknown model name given.")
         else: # Assume model class was passed
             model_type = current_model_type(x_shape, number_of_classes,
                                             metrics, **hyperparameter_ranges)
-            hyperparameters = model_type.generate_hyperparameters()
-            model = model_type.create_model(**hyperparameters)
-            model_name = model_type.model_name
+
+        hyperparameters = model_type.generate_hyperparameters()
+        model = model_type.create_model(**hyperparameters)
+        model_name = model_type.model_name
 
         models.append((model, hyperparameters, model_name))
     return models
