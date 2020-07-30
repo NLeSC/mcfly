@@ -9,7 +9,7 @@ from tensorflow.keras.utils import to_categorical, Sequence
 from test_tools import safe_remove
 
 from mcfly import find_architecture, modelgen
-from mcfly.models import Model_CNN
+from mcfly.models import CNN
 from test_modelgen import get_default as get_default_settings
 
 
@@ -104,7 +104,7 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         batch_size = 20
 
         custom_settings = get_default_settings()
-        model_type = Model_CNN(X_train.shape, 2, **custom_settings)
+        model_type = CNN(X_train.shape, 2, **custom_settings)
         hyperparams = model_type.generate_hyperparameters()
         model = model_type.create_model(**hyperparams)
         models = [(model, hyperparams, "CNN")]
@@ -141,7 +141,7 @@ class FindArchitectureBasicSuite(unittest.TestCase):
             (X_val, y_val)).batch(batch_size)
 
         custom_settings = get_default_settings()
-        model_type = Model_CNN(X_train.shape, 2, **custom_settings)
+        model_type = CNN(X_train.shape, 2, **custom_settings)
         hyperparams = model_type.generate_hyperparameters()
         model = model_type.create_model(**hyperparams)
         models = [(model, hyperparams, "CNN")]
@@ -190,7 +190,7 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         data_val = DataGenerator(X_val, y_val, batch_size)
 
         custom_settings = get_default_settings()
-        model_type = Model_CNN(X_train.shape, 2, **custom_settings)
+        model_type = CNN(X_train.shape, 2, **custom_settings)
         hyperparams = model_type.generate_hyperparameters()
         model = model_type.create_model(**hyperparams)
         models = [(model, hyperparams, "CNN")]
