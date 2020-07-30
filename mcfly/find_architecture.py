@@ -240,20 +240,14 @@ def store_train_hist_as_json(params, model_type, history, outputfile, metric_nam
 
     jsondata['metrics'] = {}
     for metric in history:
-        jsondata['metrics'] = [_cast_to_primitive_type(val) for val in history[metric]]
+        jsondata['metrics'][metric] = [_cast_to_primitive_type(val) for val in history[metric]]
     jsondata['modeltype'] = model_type
+
     for k in jsondata.keys():
         if isinstance(jsondata[k], np.ndarray) or isinstance(jsondata[k], list):
             jsondata[k] = [_cast_to_primitive_type(element) for element in jsondata[k]]
-    if os.path.isfile(outputfile):
-        with open(outputfile, 'r') as outfile:
-            previousdata = json.load(outfile)
-    else:
-        previousdata = []
-    previousdata.append(jsondata)
-    with open(outputfile, 'w') as outfile:
-        json.dump(previousdata, outfile, sort_keys=True,
-                  indent=4, ensure_ascii=False)
+
+    _create_or_append_to_json(jsondata, outputfile)
 
 
 def _cast_to_primitive_type(obj):
@@ -263,6 +257,18 @@ def _cast_to_primitive_type(obj):
         return int(obj)
     else:
         return obj
+
+
+def _create_or_append_to_json(jsondata, outputfile):
+    if os.path.isfile(outputfile):
+        with open(outputfile, 'r') as outfile:
+            previousdata = json.load(outfile)
+    else:
+        previousdata = []
+    previousdata.append(jsondata)
+    with open(outputfile, 'w') as outfile:
+        json.dump(previousdata, outfile, sort_keys=True,
+                  indent=4, ensure_ascii=False)
 
 
 def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
