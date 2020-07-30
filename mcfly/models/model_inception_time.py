@@ -75,15 +75,10 @@ class Model_InceptionTime:
     def generate_hyperparameters(self):
         """Generate a hyperparameter set for an InceptionTime model.
 
-        Parameters
-        ----------
-        settings : dict
-            Dictionary containing all mcfly settings.
-
         Returns
         ----------
         hyperparameters : dict
-            parameters for a CNN model
+            Hyperparameter ranges for a InceptionTime model
         """
         params = Namespace(**self.settings)
         hyperparameters = generate_base_hyperparameter_set(params.low_lr,
