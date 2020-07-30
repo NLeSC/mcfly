@@ -29,6 +29,7 @@ def generate_models(x_shape,
                     **hyperparameter_ranges):
     """
     Generate one or multiple untrained Keras models with random hyperparameters.
+    The number of models per given model type will be roughly balanced.
 
     Parameters
     ----------
