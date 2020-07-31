@@ -202,7 +202,6 @@ class FindArchitectureBasicSuite(unittest.TestCase):
                 batch_size=batch_size)
 
 
-    @unittest.skip('Needs tensorflow API v2. Also, quite a slow test of 15s.')
     def test_find_best_architecture_with_class_weights(self):
         """Model should not ignore tiny class with huge class weight. Note that this test is non-deterministic,
         even though a seed was set. Note2 that this test is very slow, taking up 40% of all mcfly test time."""
