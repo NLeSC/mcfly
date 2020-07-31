@@ -1,5 +1,4 @@
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Dense, Activation, Lambda, \
     Convolution2D, TimeDistributed, \
     Reshape, LSTM, Dropout, BatchNormalization
@@ -10,7 +9,7 @@ from argparse import Namespace
 from .base_hyperparameter_generator import generate_base_hyperparameter_set
 
 
-class ConvLSTM:
+class DeepConvLSTM:
     """Generate DeepConvLSTM model and hyperparameters.
     """
     def __init__(self, x_shape, number_of_classes, metrics=['accuracy'],
