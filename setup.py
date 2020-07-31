@@ -1,5 +1,5 @@
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open(os.path.join(os.path.dirname(__file__), 'mcfly/_version.py')) as versionpy:
     exec(versionpy.read())
@@ -17,7 +17,7 @@ setup(
     license = "Apache 2.0",
     keywords = "Python",
     url = "https://github.com/NLeSC/mcfly",
-    packages=['mcfly'],
+    packages = find_packages(),
     install_requires=required,
     long_description=read('README.md'),
     long_description_content_type='text/markdown',

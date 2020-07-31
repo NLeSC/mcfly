@@ -1,17 +1,15 @@
-from mcfly import find_architecture, modelgen
-from test_modelgen import get_default as get_default_settings
-import numpy as np
 from pytest import approx, raises
-from tensorflow.keras.utils import to_categorical, Sequence
-import tensorflow as tf
-import os
 import unittest
 import math
 import json
-
-
-
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.utils import to_categorical, Sequence
 from test_tools import safe_remove
+
+from mcfly import find_architecture
+from mcfly.models import CNN
+from test_modelgen import get_default as get_default_settings
 
 
 class FindArchitectureBasicSuite(unittest.TestCase):
@@ -104,9 +102,10 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         y_val = to_categorical(np.array([0, 1, 1]))
         batch_size = 20
 
-        hyperparams = modelgen.generate_CNN_hyperparameter_set(
-            get_default_settings())
-        model = modelgen.generate_CNN_model(X_train.shape, 2, **hyperparams)
+        custom_settings = get_default_settings()
+        model_type = CNN(X_train.shape, 2, **custom_settings)
+        hyperparams = model_type.generate_hyperparameters()
+        model = model_type.create_model(**hyperparams)
         models = [(model, hyperparams, "CNN")]
 
         histories, val_metrics, val_losses = \
@@ -140,9 +139,10 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         data_val = tf.data.Dataset.from_tensor_slices(
             (X_val, y_val)).batch(batch_size)
 
-        hyperparams = modelgen.generate_CNN_hyperparameter_set(
-            get_default_settings())
-        model = modelgen.generate_CNN_model(X_train.shape, 2, **hyperparams)
+        custom_settings = get_default_settings()
+        model_type = CNN(X_train.shape, 2, **custom_settings)
+        hyperparams = model_type.generate_hyperparameters()
+        model = model_type.create_model(**hyperparams)
         models = [(model, hyperparams, "CNN")]
 
         histories, val_metrics, val_losses = \
@@ -188,9 +188,10 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         data_train = DataGenerator(X_train, y_train, batch_size)
         data_val = DataGenerator(X_val, y_val, batch_size)
 
-        hyperparams = modelgen.generate_CNN_hyperparameter_set(
-            get_default_settings())
-        model = modelgen.generate_CNN_model(X_train.shape, 2, **hyperparams)
+        custom_settings = get_default_settings()
+        model_type = CNN(X_train.shape, 2, **custom_settings)
+        hyperparams = model_type.generate_hyperparameters()
+        model = model_type.create_model(**hyperparams)
         models = [(model, hyperparams, "CNN")]
 
         histories, val_metrics, val_losses = \
