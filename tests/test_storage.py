@@ -53,7 +53,10 @@ def create_dummy_model():
     num_time_steps = 100
     num_channels = 2
     num_samples_train = 5
-    model, _parameters, _type = modelgen.generate_models((num_samples_train, num_time_steps, num_channels), 5, 1)[0]
+    model, _parameters, _type = modelgen.generate_models(
+        (num_samples_train, num_time_steps, num_channels), 5, 1,
+        ['CNN'] # Chosen one model type to avoid warnings
+        )[0]
     return model
 
 
