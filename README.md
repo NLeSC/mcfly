@@ -40,8 +40,7 @@ To install the package, run in the project directory:
 
 ### Installing on Windows
 When installing on Windows, there are a few things to take into consideration. The preferred (in other words: easiest) way to install Keras and mcfly is as follows:
-* Use [Anaconda](https://www.continuum.io/downloads)
-* Use Python 3.x, because tensorflow is not available on Windows for Python 2.7
+* Use [Anaconda](https://www.anaconda.com/download)
 * Install numpy and scipy through the conda package manager (and not with pip)
 * To install mcfly, run `pip install mcfly` in the cmd prompt.
 * Loading and saving models can give problems on Windows, see https://github.com/NLeSC/mcfly-tutorial/issues/17
@@ -69,6 +68,7 @@ We use numpy-style docstrings for code documentation.
 ```cffconvert --ignore-suspect-keys --outputformat zenodo --outfile .zenodo.json```
 * Set new version number in mcfly/_version.py
 * Check that documentation uses the correct version
+  * Build documentation with `make html`
 * Edit Changelog (based on commits in https://github.com/NLeSC/mcfly/compare/v1.0.1...master)
 * Test if package can be installed with pip (`pip install .`)
 * Create Github release
@@ -79,7 +79,7 @@ We use numpy-style docstrings for code documentation.
 * Check doi on zenodo
 * If the visualization has changed, deploy it to github pages:
 ```
-git subtree push --prefix html origin gh-pages 
+git subtree push --prefix html origin gh-pages
 ```
 
 ## Licensing
