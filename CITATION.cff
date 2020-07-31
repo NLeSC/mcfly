@@ -60,4 +60,37 @@ license: "Apache-2.0"
 message: "If you use this software, please cite it using these metadata."
 title: "mcfly: deep learning for time series"
 version: "3.0.0"
-...
+references:
+  - type: article
+  - authors:
+	- affiliation: "Netherlands eScience Center"
+      family-names: Kuppevelt
+      given-names: Dafne
+      name-particle: van
+    -
+      affiliation: "Netherlands eScience Center"
+      family-names: Meijer
+      given-names: Christiaan
+    -
+      affiliation: "Netherlands eScience Center"
+      family-names: Huber
+      given-names: Florian
+      orcid: "https://orcid.org/0000-0002-3535-9406"
+    -
+      affiliation: "Netherlands eScience Center"
+      family-names: Ploeg
+      given-names: Atze
+      name-particle: "van der"
+	-
+      affiliation: "Netherlands eScience Center"
+      family-names: Sonja
+      given-names: Georgievska
+	-
+      affiliation: "Netherlands eScience Center"
+      family-names: Hees
+      given-names: Vincent
+      name-particle: van
+      orcid: "https://orcid.org/0000-0003-0182-9008"
+  - title: Mcfly: Automated deep learning on time series
+  - doi: 10.1016/j.softx.2020.100548
+
