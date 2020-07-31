@@ -1,7 +1,0 @@
-@Misc{mcfly,
-  Title                    = {mcfly},
-  Author                   = {Dafne van Kuppevelt \and Christiaan Meijer \and Vincent van Hees \and Mateusz Kuzak},
-  Month                    = {April},
-  Year                     = {2017},
-  Doi                      = {10.5281/zenodo.495345}
-}
