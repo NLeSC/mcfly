@@ -40,8 +40,7 @@ To install the package, run in the project directory:
 
 ### Installing on Windows
 When installing on Windows, there are a few things to take into consideration. The preferred (in other words: easiest) way to install Keras and mcfly is as follows:
-* Use [Anaconda](https://www.continuum.io/downloads)
-* Use Python 3.x, because tensorflow is not available on Windows for Python 2.7
+* Use [Anaconda](https://www.anaconda.com/download)
 * Install numpy and scipy through the conda package manager (and not with pip)
 * To install mcfly, run `pip install mcfly` in the cmd prompt.
 * Loading and saving models can give problems on Windows, see https://github.com/NLeSC/mcfly-tutorial/issues/17

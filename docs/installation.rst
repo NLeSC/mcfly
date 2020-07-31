@@ -1,8 +1,12 @@
 Installation
 ============
 
-Prerequisites: - Python 3.5, 3.6 or 3.7 - pip - Tensorflow 2.0, if pip
-errors that it can’t find it for your python/pip version
+Prerequisites:
+
+* Python 3.6, 3.7 or 3.8
+* pip
+* Tensorflow 2.0, if pip errors that it can’t find it for your python/pip version
+
 
 Installing all dependencies in separate conda environment:
 
@@ -22,13 +26,13 @@ Installing on Windows
 
 When installing on Windows, there are a few things to take into
 consideration. The preferred (in other words: easiest) way to install
-Keras and mcfly is as follows: \* Use
-`Anaconda <https://www.continuum.io/downloads>`__ \* Use Python 3.x,
-because tensorflow is not available on Windows for Python 2.7 \* Install
-numpy and scipy through the conda package manager (and not with pip) \*
-To install mcfly, run ``pip install mcfly`` in the cmd prompt. \*
-Loading and saving models can give problems on Windows, see
-https://github.com/NLeSC/mcfly-tutorial/issues/17
+Keras and mcfly is as follows:
+
+* Use `Anaconda <https://www.anaconda.com/download>`__
+* Install numpy and scipy through the conda package manager (and not with pip)
+* To install mcfly, run ``pip install mcfly`` in the cmd prompt.
+* Loading and saving models can give problems on Windows, see https://github.com/NLeSC/mcfly-tutorial/issues/17
+
 
 Visualization
 ~~~~~~~~~~~~~
