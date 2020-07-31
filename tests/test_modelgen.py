@@ -6,7 +6,6 @@ from mcfly import modelgen
 from mcfly.models import ResNet
 
 
-# TODO: Move this to an utils file, or obtain it from other source?
 def get_default():
     """ "Define mcflu default parameters as dictionary. """
     settings = {'metrics': ['accuracy'],
@@ -44,7 +43,6 @@ def get_default():
     return settings
 
 
-# TODO: Move this to an utils file?
 def generate_train_data(x_shape, nr_classes):
     X_train = np.random.rand(1, *x_shape[1:])
     y_train = np.random.randint(0, 1, size=(1, nr_classes))
