@@ -59,6 +59,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
           or `(inputs, targets, sample_weights)`
         - generator or `keras.utils.Sequence`. Should return a tuple of
           `(inputs, targets)` or `(inputs, targets, sample_weights)`
+
         The input dataset for training of shape
         (num_samples, num_timesteps, num_channels)
         More details can be found in the documentation for the Keras
@@ -74,6 +75,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
           or `(inputs, targets, sample_weights)`
         - generator or `keras.utils.Sequence`. Should return a tuple of
           `(inputs, targets)` or `(inputs, targets, sample_weights)`
+          
         The input dataset for validation of shape
         (num_samples_val, num_timesteps, num_channels)
         More details can be found in the documentation for the Keras
@@ -283,11 +285,13 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
     Parameters
     ----------
     X_train : Supported types:
+
         - numpy array
         - `tf.data` dataset. Should return a tuple of `(inputs, targets)`
           or `(inputs, targets, sample_weights)`
         - generator or `keras.utils.Sequence`. Should return a tuple of
           `(inputs, targets)` or `(inputs, targets, sample_weights)`
+
         The input dataset for training of shape
         (num_samples, num_timesteps, num_channels)
         More details can be found in the documentation for the Keras
@@ -303,6 +307,7 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
           or `(inputs, targets, sample_weights)`
         - generator or `keras.utils.Sequence`. Should return a tuple of
           `(inputs, targets)` or `(inputs, targets, sample_weights)`
+
         The input dataset for validation of shape
         (num_samples_val, num_timesteps, num_channels)
         More details can be found in the documentation for the Keras
