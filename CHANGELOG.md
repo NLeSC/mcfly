@@ -4,6 +4,8 @@
 - Added support for training with Datasets, generators, and other data types supported by Keras [#211](https://github.com/NLeSC/mcfly/issues/211)
 - Added separate classes for each model type, also allowing easier extension by own custom models [#239](https://github.com/NLeSC/mcfly/pull/239)
 - Dropped support for Python 3.5 (supported are: Python 3.6, 3.7 and 3.8)
+- Extend and update documentation in readthedocs [#250](https://github.com/NLeSC/mcfly/pull/250)
+- Fix broken model visualization [#256](https://github.com/NLeSC/mcfly/pull/256)
 
 ## v3.0.0
 - Add ResNet architecture
