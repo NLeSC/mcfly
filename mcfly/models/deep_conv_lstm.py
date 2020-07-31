@@ -1,5 +1,4 @@
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Dense, Activation, Lambda, \
     Convolution2D, TimeDistributed, \
     Reshape, LSTM, Dropout, BatchNormalization
@@ -10,9 +9,12 @@ from argparse import Namespace
 from .base_hyperparameter_generator import generate_base_hyperparameter_set
 
 
-class ConvLSTM:
+class DeepConvLSTM:
     """Generate DeepConvLSTM model and hyperparameters.
     """
+
+    model_name = "DeepConvLSTM"
+
     def __init__(self, x_shape, number_of_classes, metrics=['accuracy'],
                  deepconvlstm_min_conv_layers=1,
                  deepconvlstm_max_conv_layers=10,
@@ -50,7 +52,6 @@ class ConvLSTM:
         deepconvlstm_max_lstm_dims : int
             maximum number of hidden nodes per LSTM layer in DeepConvLSTM model
         """
-        self.model_name = "DeepConvLSTM"
         self.x_shape = x_shape
         self.number_of_classes = number_of_classes
         self.metrics = metrics

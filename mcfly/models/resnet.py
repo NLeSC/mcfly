@@ -13,6 +13,9 @@ from .base_hyperparameter_generator import generate_base_hyperparameter_set
 class ResNet:
     """Generate ResNet model and hyperparameters.
     """
+
+    model_name = "ResNet"
+
     def __init__(self,
                  x_shape,
                  number_of_classes,
@@ -47,7 +50,6 @@ class ResNet:
         resnet_max_max_kernel_size : int
             maximum size of CNN kernels in ResNet model
         """
-        self.model_name = "ResNet"
         self.x_shape = x_shape
         self.number_of_classes = number_of_classes
         self.metrics = metrics

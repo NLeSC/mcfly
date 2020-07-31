@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 import unittest
-from mcfly.models import ConvLSTM
+from mcfly.models import DeepConvLSTM
 from test_modelgen import get_default
 
-class ConvLSTMSuite(unittest.TestCase):
+class DeepConvLSTMSuite(unittest.TestCase):
     """
     Tests cases for DeepconvLSTM models.
     """
 
     def test_deepconvlstm_batchnorm_dim(self):
         """The output shape of the batchnorm should be (None, nr_timesteps, nr_channels, nr_filters)"""
-        model_type = ConvLSTM((None, 20, 3), 2)
+        model_type = DeepConvLSTM((None, 20, 3), 2)
         model = model_type.create_model(**{"filters": [32, 32],
                                            "lstm_dims": [32, 32]})
 
@@ -19,7 +19,7 @@ class ConvLSTMSuite(unittest.TestCase):
 
     def test_deepconvlstm_enough_batchnorm(self):
         """LSTM model should contain as many batch norm layers as it has activations layers"""
-        model_type = ConvLSTM((None, 20, 3), 2)
+        model_type = DeepConvLSTM((None, 20, 3), 2)
         model = model_type.create_model(**{"filters": [32, 32, 32],
                                            "lstm_dims": [32, 32, 32]})
 
@@ -37,14 +37,14 @@ class ConvLSTMSuite(unittest.TestCase):
             if key in custom_settings:
                 custom_settings[key] = value
 
-        model_type = ConvLSTM(None, None, **custom_settings)
+        model_type = DeepConvLSTM(None, None, **custom_settings)
         hyperparams = model_type.generate_hyperparameters()
 
         assert len(hyperparams.get('filters')) == 4
 
     def test_deepconvlstm_starts_with_batchnorm(self):
         """ DeepConvLSTM models should always start with a batch normalization layer. """
-        model_type = ConvLSTM((None, 20, 3), 2)
+        model_type = DeepConvLSTM((None, 20, 3), 2)
         model = model_type.create_model(**{"filters": [32, 32],
                                            "lstm_dims": [32, 32]})
 
