@@ -3,7 +3,7 @@ import unittest
 from mcfly.models import DeepConvLSTM
 from test_modelgen import get_default
 
-class ConvLSTMSuite(unittest.TestCase):
+class DeepConvLSTMSuite(unittest.TestCase):
     """
     Tests cases for DeepconvLSTM models.
     """
