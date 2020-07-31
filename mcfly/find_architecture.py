@@ -117,7 +117,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     histories : list of Keras History objects
         train histories for all models
     val_metrics : list of floats
-        validation accuraracies of the models
+        validation metrics of the models
     val_losses : list of floats
         validation losses of the models
 
