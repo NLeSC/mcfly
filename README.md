@@ -68,7 +68,6 @@ We use numpy-style docstrings for code documentation.
 ```cffconvert --ignore-suspect-keys --outputformat zenodo --outfile .zenodo.json```
 * Set new version number in mcfly/_version.py
 * Edit Changelog (based on commits in https://github.com/NLeSC/mcfly/compare/v1.0.1...master)
-* Test if package can be installed with pip (`pip install .`)
 * Create Github release
 * Upload to pypi:  
 ```python setup.py sdist bdist_wheel```  
