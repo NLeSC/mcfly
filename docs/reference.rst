@@ -5,6 +5,13 @@ mcfly
     :undoc-members:
     :show-inheritance:
 
+mcfly.models
+------------------------------
+
+.. automodule:: mcfly.models
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 mcfly.find_architecture module
 ------------------------------

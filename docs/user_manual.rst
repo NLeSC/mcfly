@@ -55,13 +55,13 @@ The function :func:`~mcfly.find_architecture.find_best_architecture` generates a
 and returns the best performing model on a subset of the data.
 The following four types of architectures are possible (for more information, see the :doc:`technical_doc`):
 
-**CNN**: A stack ofonvolutional layers, followed by a final dense layer
+:class:`~mcfly.models.CNN`: A stack ofonvolutional layers, followed by a final dense layer
 
-**DeepConvLSTM**: Convolutional layers, followed by LSTM layers and a final dense layer
+:class:`~mcfly.models.ConvLSTM`: Convolutional layers, followed by LSTM layers and a final dense layer
 
-**ResNet**: Convolutional layers with skip connections
+:class:`~mcfly.models.ResNet`: Convolutional layers with skip connections
 
-**InceptionTime**: Convolutional layers ('inception module') with different kernel sizes in parallel, concatenated and then followed by pooling and a dense layer.
+:class:`~mcfly.models.InceptionTime`: Convolutional layers ('inception module') with different kernel sizes in parallel, concatenated and then followed by pooling and a dense layer.
 
 The hyperparameters to be optimized are the following:
 
