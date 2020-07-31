@@ -11,6 +11,9 @@ from .base_hyperparameter_generator import generate_base_hyperparameter_set
 class CNN:
     """Generate CNN model and hyperparameters.
     """
+
+    model_name = "CNN"
+
     def __init__(self, x_shape, number_of_classes, metrics=['accuracy'],
                  cnn_min_layers=1,
                  cnn_max_layers=10,
@@ -41,7 +44,7 @@ class CNN:
         cnn_max_fc_nodes : int
             maximum number of hidden nodes per Dense layer in CNN model
         """
-        self.model_name = "CNN"
+
         self.x_shape = x_shape
         self.number_of_classes = number_of_classes
         self.metrics = metrics

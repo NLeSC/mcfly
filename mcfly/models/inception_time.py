@@ -10,6 +10,7 @@ from .base_hyperparameter_generator import generate_base_hyperparameter_set
 
 class InceptionTime:
 
+    model_name = "InceptionTime"
 
     def __init__(self,
                  x_shape,
@@ -46,7 +47,6 @@ class InceptionTime:
         IT_max_max_kernel_size : int
             maximum size of CNN kernels in InceptionTime model
         """
-        self.model_name = "InceptionTime"
         self.x_shape = x_shape
         self.number_of_classes = number_of_classes
         self.metrics = metrics
