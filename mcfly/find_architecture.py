@@ -185,7 +185,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
 
         if outputfile is not None:
             store_train_hist_as_json(params, model_types, history.history,
-                                     outputfile, model.metrics_names[0])
+                                     outputfile)
         if model_path is not None:
             model.save(os.path.join(model_path, 'model_{}.h5'.format(i)))
 
