@@ -76,10 +76,8 @@ def generate_models(x_shape,
                 'low_reg': 1,
                 'high_reg': 4}
 
-    default_models = {'CNN': CNN,
-                      'DeepConvLSTM': ConvLSTM,
-                      'ResNet': ResNet,
-                      'InceptionTime': InceptionTime}
+    models = [CNN, ConvLSTM, ResNet, InceptionTime]
+    default_models = {model.name(): model for model in models}
 
     for model_type in model_types:
         if isinstance(model_type, str) and model_type not in default_models:
