@@ -19,7 +19,7 @@ class IntegrationSuite(unittest.TestCase):
                                           number_of_classes=num_classes,
                                           number_of_models=2,
                                           metrics=[metric],
-                                          model_type='CNN')  # Because CNNs are quick to train.
+                                          model_types=['CNN'])  # Because CNNs are quick to train.
         histories, val_accuracies, val_losses = find_architecture.train_models_on_samples(X_train, y_train,
                                                                                           X_val, y_val,
                                                                                           models, nr_epochs=5,

@@ -75,7 +75,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
           or `(inputs, targets, sample_weights)`
         - generator or `keras.utils.Sequence`. Should return a tuple of
           `(inputs, targets)` or `(inputs, targets, sample_weights)`
-          
+
         The input dataset for validation of shape
         (num_samples_val, num_timesteps, num_channels)
         More details can be found in the documentation for the Keras
