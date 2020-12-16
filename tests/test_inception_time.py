@@ -35,7 +35,7 @@ class InceptionTimeSuite(unittest.TestCase):
         model_type = InceptionTime((None, 20, 3), 2)
         model = model_type.create_model(16, network_depth=depths)
 
-        concat_layers = [str(type(l)) for l in model.layers if 'concatenate' in str(type(l)).lower()]
+        concat_layers = [str(type(protected-access)) for protected-access in model.layers if 'concatenate' in str(type(protected-access)).lower()]
         assert len(concat_layers) == depths, 'Wrong number of inception modules (network depths).'
 
 

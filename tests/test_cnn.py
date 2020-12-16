@@ -24,7 +24,7 @@ class CNNSuite(unittest.TestCase):
         model = model_type.create_model(**{"filters": [32, 32],
                                            "fc_hidden_nodes": fc_hidden_nodes})
 
-        dense_layer = [l for l in model.layers if 'Dense' in str(l)][0]
+        dense_layer = [layer for layer in model.layers if 'Dense' in str(layer)][0]
         assert dense_layer.output_shape[1] == fc_hidden_nodes, 'Wrong number of fc nodes.'
 
 
@@ -44,8 +44,8 @@ class CNNSuite(unittest.TestCase):
         model = model_type.create_model(**{"filters": [32, 32],
                                            "fc_hidden_nodes": 100})
 
-        batch_norm_layers = len([l for l in model.layers if 'BatchNormalization' in str(l)])
-        activation_layers = len([l for l in model.layers if 'Activation' in str(l)])
+        batch_norm_layers = len([layer for layer in model.layers if 'BatchNormalization' in str(layer)])
+        activation_layers = len([layer for layer in model.layers if 'Activation' in str(layer)])
         assert batch_norm_layers == activation_layers
 
 

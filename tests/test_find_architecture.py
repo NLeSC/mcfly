@@ -325,7 +325,7 @@ class HistoryStoringSuite(unittest.TestCase):
 
         log = self._load_history_and_assert_is_list(self.history_file_path)
         for model_log in log:
-            assert type(model_log['metrics']) is dict
+            assert isinstance(model_log['metrics'], dict)
 
     @staticmethod
     def _write_test_history_file(history_file_path):
@@ -348,7 +348,7 @@ class HistoryStoringSuite(unittest.TestCase):
             log = json.load(f)
         # In case any assertion fails, we want to see the complete log printed to console.
         print(log)
-        assert type(log) is list
+        assert isinstance(log, list)
         return log
 
     def setUp(self):

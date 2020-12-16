@@ -355,17 +355,17 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                                       number_of_models=number_of_models,
                                       metrics=[metric],
                                       **kwargs)
-    _, val_accuracies, val_losses = train_models_on_samples(X_train,
-                                                            y_train,
-                                                            X_val,
-                                                            y_val,
-                                                            models,
-                                                            nr_epochs,
-                                                            subset_size=subset_size,
-                                                            verbose=verbose,
-                                                            outputfile=outputpath,
-                                                            model_path=model_path,
-                                                            class_weight=class_weight)
+    _, val_accuracies, _ = train_models_on_samples(X_train,
+                                                   y_train,
+                                                   X_val,
+                                                   y_val,
+                                                   models,
+                                                   nr_epochs,
+                                                   subset_size=subset_size,
+                                                   verbose=verbose,
+                                                   outputfile=outputpath,
+                                                   model_path=model_path,
+                                                   class_weight=class_weight)
     best_model_index = np.argmax(val_accuracies[metric])
     best_model, best_params, best_model_type = models[best_model_index]
     knn_acc = kNN_accuracy(
