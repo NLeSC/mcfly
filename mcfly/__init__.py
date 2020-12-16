@@ -18,5 +18,14 @@
 
 from .modelgen import generate_models
 from .find_architecture import train_models_on_samples, find_best_architecture, kNN_accuracy
-
 from ._version import __version__
+
+
+__author__ = "Netherlands eScience Center"
+__all__ = [
+    "__version__",
+    "find_best_architecture",
+    "generate_models",
+    "train_models_on_samples",
+    "kNN_accuracy",
+]
