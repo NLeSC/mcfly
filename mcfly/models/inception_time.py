@@ -99,7 +99,8 @@ class InceptionTime:
                      use_residual=True,
                      use_bottleneck=True,
                      max_kernel_size=20,
-                     learning_rate=0.01):
+                     learning_rate=0.01,
+                     regularization_rate=0.0):
         """
         Generate a InceptionTime model. See Fawaz et al. 2019.
 
@@ -124,7 +125,8 @@ class InceptionTime:
             Maximum kernel size for convolutions within Inception module.
         learning_rate : float
             learning rate
-        #TODO: add regularization?
+        regularization_rate: float
+            regularization rate
 
         Returns
         -------
@@ -135,8 +137,6 @@ class InceptionTime:
         dim_channels = self.x_shape[2]  # number of channels
         weightinit = 'lecun_uniform'  # weight initialization
         bottleneck_size = 32
-
-        # TODO: switch to Sequential() keras syntax ?
 
         def inception_module(input_tensor, stride=1, activation='linear'):
 
