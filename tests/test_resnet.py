@@ -34,7 +34,7 @@ class ResNetSuite(unittest.TestCase):
         model_type = ResNet((None, 20, 3), 2)
         model = model_type.create_model(16, 20, network_depth=depths)
 
-        add_layers = [str(type(l)) for l in model.layers if 'Add' in str(type(l))]
+        add_layers = [str(type(layer)) for layer in model.layers if 'Add' in str(type(layer))]
         assert len(add_layers) == depths, 'Wrong number of residual modules (network depths).'
 
 

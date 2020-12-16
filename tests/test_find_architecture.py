@@ -76,11 +76,11 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
         y_val = to_categorical(np.array([0, 1, 1]))
 
-        histories, val_metrics, val_losses = \
+        histories, _, _ = \
             find_architecture.train_models_on_samples(
                 X_train, y_train, X_val, y_val, [],
                 nr_epochs=1, subset_size=10, verbose=False,
-                outputfile=None, early_stopping=False,
+                outputfile=None,
                 batch_size=20, metric='accuracy')
         assert len(histories) == 0
 
@@ -108,12 +108,13 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         model = model_type.create_model(**hyperparams)
         models = [(model, hyperparams, "CNN")]
 
-        histories, val_metrics, val_losses = \
+        histories, _, _ = \
             find_architecture.train_models_on_samples(
                 X_train, y_train, X_val, y_val, models,
                 nr_epochs=1, subset_size=10, verbose=False,
                 outputfile=None, early_stopping_patience='auto',
                 batch_size=batch_size)
+        assert len(histories) == 1
 
 
     def test_train_models_on_samples_with_dataset(self):
@@ -145,12 +146,13 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         model = model_type.create_model(**hyperparams)
         models = [(model, hyperparams, "CNN")]
 
-        histories, val_metrics, val_losses = \
+        histories, _, _ = \
             find_architecture.train_models_on_samples(
                 data_train, None, data_val, None, models,
                 nr_epochs=1, subset_size=None, verbose=False,
                 outputfile=None, early_stopping_patience='auto',
                 batch_size=batch_size)
+        assert len(histories) == 1
 
 
     def test_train_models_on_samples_with_generators(self):
@@ -194,12 +196,13 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         model = model_type.create_model(**hyperparams)
         models = [(model, hyperparams, "CNN")]
 
-        histories, val_metrics, val_losses = \
+        histories, _, _ = \
             find_architecture.train_models_on_samples(
                 data_train, None, data_val, None, models,
                 nr_epochs=1, subset_size=None, verbose=False,
                 outputfile=None, early_stopping_patience='auto',
                 batch_size=batch_size)
+        assert len(histories) == 1
 
 
     def test_find_best_architecture_with_class_weights(self):

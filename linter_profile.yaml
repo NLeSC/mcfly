@@ -13,3 +13,7 @@ pylint:
     - too-many-arguments
     - too-many-locals
     - protected-access
+
+pep8:
+  disable:
+    - E722
