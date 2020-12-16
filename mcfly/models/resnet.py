@@ -97,7 +97,7 @@ class ResNet:
             max_kernel_size,
             network_depth=3,
             learning_rate=0.01,
-            regularization_rate=0.0):
+            regularization_rate=0.01):
         """
         Generate a ResNet model (see also https://arxiv.org/pdf/1611.06455.pdf).
 
@@ -125,19 +125,20 @@ class ResNet:
         dim_length = self.x_shape[1]  # number of samples in a time series
         dim_channels = self.x_shape[2]  # number of channels
         weightinit = 'lecun_uniform'
+        regularization = 0  # ignore input on purpose
 
         def conv_bn_relu_3_sandwich(x, filters, kernel_size):
             first_x = x
             for _ in range(3):
                 x = Convolution1D(filters, kernel_size, padding='same',
                                          kernel_initializer=weightinit,
-                                         kernel_regularizer=l2(regularization_rate))(x)
+                                         kernel_regularizer=l2(regularization))(x)
                 x = BatchNormalization()(x)
                 x = ReLU()(x)
 
             first_x = Convolution1D(filters, kernel_size=1, padding='same',
                                            kernel_initializer=weightinit,
-                                           kernel_regularizer=l2(regularization_rate))(x)
+                                           kernel_regularizer=l2(regularization))(x)
             x = Add()([x, first_x])
             return x
 
