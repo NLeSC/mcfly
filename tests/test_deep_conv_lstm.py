@@ -23,8 +23,8 @@ class DeepConvLSTMSuite(unittest.TestCase):
         model = model_type.create_model(**{"filters": [32, 32, 32],
                                            "lstm_dims": [32, 32, 32]})
 
-        batch_norm_layers = len([l for l in model.layers if 'BatchNormalization' in str(l)])
-        activation_layers = len([l for l in model.layers if 'Activation' in str(l)])
+        batch_norm_layers = len([layer for layer in model.layers if 'BatchNormalization' in str(layer)])
+        activation_layers = len([layer for layer in model.layers if 'Activation' in str(layer)])
         assert batch_norm_layers == activation_layers
 
     def test_DeepConvLSTM_hyperparameters_nrconvlayers(self):
