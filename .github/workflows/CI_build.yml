@@ -37,4 +37,4 @@ jobs:
           pytest
       - name: Check style against standards using prospector
         shell: bash -l {0}
-        run: prospector -o grouped -o pylint:pylint-report.txt
+        run: prospector --profile linter_profile -o grouped -o pylint:pylint-report.txt
