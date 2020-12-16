@@ -3,3 +3,10 @@ output-format: json
 strictness: high
 test-warnings: true
 doc-warnings: false
+
+pylint:
+  disable:
+    - dangerous-default-value
+    - too-many-branches
+    - too-many-arguments
+    - too-many-locals
