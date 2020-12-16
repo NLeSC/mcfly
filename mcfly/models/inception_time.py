@@ -99,8 +99,7 @@ class InceptionTime:
                      use_residual=True,
                      use_bottleneck=True,
                      max_kernel_size=20,
-                     learning_rate=0.01,
-                     regularization_rate=0.01):
+                     learning_rate=0.01):
         """
         Generate a InceptionTime model. See Fawaz et al. 2019.
 
@@ -125,8 +124,7 @@ class InceptionTime:
             Maximum kernel size for convolutions within Inception module.
         learning_rate : float
             learning rate
-        regularization_rate : float
-            regularization rate
+        #TODO: add regularization?
 
         Returns
         -------
