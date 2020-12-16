@@ -6,7 +6,10 @@ doc-warnings: false
 
 pylint:
   disable:
+    - bare-except
+    - unused-argument
     - dangerous-default-value
     - too-many-branches
     - too-many-arguments
     - too-many-locals
+    - protected-access
