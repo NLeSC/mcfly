@@ -20,12 +20,12 @@ class IntegrationSuite(unittest.TestCase):
                                           number_of_models=2,
                                           metrics=[metric],
                                           model_type='CNN')  # Because CNNs are quick to train.
-        histories, val_accuracies, val_losses = find_architecture.train_models_on_samples(X_train, y_train,
-                                                                                          X_val, y_val,
-                                                                                          models, nr_epochs=5,
-                                                                                          subset_size=150,
-                                                                                          verbose=True,
-                                                                                          outputfile=self.outputfile)
+        histories, val_accuracies, _ = find_architecture.train_models_on_samples(X_train, y_train,
+                                                                                 X_val, y_val,
+                                                                                 models, nr_epochs=5,
+                                                                                 subset_size=150,
+                                                                                 verbose=True,
+                                                                                 outputfile=self.outputfile)
         best_model_index = np.argmax(val_accuracies[metric])
         best_model, _, _ = models[best_model_index]
         _ = best_model.fit(X_train[:200, :, :], y_train[:200, :],
