@@ -215,7 +215,7 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         X_test, y_test = _create_2_class_labeled_dataset(10, 10)
         class_weight = {0: 2, 1: 0.002}
 
-        best_model, best_params, best_model_type, knn_acc = find_architecture.find_best_architecture(
+        best_model, _, _, _ = find_architecture.find_best_architecture(
             X_train, y_train, X_val, y_val, verbose=False, subset_size=1000,
             number_of_models=5, nr_epochs=1, model_type='CNN', class_weight=class_weight)
 
