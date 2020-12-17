@@ -5,18 +5,20 @@ platform:
 
 environment:
   matrix:
-    # Python 3.5, 32 bit
-    - MINICONDA: C:\Miniconda35-x64
-    # Python 3.6
+    # Python 3.6, 32 bit
     - MINICONDA: C:\Miniconda36-x64
+    # Python 3.7
+    - MINICONDA: C:\Miniconda37-x64
+    # Python 3.8
+    - MINICONDA: C:\Miniconda38-x64
 
 matrix:
   exclude:
-    # Python 3.5
-    - MINICONDA: C:\Miniconda35
-      platform: x64
     # Python 3.6
     - MINICONDA: C:\Miniconda36
+      platform: x64
+    # Python 3.7
+    - MINICONDA: C:\Miniconda37
       platform: x64
 
 init:
