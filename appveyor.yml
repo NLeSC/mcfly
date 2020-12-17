@@ -20,6 +20,9 @@ matrix:
     # Python 3.7
     - MINICONDA: C:\Miniconda37
       platform: x64
+    # Python 3.8
+    - MINICONDA: C:\Miniconda38
+      platform: x64
 
 init:
   - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%MINICONDA%\\Library\\bin;%PATH%"
