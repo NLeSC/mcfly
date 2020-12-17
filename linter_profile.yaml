@@ -6,6 +6,8 @@ doc-warnings: false
 
 pylint:
   disable:
+    - wrong-import-position
+    - redefined-builtin
     - bare-except
     - unused-argument
     - dangerous-default-value
