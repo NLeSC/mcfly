@@ -75,7 +75,6 @@ class ModelGenerationSuite(unittest.TestCase):
         """ Test if model class can be passed as model_types input."""
         x_shape = (None, 20, 10)
         nr_classes = 2
-        # X_train, y_train = generate_train_data(x_shape, nr_classes)
         n_models = 4
 
         models = modelgen.generate_models(x_shape, nr_classes, n_models,
@@ -91,7 +90,6 @@ class ModelGenerationSuite(unittest.TestCase):
         """ Test expected generate_models exception."""
         x_shape = (None, 20, 10)
         nr_classes = 2
-        # X_train, y_train = generate_train_data(x_shape, nr_classes)
         n_models = 2
 
         with pytest.raises(NameError, match="Unknown model name, 'wrong_entry'."):
