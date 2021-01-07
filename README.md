@@ -3,7 +3,6 @@
 </p>
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/NLeSC/mcfly/CI%20Build)
-[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/lv8hih1hvxbuu5f7/branch/master?svg=true)](https://ci.appveyor.com/project/NLeSC/mcfly/)
 [![Coverage](https://scrutinizer-ci.com/g/NLeSC/mcfly/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/NLeSC/mcfly/statistics/)
 [![PyPI](https://img.shields.io/pypi/v/mcfly.svg)](https://pypi.python.org/pypi/mcfly/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.596127.svg)](https://doi.org/10.5281/zenodo.596127)
