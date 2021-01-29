@@ -15,13 +15,13 @@ class InceptionTime:
     def __init__(self,
                  x_shape,
                  number_of_classes,
-                 metrics = ['accuracy'],
-                 IT_min_network_depth = 3,
-                 IT_max_network_depth = 6,
-                 IT_min_filters_number = 32,
-                 IT_max_filters_number = 96,
-                 IT_min_max_kernel_size = 10,
-                 IT_max_max_kernel_size = 100,
+                 metrics=['accuracy'],
+                 IT_min_network_depth=3,
+                 IT_max_network_depth=6,
+                 IT_min_filters_number=32,
+                 IT_max_filters_number=96,
+                 IT_min_max_kernel_size=10,
+                 IT_max_max_kernel_size=100,
                  **_other
                  ):
         """
@@ -63,13 +63,12 @@ class InceptionTime:
             'IT_max_filters_number': IT_max_filters_number,
             'IT_min_max_kernel_size': IT_min_max_kernel_size,
             'IT_max_max_kernel_size': IT_max_max_kernel_size
-            }
+        }
 
         # Add missing parameters from default
         for key, value in _other.items():
             if key not in self.settings:
                 self.settings[key] = value
-
 
     def generate_hyperparameters(self):
         """Generate a hyperparameter set for an InceptionTime model.
@@ -92,7 +91,6 @@ class InceptionTime:
                                                                params.IT_max_max_kernel_size + 1)
         return hyperparameters
 
-
     def create_model(self,
                      filters_number,
                      network_depth=6,
@@ -100,7 +98,7 @@ class InceptionTime:
                      use_bottleneck=True,
                      max_kernel_size=20,
                      learning_rate=0.01,
-                     regularization_rate=0.01):
+                     regularization_rate=0.0):
         """
         Generate a InceptionTime model. See Fawaz et al. 2019.
 
@@ -125,7 +123,7 @@ class InceptionTime:
             Maximum kernel size for convolutions within Inception module.
         learning_rate : float
             learning rate
-        regularization_rate : float
+        regularization_rate: float
             regularization rate
 
         Returns
@@ -138,16 +136,14 @@ class InceptionTime:
         weightinit = 'lecun_uniform'  # weight initialization
         bottleneck_size = 32
 
-        # TODO: switch to Sequential() keras syntax ?
-
         def inception_module(input_tensor, stride=1, activation='linear'):
 
             if use_bottleneck and int(input_tensor.shape[-1]) > 1:
                 input_inception = Conv1D(filters=bottleneck_size, kernel_size=1,
-                                                padding='same',
-                                                activation=activation,
-                                                kernel_initializer=weightinit,
-                                                use_bias=False)(input_tensor)
+                                         padding='same',
+                                         activation=activation,
+                                         kernel_initializer=weightinit,
+                                         use_bias=False)(input_tensor)
             else:
                 input_inception = input_tensor
 
@@ -156,21 +152,21 @@ class InceptionTime:
 
             for kernel_size in kernel_sizes:
                 conv_list.append(Conv1D(filters=filters_number,
-                                               kernel_size=kernel_size,
-                                               strides=stride,
-                                               padding='same',
-                                               activation=activation,
-                                               kernel_initializer=weightinit,
-                                               use_bias=False)(input_inception))
+                                        kernel_size=kernel_size,
+                                        strides=stride,
+                                        padding='same',
+                                        activation=activation,
+                                        kernel_initializer=weightinit,
+                                        use_bias=False)(input_inception))
 
             max_pool_1 = MaxPool1D(pool_size=3, strides=stride, padding='same')(input_tensor)
 
             conv_last = Conv1D(filters=filters_number,
-                                      kernel_size=1,
-                                      padding='same',
-                                      activation=activation,
-                                      kernel_initializer=weightinit,
-                                      use_bias=False)(max_pool_1)
+                               kernel_size=1,
+                               padding='same',
+                               activation=activation,
+                               kernel_initializer=weightinit,
+                               use_bias=False)(max_pool_1)
 
             conv_list.append(conv_last)
 
@@ -181,10 +177,10 @@ class InceptionTime:
 
         def shortcut_layer(input_tensor, out_tensor):
             shortcut_y = Conv1D(filters=int(out_tensor.shape[-1]),
-                                       kernel_size=1,
-                                       padding='same',
-                                       kernel_initializer=weightinit,
-                                       use_bias=False)(input_tensor)
+                                kernel_size=1,
+                                padding='same',
+                                kernel_initializer=weightinit,
+                                use_bias=False)(input_tensor)
             shortcut_y = BatchNormalization()(shortcut_y)
 
             x = Add()([shortcut_y, out_tensor])

@@ -99,7 +99,7 @@ def generate_models(x_shape,
 
     model_types_selected = []
 
-    for i in range(int(np.ceil(number_of_models/len(model_types)))):
+    for _ in range(int(np.ceil(number_of_models/len(model_types)))):
         np.random.shuffle(model_types)
         model_types_selected.extend(model_types)
 

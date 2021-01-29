@@ -1,5 +1,7 @@
 notebooks/.ipynb_checkpoints
 *.pyc
 *.egg-info
+.coverage
+.pylint.d/
 docs/_build/
 notebooks/tutorial/data

@@ -76,11 +76,11 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
         y_val = to_categorical(np.array([0, 1, 1]))
 
-        histories, val_metrics, val_losses = \
+        histories, _, _ = \
             find_architecture.train_models_on_samples(
                 X_train, y_train, X_val, y_val, [],
                 nr_epochs=1, subset_size=10, verbose=False,
-                outputfile=None, early_stopping=False,
+                outputfile=None,
                 batch_size=20, metric='accuracy')
         assert len(histories) == 0
 
@@ -108,12 +108,13 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         model = model_type.create_model(**hyperparams)
         models = [(model, hyperparams, "CNN")]
 
-        histories, val_metrics, val_losses = \
+        histories, _, _ = \
             find_architecture.train_models_on_samples(
                 X_train, y_train, X_val, y_val, models,
                 nr_epochs=1, subset_size=10, verbose=False,
                 outputfile=None, early_stopping_patience='auto',
                 batch_size=batch_size)
+        assert len(histories) == 1
 
 
     def test_train_models_on_samples_with_dataset(self):
@@ -145,12 +146,13 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         model = model_type.create_model(**hyperparams)
         models = [(model, hyperparams, "CNN")]
 
-        histories, val_metrics, val_losses = \
+        histories, _, _ = \
             find_architecture.train_models_on_samples(
                 data_train, None, data_val, None, models,
                 nr_epochs=1, subset_size=None, verbose=False,
                 outputfile=None, early_stopping_patience='auto',
                 batch_size=batch_size)
+        assert len(histories) == 1
 
 
     def test_train_models_on_samples_with_generators(self):
@@ -194,12 +196,13 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         model = model_type.create_model(**hyperparams)
         models = [(model, hyperparams, "CNN")]
 
-        histories, val_metrics, val_losses = \
+        histories, _, _ = \
             find_architecture.train_models_on_samples(
                 data_train, None, data_val, None, models,
                 nr_epochs=1, subset_size=None, verbose=False,
                 outputfile=None, early_stopping_patience='auto',
                 batch_size=batch_size)
+        assert len(histories) == 1
 
 
     def test_find_best_architecture_with_class_weights(self):
@@ -212,7 +215,7 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         X_test, y_test = _create_2_class_labeled_dataset(10, 10)
         class_weight = {0: 2, 1: 0.002}
 
-        best_model, best_params, best_model_type, knn_acc = find_architecture.find_best_architecture(
+        best_model, _, _, _ = find_architecture.find_best_architecture(
             X_train, y_train, X_val, y_val, verbose=False, subset_size=1000,
             number_of_models=5, nr_epochs=1, model_type='CNN', class_weight=class_weight)
 
@@ -325,7 +328,7 @@ class HistoryStoringSuite(unittest.TestCase):
 
         log = self._load_history_and_assert_is_list(self.history_file_path)
         for model_log in log:
-            assert type(model_log['metrics']) is dict
+            assert isinstance(model_log['metrics'], dict)
 
     @staticmethod
     def _write_test_history_file(history_file_path):
@@ -348,7 +351,7 @@ class HistoryStoringSuite(unittest.TestCase):
             log = json.load(f)
         # In case any assertion fails, we want to see the complete log printed to console.
         print(log)
-        assert type(log) is list
+        assert isinstance(log, list)
         return log
 
     def setUp(self):

@@ -1,0 +1,21 @@
+output-format: json
+
+strictness: medium
+test-warnings: true
+doc-warnings: false
+
+pylint:
+  disable:
+    - wrong-import-position
+    - redefined-builtin
+    - bare-except
+    - unused-argument
+    - dangerous-default-value
+    - too-many-branches
+    - too-many-arguments
+    - too-many-locals
+    - protected-access
+
+pep8:
+  disable:
+    - E722

@@ -64,7 +64,7 @@ class ModelGenerationSuite(unittest.TestCase):
         for model in models:
             model[0].fit(X_train, y_train, epochs = 1)
 
-        model, hyperparams, modeltype = models[0]
+        model, _, modeltype = models[0]
         model_metrics = [m.name for m in model.metrics]
         assert "accuracy" in model_metrics, "Not found accuracy for model {}. Found {}".format(
             modeltype, model_metrics)
@@ -75,12 +75,11 @@ class ModelGenerationSuite(unittest.TestCase):
         """ Test if model class can be passed as model_types input."""
         x_shape = (None, 20, 10)
         nr_classes = 2
-        X_train, y_train = generate_train_data(x_shape, nr_classes)
         n_models = 4
 
         models = modelgen.generate_models(x_shape, nr_classes, n_models,
                                           model_types=['CNN', ResNet])
-        created_model_names = list(set([x[2] for x in models]))
+        created_model_names = list({x[2] for x in models})
         created_model_names.sort()
         assert len(models) == 4, "Expected number of models to be 4"
         assert created_model_names == ["CNN", "ResNet"], "Expected different model names."
@@ -91,12 +90,11 @@ class ModelGenerationSuite(unittest.TestCase):
         """ Test expected generate_models exception."""
         x_shape = (None, 20, 10)
         nr_classes = 2
-        X_train, y_train = generate_train_data(x_shape, nr_classes)
         n_models = 2
 
         with pytest.raises(NameError, match="Unknown model name, 'wrong_entry'."):
-            models = modelgen.generate_models(x_shape, nr_classes, n_models,
-                                              model_types=['CNN', "wrong_entry"])
+            _ = modelgen.generate_models(x_shape, nr_classes, n_models,
+                                         model_types=['CNN', "wrong_entry"])
 
     def setUp(self):
         np.random.seed(1234)

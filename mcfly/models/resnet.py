@@ -19,13 +19,13 @@ class ResNet:
     def __init__(self,
                  x_shape,
                  number_of_classes,
-                 metrics = ['accuracy'],
-                 resnet_min_network_depth = 2,
-                 resnet_max_network_depth = 5,
-                 resnet_min_filters_number = 32,
-                 resnet_max_filters_number = 128,
-                 resnet_min_max_kernel_size = 8,
-                 resnet_max_max_kernel_size = 32,
+                 metrics=['accuracy'],
+                 resnet_min_network_depth=2,
+                 resnet_max_network_depth=5,
+                 resnet_min_filters_number=32,
+                 resnet_max_filters_number=128,
+                 resnet_min_max_kernel_size=8,
+                 resnet_max_max_kernel_size=32,
                  **_other):
         """
         Parameters
@@ -79,15 +79,15 @@ class ResNet:
         """
         params = Namespace(**self.settings)
         hyperparameters = generate_base_hyperparameter_set(params.low_lr,
-                                                            params.high_lr,
-                                                            params.low_reg,
-                                                            params.high_reg)
+                                                           params.high_lr,
+                                                           params.low_reg,
+                                                           params.high_reg)
         hyperparameters['network_depth'] = np.random.randint(params.resnet_min_network_depth,
-                                                              params.resnet_max_network_depth + 1)
+                                                             params.resnet_max_network_depth + 1)
         hyperparameters['min_filters_number'] = np.random.randint(params.resnet_min_filters_number,
                                                                   params.resnet_max_filters_number + 1)
         hyperparameters['max_kernel_size'] = np.random.randint(params.resnet_min_max_kernel_size,
-                                                                params.resnet_max_max_kernel_size + 1)
+                                                               params.resnet_max_max_kernel_size + 1)
         return hyperparameters
 
 
@@ -125,20 +125,20 @@ class ResNet:
         dim_length = self.x_shape[1]  # number of samples in a time series
         dim_channels = self.x_shape[2]  # number of channels
         weightinit = 'lecun_uniform'
-        regularization = 0
+        regularization = 0  # ignore input on purpose
 
         def conv_bn_relu_3_sandwich(x, filters, kernel_size):
             first_x = x
-            for i in range(3):
+            for _ in range(3):
                 x = Convolution1D(filters, kernel_size, padding='same',
-                                         kernel_initializer=weightinit,
-                                         kernel_regularizer=l2(regularization))(x)
+                                  kernel_initializer=weightinit,
+                                  kernel_regularizer=l2(regularization))(x)
                 x = BatchNormalization()(x)
                 x = ReLU()(x)
 
             first_x = Convolution1D(filters, kernel_size=1, padding='same',
-                                           kernel_initializer=weightinit,
-                                           kernel_regularizer=l2(regularization))(x)
+                                    kernel_initializer=weightinit,
+                                    kernel_regularizer=l2(regularization))(x)
             x = Add()([x, first_x])
             return x
 

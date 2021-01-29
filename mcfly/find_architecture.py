@@ -201,10 +201,9 @@ def _get_from_history(metric_name, history_history):
     """
     if metric_name == 'val_accuracy':
         return _get_either_from_history('val_accuracy', 'val_acc', history_history)
-    elif metric_name == 'accuracy':
+    if metric_name == 'accuracy':
         return _get_either_from_history('accuracy', 'acc', history_history)
-    else:
-        return history_history[metric_name]
+    return history_history[metric_name]
 
 
 def _get_either_from_history(option1, option2, history_history):
@@ -246,7 +245,7 @@ def store_train_hist_as_json(params, model_type, history, outputfile, metric_nam
     jsondata['modeltype'] = model_type
 
     for k in jsondata.keys():
-        if isinstance(jsondata[k], np.ndarray) or isinstance(jsondata[k], list):
+        if isinstance(jsondata[k], (np.ndarray, list)):
             jsondata[k] = [_cast_to_primitive_type(element) for element in jsondata[k]]
 
     _create_or_append_to_json(jsondata, outputfile)
@@ -255,10 +254,9 @@ def store_train_hist_as_json(params, model_type, history, outputfile, metric_nam
 def _cast_to_primitive_type(obj):
     if isinstance(obj, np.floating):
         return float(obj)
-    elif isinstance(obj, np.integer):
+    if isinstance(obj, np.integer):
         return int(obj)
-    else:
-        return obj
+    return obj
 
 
 def _create_or_append_to_json(jsondata, outputfile):
@@ -357,17 +355,17 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                                       number_of_models=number_of_models,
                                       metrics=[metric],
                                       **kwargs)
-    histories, val_accuracies, val_losses = train_models_on_samples(X_train,
-                                                                    y_train,
-                                                                    X_val,
-                                                                    y_val,
-                                                                    models,
-                                                                    nr_epochs,
-                                                                    subset_size=subset_size,
-                                                                    verbose=verbose,
-                                                                    outputfile=outputpath,
-                                                                    model_path=model_path,
-                                                                    class_weight=class_weight)
+    _, val_accuracies, _ = train_models_on_samples(X_train,
+                                                   y_train,
+                                                   X_val,
+                                                   y_val,
+                                                   models,
+                                                   nr_epochs,
+                                                   subset_size=subset_size,
+                                                   verbose=verbose,
+                                                   outputfile=outputpath,
+                                                   model_path=model_path,
+                                                   class_weight=class_weight)
     best_model_index = np.argmax(val_accuracies[metric])
     best_model, best_params, best_model_type = models[best_model_index]
     knn_acc = kNN_accuracy(
@@ -400,7 +398,7 @@ def _get_metric_name(name):
     -------
 
     """
-    if name == 'acc' or name == 'accuracy':
+    if name in ['acc', 'accuracy']:
         return 'accuracy'
     try:
         metric_fn = metrics.get(name)
