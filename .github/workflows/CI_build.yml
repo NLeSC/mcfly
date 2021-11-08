@@ -69,6 +69,3 @@ jobs:
       - name: Run unit tests
         run: |
           pytest
-      - name: Check style against standards using prospector
-        shell: bash -l {0}
-        run: prospector --profile linter_profile -o grouped -o pylint:pylint-report.txt
