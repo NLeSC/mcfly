@@ -219,7 +219,7 @@ class FindArchitectureBasicSuite(unittest.TestCase):
             X_train, y_train, X_val, y_val, verbose=False, subset_size=1000,
             number_of_models=5, nr_epochs=1, model_type='CNN', class_weight=class_weight)
 
-        probabilities = best_model.predict_proba(X_test)
+        probabilities = best_model.predict(X_test)
         predicted = probabilities.argmax(axis=1)
         np.testing.assert_array_equal(predicted, y_test.argmax(axis=1))
 
