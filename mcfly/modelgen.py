@@ -50,10 +50,10 @@ def generate_models(x_shape,
         See https://keras.io/metrics/ for possible values.
     low_lr : float
         minimum of log range for learning rate: learning rate is sampled
-        between `10**(-low_reg)` and `10**(-high_reg)`
+        between `10**(-low_lr)` and `10**(-high_lr)`
     high_lr : float
         maximum  of log range for learning rate: learning rate is sampled
-        between `10**(-low_reg)` and `10**(-high_reg)`
+        between `10**(-low_lr)` and `10**(-high_lr)`
     low_reg : float
         minimum  of log range for regularization rate: regularization rate is
         sampled between `10**(-low_reg)` and `10**(-high_reg)`
