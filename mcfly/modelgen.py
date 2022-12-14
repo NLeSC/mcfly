@@ -385,7 +385,7 @@ def generate_resnet_model(input_shape,
     dim_length = input_shape[1]  # number of samples in a time series
     dim_channels = input_shape[2]  # number of channels
     weightinit = 'lecun_uniform'
-    regularization = 0
+    regularization = regularization_rate
 
     def conv_bn_relu_3_sandwich(x, filters, kernel_size):
         first_x = x
