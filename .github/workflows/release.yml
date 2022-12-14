@@ -22,7 +22,7 @@ jobs:
       - name: Build package
         run: |
           python3 -m pip install --upgrade pip setuptools wheel
-          pip install -e .
+          python3 -m pip install .
       - name: Build wheel and source distribution
         run: python3 -m build
       - uses: actions/upload-artifact@v3
