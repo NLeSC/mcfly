@@ -21,7 +21,7 @@ jobs:
           python3 --version
       - name: Build package
         run: |
-          python3 -m pip install --upgrade pip
+          python3 -m pip install --upgrade pip setuptools wheel
           pip install -e .
       - name: Build wheel and source distribution
         run: python3 -m build
