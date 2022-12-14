@@ -17,7 +17,7 @@ The goal of mcfly is to ease the use of deep learning technology for time series
 Prerequisites:
 - Python 3.5, 3.6 or 3.7
 - pip
-- Tensorflow 2.0, if pip errors that it can't find it for your python/pip version
+- Tensorflow 2.0, if pip errors that it can't find it for your python/pip version 
 
 Installing all dependencies in separate conda environment:
 ```sh
