@@ -35,5 +35,10 @@ setup(
                             "pytest",
                             "pytest-cov",
                             ],
+                    "publishing": [
+                        "build",
+                        "twine",
+                        "wheel"
+                    ]
     }
 )
