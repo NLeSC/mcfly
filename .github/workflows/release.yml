@@ -11,10 +11,11 @@ jobs:
     name: Build universal wheel and source distribution
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Python 
-        uses: actions/checkout@v3
-        with: 
-          python-version: 3.10
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'
       - name: Python info
         run: |
           which python3
