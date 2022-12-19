@@ -40,6 +40,7 @@ from collections import defaultdict
 
 
 from . import modelgen
+from .task import Task
 
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
@@ -353,6 +354,7 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
     """
     models = modelgen.generate_models(X_train.shape, y_train.shape[1],
                                       number_of_models=number_of_models,
+                                      task=Task.classification,
                                       metrics=[metric],
                                       **kwargs)
     _, val_accuracies, _ = train_models_on_samples(X_train,

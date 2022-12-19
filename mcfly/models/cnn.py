@@ -6,6 +6,7 @@ from tensorflow.keras.optimizers import Adam
 import numpy as np
 from argparse import Namespace
 from .base_hyperparameter_generator import generate_base_hyperparameter_set
+from ..task import Task
 
 
 class CNN:
@@ -84,7 +85,8 @@ class CNN:
         return hyperparameters
 
     def create_model(self, filters, fc_hidden_nodes,
-                     learning_rate=0.01, regularization_rate=0.01):
+                     learning_rate=0.01, regularization_rate=0.01,
+                     task=Task.classification):
         """
         Generate a convolutional neural network (CNN) model.
 
@@ -100,6 +102,8 @@ class CNN:
             learning rate
         regularization_rate : float
             regularization rate
+        task: str
+            Task type, either 'classification' or 'regression'
 
         Returns
         -------
@@ -128,10 +132,16 @@ class CNN:
                         kernel_initializer=weightinit))  # Fully connected layer
         model.add(Activation('relu'))  # Relu activation
         model.add(Dense(units=dim_output, kernel_initializer=weightinit))
-        model.add(BatchNormalization())
-        model.add(Activation("softmax"))  # Final classification layer
 
-        model.compile(loss='categorical_crossentropy',
+        if task is Task.classification:
+            model.add(BatchNormalization())
+            model.add(Activation("softmax"))  # Final classification layer
+            loss_function = 'categorical_crossentropy'
+
+        elif task is Task.regression:
+            loss_function = 'mean_squared_error'
+
+        model.compile(loss=loss_function,
                       optimizer=Adam(lr=learning_rate),
                       metrics=self.metrics)
 
