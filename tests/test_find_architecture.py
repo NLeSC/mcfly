@@ -221,7 +221,7 @@ class FindArchitectureBasicSuite(unittest.TestCase):
 
         probabilities = best_model.predict(X_test)
         predicted = probabilities.argmax(axis=1)
-        np.testing.assert_array_equal(predicted, y_test.argmax(axis=1))
+        np.testing.assert_allclose(predicted, y_test.argmax(axis=1))
 
     def setUp(self):
         np.random.seed(1234)
