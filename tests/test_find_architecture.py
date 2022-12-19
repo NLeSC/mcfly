@@ -1,4 +1,4 @@
-from pytest import approx, raises
+from pytest import approx, raises, mark
 import unittest
 import math
 import json
@@ -9,6 +9,7 @@ from test_tools import safe_remove
 
 from mcfly import find_architecture
 from mcfly.models import CNN
+from mcfly.modelgen import Task
 from test_modelgen import get_default as get_default_settings
 
 
@@ -23,7 +24,7 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         X_val = np.array([[[0.9]]])
         y_val = np.array([[1, 0]])
 
-        acc = find_architecture.kNN_accuracy(
+        acc = find_architecture.kNN_performance(
             X_train, y_train, X_val, y_val, k=1)
         assert acc == approx(1.0)
 
@@ -36,11 +37,37 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         X_val = np.array([[[0.9]]])
         y_val = np.array([[0, 1]])
 
-        acc = find_architecture.kNN_accuracy(
+        acc = find_architecture.kNN_performance(
             X_train, y_train, X_val, y_val, k=1)
         assert acc == approx(0)
 
-    def test_find_best_architecture(self):
+    def test_kNN_mse_above_0(self):
+        """
+        The mean squared error for this single-point dataset should be above 0.
+        """
+        X_train = np.array([[[1]], [[0]]])
+        y_train = np.array([[1,], [0,]])
+        X_val = np.array([[[0.9]]])
+        y_val = np.array([[0,]])
+
+        mse = find_architecture.kNN_performance(
+            X_train, y_train, X_val, y_val, k=1, task=Task.regression)
+        assert mse > 0
+
+    def test_kNN_mse_0(self):
+        """
+        The mean squared error for this single-point dataset should be 0.
+        """
+        X_train = np.array([[[1]], [[0]]])
+        y_train = np.array([[1,], [0,]])
+        X_val = np.array([[[1]]])
+        y_val = np.array([[1,]])
+
+        mse = find_architecture.kNN_performance(
+            X_train, y_train, X_val, y_val, k=1, task=Task.regression)
+        assert mse == approx(0)
+
+    def test_find_best_architecture_classification(self):
         """ Find_best_architecture should return a single model, parameters, type and valid knn accuracy."""
         num_timesteps = 100
         num_channels = 2
@@ -50,9 +77,9 @@ class FindArchitectureBasicSuite(unittest.TestCase):
             num_samples_train,
             num_timesteps,
             num_channels)
-        y_train = to_categorical(np.array([0, 0, 1, 1, 1]))
+        y_train = np.int8(to_categorical(np.array([0, 0, 1, 1, 1])))
         X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
-        y_val = to_categorical(np.array([0, 1, 1]))
+        y_val = np.int8(to_categorical(np.array([0, 1, 1])))
         best_model, best_params, best_model_type, knn_acc = find_architecture.find_best_architecture(
             X_train, y_train, X_val, y_val, verbose=False, subset_size=10,
             number_of_models=1, nr_epochs=1)
@@ -60,6 +87,27 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         self.assertIsNotNone(best_params)
         self.assertIsNotNone(best_model_type)
         assert 1 >= knn_acc >= 0
+
+    def test_find_best_architecture_regression(self):
+        """ Find_best_architecture should return a single model, parameters, type and valid knn mean squared error."""
+        num_timesteps = 100
+        num_channels = 2
+        num_samples_train = 5
+        num_samples_val = 3
+        X_train = np.random.rand(
+            num_samples_train,
+            num_timesteps,
+            num_channels)
+        y_train = np.random.uniform(-1, 1, size=(num_samples_train, 1))
+        X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
+        y_val = np.random.uniform(-1, 1, size=(num_samples_val, 1))
+        best_model, best_params, best_model_type, knn_mse = find_architecture.find_best_architecture(
+            X_train, y_train, X_val, y_val, verbose=False, subset_size=10, metric='mean_squared_error',
+            number_of_models=1, nr_epochs=1)
+        assert hasattr(best_model, 'fit')
+        self.assertIsNotNone(best_params)
+        self.assertIsNotNone(best_model_type)
+        assert knn_mse >= 0
 
     # %TODO add test with metric other than accuracy
     # TODO: Is this a test? It's not set up as one
@@ -205,6 +253,7 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         assert len(histories) == 1
 
 
+    @mark.skip()
     def test_find_best_architecture_with_class_weights(self):
         """Model should not ignore tiny class with huge class weight. Note that this test is non-deterministic,
         even though a seed was set. Note2 that this test is very slow, taking up 40% of all mcfly test time."""
@@ -246,7 +295,137 @@ def _create_2_class_noisy_data(num_samples_class_a, num_samples_class_b):
 def _create_2_class_labels(num_samples_class_a, num_samples_class_b):
     labels_class_a = np.zeros(num_samples_class_a)
     labels_class_b = np.ones(num_samples_class_b)
-    return to_categorical(np.hstack((labels_class_a, labels_class_b)))
+    return np.int8(to_categorical(np.hstack((labels_class_a, labels_class_b))))
+
+
+def _create_regression_dataset(num_samples, y_dims=1):
+    num_channels = 1
+    num_time_steps = 10
+
+    X = np.random.uniform(-1.0, 1.0, size=(num_samples, num_time_steps, num_channels))
+    y = np.random.uniform(-1.0, 1.0, size=(num_samples, y_dims))
+
+    return X, y
+
+
+class TaskInferenceSuite(unittest.TestCase):
+    batch_size = 5
+    
+    class DataGenerator(Sequence):
+        def __init__(self, x_set, y_set, batch_size):
+            self.x, self.y = x_set, y_set
+            self.batch_size = batch_size
+
+        def __len__(self):
+            return math.ceil(len(self.x) / self.batch_size)
+
+        def __getitem__(self, idx):
+            batch_x = self.x[idx * self.batch_size:(idx + 1) *
+            self.batch_size]
+            batch_y = self.y[idx * self.batch_size:(idx + 1) *
+            self.batch_size]
+            return batch_x, batch_y
+
+
+    def test_infer_task_from_y_no_array(self):
+        y_train = _create_2_class_labels(10, 10)
+        y_val = _create_2_class_labels(2, 2)
+
+        msg = "Both 'y_train' and 'y_val' must be numpy arrays"
+        with raises(TypeError, match=msg):
+            find_architecture._infer_task_from_y(y_train.tolist(), y_val.tolist())
+
+        with raises(TypeError, match=msg):
+            find_architecture._infer_task_from_y(y_train, y_val.tolist())
+
+        with raises(TypeError, match=msg):
+            find_architecture._infer_task_from_y(y_train.tolist(), y_val)
+
+
+    def test_infer_task_from_y_different_dtype(self):
+        y_train = _create_2_class_labels(10, 10)
+        _, y_val = _create_regression_dataset(2)
+
+        with raises(TypeError, match="Arguments 'y_train' and 'y_val' must be the same type \(e.g., numpy.integer\)"):
+            find_architecture._infer_task_from_y(y_train, y_val)
+
+
+    def test_infer_task_from_y_other_type(self):
+        y_train = _create_2_class_labels(10, 10)
+        y_val = _create_2_class_labels(2, 2)
+
+        with raises(TypeError, match="Both 'y_train' and 'y_val' must be of type integer or float"):
+            find_architecture._infer_task_from_y(y_train.astype(str), y_val.astype(str))
+
+
+    def test_infer_task_from_y_classification(self):
+        X_train, y_train = _create_2_class_labeled_dataset(10, 10)
+        X_val, y_val = _create_2_class_labeled_dataset(2, 2)
+
+        task = find_architecture._infer_task(X_train, X_val, y_train, y_val)
+
+        assert task == Task.classification
+
+
+    def test_infer_task_from_y_regression(self):
+        X_train, y_train = _create_regression_dataset(10)
+        X_val, y_val = _create_regression_dataset(2)
+
+        task = find_architecture._infer_task(X_train, X_val, y_train, y_val)
+
+        assert task == Task.regression
+
+
+    def test_infer_task_generator_classification(self):
+        X_train, y_train = _create_2_class_labeled_dataset(10, 10)
+        X_val, y_val = _create_2_class_labeled_dataset(2, 2)
+
+        data_train = self.DataGenerator(X_train, y_train, self.batch_size)
+        data_val = self.DataGenerator(X_val, y_val, self.batch_size)
+
+        task = find_architecture._infer_task(data_train, data_val, None, None)
+        
+        assert task == Task.classification
+
+
+    def test_infer_task_generator_regression(self):
+        X_train, y_train = _create_regression_dataset(10)
+        X_val, y_val = _create_regression_dataset(2)
+
+        data_train = self.DataGenerator(X_train, y_train, self.batch_size)
+        data_val = self.DataGenerator(X_val, y_val, self.batch_size)
+
+        task = find_architecture._infer_task(data_train, data_val, None, None)
+        
+        assert task == Task.regression
+
+
+    def test_infer_task_dataset_classification(self):
+        X_train, y_train = _create_2_class_labeled_dataset(10, 10)
+        X_val, y_val = _create_2_class_labeled_dataset(2, 2)
+
+        data_train = tf.data.Dataset.from_tensor_slices(
+            (X_train, y_train)).batch(self.batch_size)
+        data_val = tf.data.Dataset.from_tensor_slices(
+            (X_val, y_val)).batch(self.batch_size)
+
+        task = find_architecture._infer_task(data_train, data_val, None, None)
+        
+        assert task == Task.classification
+
+
+    def test_infer_task_dataset_regression(self):
+        X_train, y_train = _create_regression_dataset(10)
+        X_val, y_val = _create_regression_dataset(2)
+
+        data_train = tf.data.Dataset.from_tensor_slices(
+            (X_train, y_train)).batch(self.batch_size)
+        data_val = tf.data.Dataset.from_tensor_slices(
+            (X_val, y_val)).batch(self.batch_size)
+
+        task = find_architecture._infer_task(data_train, data_val, None, None)
+        
+        assert task == Task.regression
 
 
 class MetricNamingSuite(unittest.TestCase):
