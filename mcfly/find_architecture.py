@@ -273,33 +273,39 @@ def _create_or_append_to_json(jsondata, outputfile):
                   indent=4, ensure_ascii=False)
 
 
+def _is_one_hot_encoding(y):
+    return np.unique(y).shape[0] == 2 and np.unique(y) in np.array([0, 1]) and y.shape[1] > 1
+
+
 def _infer_task_from_y(y_train, y_val):
-    if not isinstance(y_train, np.ndarray) or not isinstance(y_val, np.ndarray):
-        raise TypeError("Both 'y_train' and 'y_val' must be numpy arrays")
+    y_train_is_one_hot = _is_one_hot_encoding(y_train)
+    y_val_is_one_hot = _is_one_hot_encoding(y_val)
 
-    if y_train.dtype != y_val.dtype:
-        raise TypeError("Arguments 'y_train' and 'y_val' must be the same type (e.g., numpy.integer)")
-
-    if np.issubdtype(y_train.dtype, np.integer) and np.issubdtype(y_val.dtype, np.integer):
+    if y_train_is_one_hot and y_val_is_one_hot:
         return Task.classification
 
-    if np.issubdtype(y_train.dtype, np.floating) and np.issubdtype(y_val.dtype, np.floating):
+    if not y_train_is_one_hot and not y_val_is_one_hot:
         return Task.regression
 
-    raise TypeError("Both 'y_train' and 'y_val' must be of type integer or float")
+    raise ValueError("Both 'y_train' and 'y_val' must be one-hot encoding or continuous")
 
 
 def _infer_task(X_train, X_val, y_train, y_val):
+    def _get_first_batch(y):
+        return next(iter(y))[1]
+
     if y_train is None:
+        # Infer task from first batch
         if isinstance(X_train, (Generator, Sequence)):
-            y_train = list(X_train)[0][1]
+            y_train = _get_first_batch(X_train)
         elif isinstance(X_train, (tf.data.Dataset)):
-            y_train = list(X_train.as_numpy_iterator())[0][1]
+            y_train = _get_first_batch(X_train).numpy()
     if y_val is None:
+        # Infer task from first batch
         if isinstance(X_val, (Generator, Sequence)):
-            y_val = list(X_val)[0][1]
+            y_val = _get_first_batch(X_val)
         elif isinstance(X_val, (tf.data.Dataset)):
-            y_val = list(X_val.as_numpy_iterator())[0][1]
+            y_val = _get_first_batch(X_val).numpy()
     
     return _infer_task_from_y(y_train, y_val)
 
