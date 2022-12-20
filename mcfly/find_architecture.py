@@ -318,6 +318,13 @@ def _infer_default_metric(task):
         return 'mean_squared_error'
 
 
+def _get_shape_from_input(X, y):
+    if hasattr(X, 'shape') and hasattr(y, 'shape'):
+        return X.shape, y.shape
+
+    return next(iter(X))[0].shape, next(iter(X))[1].shape
+
+
 def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                            number_of_models=5, nr_epochs=5, subset_size=100,
                            outputpath=None, model_path=None, metric=None,
@@ -403,7 +410,9 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
     if not metric:
         metric = _infer_default_metric(task)
 
-    models = modelgen.generate_models(X_train.shape, y_train.shape[1],
+    X_shape, y_shape = _get_shape_from_input(X_train, y_train)
+
+    models = modelgen.generate_models(X_shape, y_shape[1],
                                       number_of_models=number_of_models,
                                       task=task,
                                       metrics=[metric],
@@ -424,7 +433,7 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
 
     knn_performance = None
 
-    if metric is _infer_default_metric(task):
+    if metric is _infer_default_metric(task) and y_train is not None and y_val is not None:
         knn_performance = kNN_performance(
             X_train[:subset_size, :, :], y_train[:subset_size, :], X_val, y_val, task=task)
         if verbose:
