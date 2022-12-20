@@ -310,9 +310,16 @@ def _infer_task(X_train, X_val, y_train, y_val):
     return _infer_task_from_y(y_train, y_val)
 
 
+def _infer_default_metric(task):
+    if task is Task.classification:
+        return 'accuracy'
+    if task is Task.regression:
+        return 'mean_squared_error'
+
+
 def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                            number_of_models=5, nr_epochs=5, subset_size=100,
-                           outputpath=None, model_path=None, metric='accuracy',
+                           outputpath=None, model_path=None, metric=None,
                            class_weight=None,
                            **kwargs):
     """
@@ -391,6 +398,10 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
     [1]: https://www.tensorflow.org/api_docs/python/tf/keras/Model#fit
     """
     task = _infer_task(X_train, X_val, y_train, y_val)
+
+    if not metric:
+        metric = _infer_default_metric(task)
+
     models = modelgen.generate_models(X_train.shape, y_train.shape[1],
                                       number_of_models=number_of_models,
                                       task=task,
@@ -409,21 +420,26 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                                                    class_weight=class_weight)
     best_model_index = np.argmax(val_performance[metric])
     best_model, best_params, best_model_type = models[best_model_index]
-    knn_performance = kNN_performance(
-        X_train[:subset_size, :, :], y_train[:subset_size, :], X_val, y_val, task=task)
-    if verbose:
-        print('Best model: model ', best_model_index)
-        print('Model type: ', best_model_type)
-        print('Hyperparameters: ', best_params)
-        print(str(metric) + ' on validation set: ',
-              val_performance[metric][best_model_index])
-        print('Performance of kNN on validation set', knn_performance)
 
-    if _kNN_better_than_best_model(val_performance[metric][best_model_index], knn_performance, task):
-        warnings.warn('Best model not better than kNN: ' +
-                      str(val_performance[metric][best_model_index]) + ' vs  ' +
-                      str(knn_performance)
-                      )
+    knn_performance = None
+
+    if metric is _infer_default_metric(task):
+        knn_performance = kNN_performance(
+            X_train[:subset_size, :, :], y_train[:subset_size, :], X_val, y_val, task=task)
+        if verbose:
+            print('Best model: model ', best_model_index)
+            print('Model type: ', best_model_type)
+            print('Hyperparameters: ', best_params)
+            print(str(metric) + ' on validation set: ',
+                val_performance[metric][best_model_index])
+            print('Performance of kNN on validation set', knn_performance)
+
+        if _kNN_better_than_best_model(val_performance[metric][best_model_index], knn_performance, task):
+            warnings.warn('Best model not better than kNN: ' +
+                        str(val_performance[metric][best_model_index]) + ' vs  ' +
+                        str(knn_performance)
+                        )
+        
     return best_model, best_params, best_model_type, knn_performance
 
 

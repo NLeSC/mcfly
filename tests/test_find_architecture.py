@@ -4,6 +4,7 @@ import math
 import json
 import numpy as np
 import tensorflow as tf
+from tensorflow.keras.metrics import Precision
 from tensorflow.keras.utils import to_categorical, Sequence
 from test_tools import safe_remove
 
@@ -104,6 +105,27 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         self.assertIsNotNone(best_model_type)
         assert 1 >= knn_acc >= 0
 
+    def test_find_best_architecture_classification_non_default_metric(self):
+        """ Find_best_architecture should return a single model, parameters, type and valid knn accuracy."""
+        num_timesteps = 100
+        num_channels = 2
+        num_samples_train = 5
+        num_samples_val = 3
+        X_train = np.random.rand(
+            num_samples_train,
+            num_timesteps,
+            num_channels)
+        y_train = to_categorical(np.array([0, 0, 1, 1, 1]))
+        X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
+        y_val = to_categorical(np.array([0, 1, 1]))
+        best_model, best_params, best_model_type, knn_acc = find_architecture.find_best_architecture(
+            X_train, y_train, X_val, y_val, verbose=False, subset_size=10, metric='categorical_accuracy',
+            number_of_models=1, nr_epochs=1)
+        assert hasattr(best_model, 'fit')
+        self.assertIsNotNone(best_params)
+        self.assertIsNotNone(best_model_type)
+        self.assertIsNone(knn_acc)
+
     def test_find_best_architecture_regression(self):
         """ Find_best_architecture should return a single model, parameters, type and valid knn mean squared error."""
         num_timesteps = 100
@@ -118,12 +140,33 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
         y_val = np.random.uniform(-1, 1, size=(num_samples_val, 1))
         best_model, best_params, best_model_type, knn_mse = find_architecture.find_best_architecture(
-            X_train, y_train, X_val, y_val, verbose=False, subset_size=10, metric='mean_squared_error',
+            X_train, y_train, X_val, y_val, verbose=False, subset_size=10,
             number_of_models=1, nr_epochs=1)
         assert hasattr(best_model, 'fit')
         self.assertIsNotNone(best_params)
         self.assertIsNotNone(best_model_type)
         assert knn_mse >= 0
+
+    def test_find_best_architecture_regression_non_default_metric(self):
+        """ Find_best_architecture should return a single model, parameters, type and valid knn mean squared error."""
+        num_timesteps = 100
+        num_channels = 2
+        num_samples_train = 5
+        num_samples_val = 3
+        X_train = np.random.rand(
+            num_samples_train,
+            num_timesteps,
+            num_channels)
+        y_train = np.random.uniform(-1, 1, size=(num_samples_train, 1))
+        X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
+        y_val = np.random.uniform(-1, 1, size=(num_samples_val, 1))
+        best_model, best_params, best_model_type, knn_mse = find_architecture.find_best_architecture(
+            X_train, y_train, X_val, y_val, verbose=False, subset_size=10, metric='mean_absolute_error',
+            number_of_models=1, nr_epochs=1)
+        assert hasattr(best_model, 'fit')
+        self.assertIsNotNone(best_params)
+        self.assertIsNotNone(best_model_type)
+        self.assertIsNone(knn_mse)
 
     # %TODO add test with metric other than accuracy
     # TODO: Is this a test? It's not set up as one
