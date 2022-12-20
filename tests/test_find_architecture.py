@@ -84,7 +84,6 @@ class FindArchitectureBasicSuite(unittest.TestCase):
                 batch_size=20, metric='accuracy')
         assert len(histories) == 0
 
-
     def test_train_models_on_samples_with_x_and_y(self):
         """
         Model should be able to train using separated x and y values
@@ -115,7 +114,6 @@ class FindArchitectureBasicSuite(unittest.TestCase):
                 outputfile=None, early_stopping_patience='auto',
                 batch_size=batch_size)
         assert len(histories) == 1
-
 
     def test_train_models_on_samples_with_dataset(self):
         """
@@ -154,7 +152,6 @@ class FindArchitectureBasicSuite(unittest.TestCase):
                 batch_size=batch_size)
         assert len(histories) == 1
 
-
     def test_train_models_on_samples_with_generators(self):
         """
         Model should be able to train using a generator as an input
@@ -182,9 +179,9 @@ class FindArchitectureBasicSuite(unittest.TestCase):
 
             def __getitem__(self, idx):
                 batch_x = self.x[idx * self.batch_size:(idx + 1) *
-                self.batch_size]
+                                                       self.batch_size]
                 batch_y = self.y[idx * self.batch_size:(idx + 1) *
-                self.batch_size]
+                                                       self.batch_size]
                 return batch_x, batch_y
 
         data_train = DataGenerator(X_train, y_train, batch_size)
@@ -203,25 +200,6 @@ class FindArchitectureBasicSuite(unittest.TestCase):
                 outputfile=None, early_stopping_patience='auto',
                 batch_size=batch_size)
         assert len(histories) == 1
-
-
-    def test_find_best_architecture_with_class_weights(self):
-        """Model should not ignore tiny class with huge class weight. Note that this test is non-deterministic,
-        even though a seed was set. Note2 that this test is very slow, taking up 40% of all mcfly test time."""
-        tf.random.set_seed(1234)  # Needs tensorflow API v2
-
-        X_train, y_train = _create_2_class_labeled_dataset(1, 999)  # very unbalanced
-        X_val, y_val = _create_2_class_labeled_dataset(1, 99)
-        X_test, y_test = _create_2_class_labeled_dataset(10, 10)
-        class_weight = {0: 2, 1: 0.002}
-
-        best_model, _, _, _ = find_architecture.find_best_architecture(
-            X_train, y_train, X_val, y_val, verbose=False, subset_size=1000,
-            number_of_models=5, nr_epochs=1, model_type='CNN', class_weight=class_weight)
-
-        probabilities = best_model.predict(X_test)
-        predicted = probabilities.argmax(axis=1)
-        np.testing.assert_allclose(predicted, y_test.argmax(axis=1))
 
     def setUp(self):
         np.random.seed(1234)
@@ -338,8 +316,8 @@ class HistoryStoringSuite(unittest.TestCase):
                   'filters': np.array([1, 1]),
                   'lstm_dims': np.array([1, 1])
                   }
-        history = {'loss': [1, 1], 'accuracy': [np.float64(0), np.float32(0)],
-                   'val_loss': [np.float(1), np.float(1)], 'val_accuracy': [np.float64(0), np.float64(0)],
+        history = {'loss': [1, 1], 'accuracy': [np.float64(0), np.float64(0)],
+                   'val_loss': [np.float64(1), np.float64(1)], 'val_accuracy': [np.float64(0), np.float64(0)],
                    'my_own_custom_metric': [np.float64(0), np.float64(0)]}
         model_type = 'ABC'
         find_architecture.store_train_hist_as_json(params, model_type, history, history_file_path)
