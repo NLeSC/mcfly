@@ -34,12 +34,15 @@ import warnings
 import numpy as np
 from sklearn import neighbors, metrics as sklearnmetrics
 from tensorflow.keras import metrics
+from tensorflow.keras.utils import Sequence
 from tensorflow.keras.callbacks import EarlyStopping
 import tensorflow as tf
 from collections import defaultdict
+from types import GeneratorType
 
 
 from . import modelgen
+from .task import Task
 
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
@@ -271,9 +274,53 @@ def _create_or_append_to_json(jsondata, outputfile):
                   indent=4, ensure_ascii=False)
 
 
+def _is_one_hot_encoding(y):
+    return np.unique(y).shape[0] == 2 and np.unique(y) in np.array([0, 1]) and y.shape[1] > 1
+
+
+def _infer_task_from_y(y_train, y_val):
+    y_train_is_one_hot = _is_one_hot_encoding(y_train)
+    y_val_is_one_hot = _is_one_hot_encoding(y_val)
+
+    if y_train_is_one_hot and y_val_is_one_hot:
+        return Task.classification
+
+    if not y_train_is_one_hot and not y_val_is_one_hot:
+        return Task.regression
+
+    raise ValueError("Both 'y_train' and 'y_val' must be one-hot encoding or continuous")
+
+
+def _infer_task(X_train, X_val, y_train, y_val):
+    def _get_first_batch(y):
+        return next(iter(y))[1]
+
+    if y_train is None:
+        # Infer task from first batch
+        if isinstance(X_train, (GeneratorType, Sequence)):
+            y_train = _get_first_batch(X_train)
+        elif isinstance(X_train, (tf.data.Dataset)):
+            y_train = _get_first_batch(X_train).numpy()
+    if y_val is None:
+        # Infer task from first batch
+        if isinstance(X_val, (GeneratorType, Sequence)):
+            y_val = _get_first_batch(X_val)
+        elif isinstance(X_val, (tf.data.Dataset)):
+            y_val = _get_first_batch(X_val).numpy()
+    
+    return _infer_task_from_y(y_train, y_val)
+
+
+def _infer_default_metric(task):
+    if task is Task.classification:
+        return 'accuracy'
+    if task is Task.regression:
+        return 'mean_squared_error'
+
+
 def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                            number_of_models=5, nr_epochs=5, subset_size=100,
-                           outputpath=None, model_path=None, metric='accuracy',
+                           outputpath=None, model_path=None, metric=None,
                            class_weight=None,
                            **kwargs):
     """
@@ -345,17 +392,23 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
         Dictionary containing the hyperparameters for the best model
     best_model_type : str
         Type of the best model
-    knn_acc : float
-        accuaracy for kNN prediction on validation set
+    knn_performance : float
+        performance score for kNN prediction on validation set
 
 
     [1]: https://www.tensorflow.org/api_docs/python/tf/keras/Model#fit
     """
+    task = _infer_task(X_train, X_val, y_train, y_val)
+
+    if not metric:
+        metric = _infer_default_metric(task)
+
     models = modelgen.generate_models(X_train.shape, y_train.shape[1],
                                       number_of_models=number_of_models,
+                                      task=task,
                                       metrics=[metric],
                                       **kwargs)
-    _, val_accuracies, _ = train_models_on_samples(X_train,
+    _, val_performance, _ = train_models_on_samples(X_train,
                                                    y_train,
                                                    X_val,
                                                    y_val,
@@ -366,24 +419,35 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
                                                    outputfile=outputpath,
                                                    model_path=model_path,
                                                    class_weight=class_weight)
-    best_model_index = np.argmax(val_accuracies[metric])
+    best_model_index = np.argmax(val_performance[metric])
     best_model, best_params, best_model_type = models[best_model_index]
-    knn_acc = kNN_accuracy(
-        X_train[:subset_size, :, :], y_train[:subset_size, :], X_val, y_val)
-    if verbose:
-        print('Best model: model ', best_model_index)
-        print('Model type: ', best_model_type)
-        print('Hyperparameters: ', best_params)
-        print(str(metric) + ' on validation set: ',
-              val_accuracies[metric][best_model_index])
-        print('Accuracy of kNN on validation set', knn_acc)
 
-    if val_accuracies[metric][best_model_index] < knn_acc:
-        warnings.warn('Best model not better than kNN: ' +
-                      str(val_accuracies[best_model_index]) + ' vs  ' +
-                      str(knn_acc)
-                      )
-    return best_model, best_params, best_model_type, knn_acc
+    knn_performance = None
+
+    if metric is _infer_default_metric(task):
+        knn_performance = kNN_performance(
+            X_train[:subset_size, :, :], y_train[:subset_size, :], X_val, y_val, task=task)
+        if verbose:
+            print('Best model: model ', best_model_index)
+            print('Model type: ', best_model_type)
+            print('Hyperparameters: ', best_params)
+            print(str(metric) + ' on validation set: ',
+                val_performance[metric][best_model_index])
+            print('Performance of kNN on validation set', knn_performance)
+
+        if _kNN_better_than_best_model(val_performance[metric][best_model_index], knn_performance, task):
+            warnings.warn('Best model not better than kNN: ' +
+                        str(val_performance[metric][best_model_index]) + ' vs  ' +
+                        str(knn_performance)
+                        )
+        
+    return best_model, best_params, best_model_type, knn_performance
+
+
+def _kNN_better_than_best_model(best_model_performance, knn_performance, task):
+    return (task is Task.classification and best_model_performance < knn_performance) or \
+        (task is Task.regression and best_model_performance > knn_performance)
+
 
 
 def _get_metric_name(name):
@@ -408,9 +472,12 @@ def _get_metric_name(name):
     return name
 
 
-def kNN_accuracy(X_train, y_train, X_val, y_val, k=1):
+def kNN_performance(X_train, y_train, X_val, y_val, k=1, task=Task.classification):
     """
-    Performs k-Neigherst Neighbors and returns the accuracy score.
+    Performs k-Neigherst Neighbors and returns the validation performance score.
+
+    Returns accuracy if `task` is 'classification' or mean squared error if `task`
+    is 'regression'.
 
     Parameters
     ----------
@@ -423,15 +490,26 @@ def kNN_accuracy(X_train, y_train, X_val, y_val, k=1):
     y_val : numpy array
         Class labels for validation set
     k : int
-        number of neighbors to use for classifying
+        Number of neighbors to use for classifying
+    task : str
+        Task type, either 'classification' or 'regression'
+
 
     Returns
     -------
-    accuracy: float
-        accuracy score on the validation set
+    score: float
+        Performance score on the validation set
     """
     num_samples, num_timesteps, num_channels = X_train.shape
-    clf = neighbors.KNeighborsClassifier(k)
+
+    if task is Task.classification:
+        clf = neighbors.KNeighborsClassifier(k)
+        score = sklearnmetrics.accuracy_score
+
+    elif task is Task.regression:
+        clf = neighbors.KNeighborsRegressor(k)
+        score = sklearnmetrics.mean_squared_error
+
     clf.fit(
         X_train.reshape(
             num_samples,
@@ -442,4 +520,4 @@ def kNN_accuracy(X_train, y_train, X_val, y_val, k=1):
     val_predict = clf.predict(
         X_val.reshape(num_samples,
                       num_timesteps * num_channels))
-    return sklearnmetrics.accuracy_score(val_predict, y_val)
+    return score(val_predict, y_val)

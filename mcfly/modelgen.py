@@ -19,12 +19,14 @@
 import warnings
 import numpy as np
 from mcfly.models import CNN, DeepConvLSTM, ResNet, InceptionTime
+from mcfly.task import Task
 
 
 def generate_models(x_shape,
                     number_of_classes,
                     number_of_models,
                     model_types=['CNN', 'DeepConvLSTM', 'ResNet', 'InceptionTime'],
+                    task=Task.classification,
                     metrics=['accuracy'],
                     **hyperparameter_ranges):
     """
@@ -45,6 +47,9 @@ def generate_models(x_shape,
         'ResNet', or 'InceptionTime'), or custom model classes (see mcfly.models
         for examples on how such a class is build and what it must contain).
         Default is to use all built-in mcfly models.
+    task: str
+        Task type, either 'classification' or 'regression'
+
     metrics : list
         Metrics to calculate on the validation set.
         See https://keras.io/metrics/ for possible values.
@@ -115,7 +120,7 @@ def generate_models(x_shape,
                                             metrics, **hyperparameter_ranges)
 
         hyperparameters = model_type.generate_hyperparameters()
-        model = model_type.create_model(**hyperparameters)
+        model = model_type.create_model(task=task, **hyperparameters)
         model_name = model_type.model_name
 
         models.append((model, hyperparameters, model_name))
