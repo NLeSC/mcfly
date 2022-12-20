@@ -1,4 +1,4 @@
-from pytest import approx, raises, mark
+from pytest import approx, raises
 import unittest
 import math
 import json
@@ -29,7 +29,46 @@ class DataGenerator(Sequence):
             return batch_x, batch_y
 
 
+def _create_2_class_labeled_dataset(num_samples_class_a, num_samples_class_b):
+    X = _create_2_class_noisy_data(num_samples_class_a, num_samples_class_b)
+    y = _create_2_class_labels(num_samples_class_a, num_samples_class_b)
+    return X, y
+
+
+def _create_2_class_noisy_data(num_samples_class_a, num_samples_class_b):
+    num_channels = 2
+    num_time_steps = 100
+    data_class_a = np.zeros((num_samples_class_a, num_time_steps, num_channels))
+    data_class_b = np.ones((num_samples_class_b, num_time_steps, num_channels))
+    signal = np.vstack((data_class_a, data_class_b))
+    noise = 0.1 * np.random.randn(signal.shape[0], signal.shape[1], signal.shape[2])
+    return signal + noise
+
+
+def _create_2_class_labels(num_samples_class_a, num_samples_class_b):
+    labels_class_a = np.zeros(num_samples_class_a)
+    labels_class_b = np.ones(num_samples_class_b)
+    return to_categorical(np.hstack((labels_class_a, labels_class_b)))
+
+
+def _create_regression_dataset(num_samples, y_dims=1):
+    num_channels = 2
+    num_time_steps = 100
+
+    X = np.random.uniform(-1.0, 1.0, size=(num_samples, num_time_steps, num_channels))
+    y = np.random.uniform(-1.0, 1.0, size=(num_samples, y_dims))
+
+    return X, y
+
+
 class FindArchitectureBasicSuite(unittest.TestCase):
+    classification_train_dataset = _create_2_class_labeled_dataset(5, 5)
+    classification_val_dataset = _create_2_class_labeled_dataset(3, 3)
+
+    regression_train_dataset = _create_regression_dataset(10)
+    regression_val_dataset = _create_regression_dataset(6)
+
+    batch_size = 5
 
     def test_kNN_accuracy_1(self):
         """
@@ -85,17 +124,8 @@ class FindArchitectureBasicSuite(unittest.TestCase):
 
     def test_find_best_architecture_classification(self):
         """ Find_best_architecture should return a single model, parameters, type and valid knn accuracy."""
-        num_timesteps = 100
-        num_channels = 2
-        num_samples_train = 5
-        num_samples_val = 3
-        X_train = np.random.rand(
-            num_samples_train,
-            num_timesteps,
-            num_channels)
-        y_train = to_categorical(np.array([0, 0, 1, 1, 1]))
-        X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
-        y_val = to_categorical(np.array([0, 1, 1]))
+        X_train, y_train = self.classification_train_dataset
+        X_val, y_val = self.classification_val_dataset
         best_model, best_params, best_model_type, knn_acc = find_architecture.find_best_architecture(
             X_train, y_train, X_val, y_val, verbose=False, subset_size=10,
             number_of_models=1, nr_epochs=1)
@@ -106,17 +136,8 @@ class FindArchitectureBasicSuite(unittest.TestCase):
 
     def test_find_best_architecture_classification_non_default_metric(self):
         """ Find_best_architecture should return a single model, parameters, type and valid knn accuracy."""
-        num_timesteps = 100
-        num_channels = 2
-        num_samples_train = 5
-        num_samples_val = 3
-        X_train = np.random.rand(
-            num_samples_train,
-            num_timesteps,
-            num_channels)
-        y_train = to_categorical(np.array([0, 0, 1, 1, 1]))
-        X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
-        y_val = to_categorical(np.array([0, 1, 1]))
+        X_train, y_train = self.classification_train_dataset
+        X_val, y_val = self.classification_val_dataset
         best_model, best_params, best_model_type, knn_acc = find_architecture.find_best_architecture(
             X_train, y_train, X_val, y_val, verbose=False, subset_size=10, metric='categorical_accuracy',
             number_of_models=1, nr_epochs=1)
@@ -127,17 +148,8 @@ class FindArchitectureBasicSuite(unittest.TestCase):
 
     def test_find_best_architecture_regression(self):
         """ Find_best_architecture should return a single model, parameters, type and valid knn mean squared error."""
-        num_timesteps = 100
-        num_channels = 2
-        num_samples_train = 5
-        num_samples_val = 3
-        X_train = np.random.rand(
-            num_samples_train,
-            num_timesteps,
-            num_channels)
-        y_train = np.random.uniform(-1, 1, size=(num_samples_train, 1))
-        X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
-        y_val = np.random.uniform(-1, 1, size=(num_samples_val, 1))
+        X_train, y_train = self.regression_train_dataset
+        X_val, y_val = self.regression_val_dataset
         best_model, best_params, best_model_type, knn_mse = find_architecture.find_best_architecture(
             X_train, y_train, X_val, y_val, verbose=False, subset_size=10,
             number_of_models=1, nr_epochs=1)
@@ -148,17 +160,8 @@ class FindArchitectureBasicSuite(unittest.TestCase):
 
     def test_find_best_architecture_regression_non_default_metric(self):
         """ Find_best_architecture should return a single model, parameters, type and valid knn mean squared error."""
-        num_timesteps = 100
-        num_channels = 2
-        num_samples_train = 5
-        num_samples_val = 3
-        X_train = np.random.rand(
-            num_samples_train,
-            num_timesteps,
-            num_channels)
-        y_train = np.random.uniform(-1, 1, size=(num_samples_train, 1))
-        X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
-        y_val = np.random.uniform(-1, 1, size=(num_samples_val, 1))
+        X_train, y_train = self.regression_train_dataset
+        X_val, y_val = self.regression_val_dataset
         best_model, best_params, best_model_type, knn_mse = find_architecture.find_best_architecture(
             X_train, y_train, X_val, y_val, verbose=False, subset_size=10, metric='mean_absolute_error',
             number_of_models=1, nr_epochs=1)
@@ -170,42 +173,23 @@ class FindArchitectureBasicSuite(unittest.TestCase):
     # %TODO add test with metric other than accuracy
     # TODO: Is this a test? It's not set up as one
     def train_models_on_samples_empty(self):
-        num_timesteps = 100
-        num_channels = 2
-        num_samples_train = 5
-        num_samples_val = 3
-        X_train = np.random.rand(
-            num_samples_train,
-            num_timesteps,
-            num_channels)
-        y_train = to_categorical(np.array([0, 0, 1, 1, 1]))
-        X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
-        y_val = to_categorical(np.array([0, 1, 1]))
+        X_train, y_train = self.classification_train_dataset
+        X_val, y_val = self.classification_val_dataset
 
         histories, _, _ = \
             find_architecture.train_models_on_samples(
                 X_train, y_train, X_val, y_val, [],
                 nr_epochs=1, subset_size=10, verbose=False,
                 outputfile=None,
-                batch_size=20, metric='accuracy')
+                batch_size=self.batch_size, metric='accuracy')
         assert len(histories) == 0
 
     def test_train_models_on_samples_with_x_and_y(self):
         """
         Model should be able to train using separated x and y values
         """
-        num_timesteps = 100
-        num_channels = 2
-        num_samples_train = 5
-        num_samples_val = 3
-        X_train = np.random.rand(
-            num_samples_train,
-            num_timesteps,
-            num_channels)
-        y_train = to_categorical(np.array([0, 0, 1, 1, 1]))
-        X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
-        y_val = to_categorical(np.array([0, 1, 1]))
-        batch_size = 20
+        X_train, y_train = self.classification_train_dataset
+        X_val, y_val = self.classification_val_dataset
 
         custom_settings = get_default_settings()
         model_type = CNN(X_train.shape, 2, **custom_settings)
@@ -218,31 +202,21 @@ class FindArchitectureBasicSuite(unittest.TestCase):
                 X_train, y_train, X_val, y_val, models,
                 nr_epochs=1, subset_size=10, verbose=False,
                 outputfile=None, early_stopping_patience='auto',
-                batch_size=batch_size)
+                batch_size=self.batch_size)
         assert len(histories) == 1
 
     def test_train_models_on_samples_with_dataset(self):
         """
         Model should be able to train using a dataset as an input
         """
-        num_timesteps = 100
-        num_channels = 2
-        num_samples_train = 5
-        num_samples_val = 3
-        X_train = np.random.rand(
-            num_samples_train,
-            num_timesteps,
-            num_channels)
-        y_train = to_categorical(np.array([0, 0, 1, 1, 1]))
-        X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
-        y_val = to_categorical(np.array([0, 1, 1]))
-        batch_size = 20
+        X_train, y_train = self.classification_train_dataset
+        X_val, y_val = self.classification_val_dataset
 
         data_train = tf.data.Dataset.from_tensor_slices(
-            (X_train, y_train)).batch(batch_size)
+            (X_train, y_train)).batch(self.batch_size)
 
         data_val = tf.data.Dataset.from_tensor_slices(
-            (X_val, y_val)).batch(batch_size)
+            (X_val, y_val)).batch(self.batch_size)
 
         custom_settings = get_default_settings()
         model_type = CNN(X_train.shape, 2, **custom_settings)
@@ -255,28 +229,18 @@ class FindArchitectureBasicSuite(unittest.TestCase):
                 data_train, None, data_val, None, models,
                 nr_epochs=1, subset_size=None, verbose=False,
                 outputfile=None, early_stopping_patience='auto',
-                batch_size=batch_size)
+                batch_size=self.batch_size)
         assert len(histories) == 1
 
     def test_train_models_on_samples_with_generators(self):
         """
         Model should be able to train using a generator as an input
         """
-        num_timesteps = 100
-        num_channels = 2
-        num_samples_train = 5
-        num_samples_val = 3
-        X_train = np.random.rand(
-            num_samples_train,
-            num_timesteps,
-            num_channels)
-        y_train = to_categorical(np.array([0, 0, 1, 1, 1]))
-        X_val = np.random.rand(num_samples_val, num_timesteps, num_channels)
-        y_val = to_categorical(np.array([0, 1, 1]))
-        batch_size = 20
+        X_train, y_train = self.classification_train_dataset
+        X_val, y_val = self.classification_val_dataset
 
-        data_train = DataGenerator(X_train, y_train, batch_size)
-        data_val = DataGenerator(X_val, y_val, batch_size)
+        data_train = DataGenerator(X_train, y_train, self.batch_size)
+        data_val = DataGenerator(X_val, y_val, self.batch_size)
 
         custom_settings = get_default_settings()
         model_type = CNN(X_train.shape, 2, **custom_settings)
@@ -289,60 +253,34 @@ class FindArchitectureBasicSuite(unittest.TestCase):
                 data_train, None, data_val, None, models,
                 nr_epochs=1, subset_size=None, verbose=False,
                 outputfile=None, early_stopping_patience='auto',
-                batch_size=batch_size)
+                batch_size=self.batch_size)
         assert len(histories) == 1
 
     def setUp(self):
         np.random.seed(1234)
 
 
-def _create_2_class_labeled_dataset(num_samples_class_a, num_samples_class_b):
-    X = _create_2_class_noisy_data(num_samples_class_a, num_samples_class_b)
-    y = _create_2_class_labels(num_samples_class_a, num_samples_class_b)
-    return X, y
-
-
-def _create_2_class_noisy_data(num_samples_class_a, num_samples_class_b):
-    num_channels = 1
-    num_time_steps = 10
-    data_class_a = np.zeros((num_samples_class_a, num_time_steps, num_channels))
-    data_class_b = np.ones((num_samples_class_b, num_time_steps, num_channels))
-    signal = np.vstack((data_class_a, data_class_b))
-    noise = 0.1 * np.random.randn(signal.shape[0], signal.shape[1], signal.shape[2])
-    return signal + noise
-
-
-def _create_2_class_labels(num_samples_class_a, num_samples_class_b):
-    labels_class_a = np.zeros(num_samples_class_a)
-    labels_class_b = np.ones(num_samples_class_b)
-    return to_categorical(np.hstack((labels_class_a, labels_class_b)))
-
-
-def _create_regression_dataset(num_samples, y_dims=1):
-    num_channels = 1
-    num_time_steps = 10
-
-    X = np.random.uniform(-1.0, 1.0, size=(num_samples, num_time_steps, num_channels))
-    y = np.random.uniform(-1.0, 1.0, size=(num_samples, y_dims))
-
-    return X, y
-
-
 class TaskInferenceSuite(unittest.TestCase):
+    classification_train_dataset = _create_2_class_labeled_dataset(5, 5)
+    classification_val_dataset = _create_2_class_labeled_dataset(3, 3)
+
+    regression_train_dataset = _create_regression_dataset(10)
+    regression_val_dataset = _create_regression_dataset(6)
+
     batch_size = 5
 
 
     def test_infer_task_from_y_different_dtype(self):
-        y_train = _create_2_class_labels(10, 10)
-        _, y_val = _create_regression_dataset(2)
+        _, y_train = self.classification_train_dataset
+        _, y_val = self.regression_val_dataset
 
         with raises(ValueError, match="Both 'y_train' and 'y_val' must be one-hot encoding or continuous"):
             find_architecture._infer_task_from_y(y_train, y_val)
 
 
     def test_infer_task_from_y_classification(self):
-        X_train, y_train = _create_2_class_labeled_dataset(10, 10)
-        X_val, y_val = _create_2_class_labeled_dataset(2, 2)
+        X_train, y_train = self.classification_train_dataset
+        X_val, y_val = self.classification_val_dataset
 
         task = find_architecture._infer_task(X_train, X_val, y_train, y_val)
 
@@ -350,8 +288,8 @@ class TaskInferenceSuite(unittest.TestCase):
 
 
     def test_infer_task_from_y_regression(self):
-        X_train, y_train = _create_regression_dataset(10)
-        X_val, y_val = _create_regression_dataset(2)
+        X_train, y_train = self.regression_train_dataset
+        X_val, y_val = self.regression_val_dataset
 
         task = find_architecture._infer_task(X_train, X_val, y_train, y_val)
 
@@ -359,8 +297,8 @@ class TaskInferenceSuite(unittest.TestCase):
 
 
     def test_infer_task_generator_classification(self):
-        X_train, y_train = _create_2_class_labeled_dataset(10, 10)
-        X_val, y_val = _create_2_class_labeled_dataset(2, 2)
+        X_train, y_train = self.classification_train_dataset
+        X_val, y_val = self.classification_val_dataset
 
         data_train = DataGenerator(X_train, y_train, self.batch_size)
         data_val = DataGenerator(X_val, y_val, self.batch_size)
@@ -371,8 +309,8 @@ class TaskInferenceSuite(unittest.TestCase):
 
 
     def test_infer_task_generator_regression(self):
-        X_train, y_train = _create_regression_dataset(10)
-        X_val, y_val = _create_regression_dataset(2)
+        X_train, y_train = self.regression_train_dataset
+        X_val, y_val = self.regression_val_dataset
 
         data_train = DataGenerator(X_train, y_train, self.batch_size)
         data_val = DataGenerator(X_val, y_val, self.batch_size)
@@ -383,8 +321,8 @@ class TaskInferenceSuite(unittest.TestCase):
 
 
     def test_infer_task_dataset_classification(self):
-        X_train, y_train = _create_2_class_labeled_dataset(10, 10)
-        X_val, y_val = _create_2_class_labeled_dataset(2, 2)
+        X_train, y_train = self.classification_train_dataset
+        X_val, y_val = self.classification_val_dataset
 
         data_train = tf.data.Dataset.from_tensor_slices(
             (X_train, y_train)).batch(self.batch_size)
@@ -397,8 +335,8 @@ class TaskInferenceSuite(unittest.TestCase):
 
 
     def test_infer_task_dataset_regression(self):
-        X_train, y_train = _create_regression_dataset(10)
-        X_val, y_val = _create_regression_dataset(2)
+        X_train, y_train = self.regression_train_dataset
+        X_val, y_val = self.regression_val_dataset
 
         data_train = tf.data.Dataset.from_tensor_slices(
             (X_train, y_train)).batch(self.batch_size)
