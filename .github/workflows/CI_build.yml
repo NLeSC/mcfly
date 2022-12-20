@@ -1,41 +1,42 @@
 name: CI Build
 
 on:
+  workflow_dispatch:
   push:
+    branches:
+    - main
   pull_request:
-    types: [opened, reopened]
+    branches:
+    - main
   schedule:
     - cron: '0 0 1 * *'
 
 jobs:
 
   first_check:
-    name: first code check / python-3.8 / ubuntu-latest
+    name: first code check / python-3.10 / ubuntu-latest
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v3
         with:
-          python-version: 3.8
+          python-version: '3.10'
       - name: Python info
         run: |
-          which python
-          python --version
+          which python3
+          python3 --version
       - name: Build package and create dev environment
         run: |
-          python -m pip install --upgrade pip
-          pip install -e .[dev]
-      - name: Show pip list
-        run: |
-          pip list
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install -e .[dev]
       - name: Check style against standards using prospector
         shell: bash -l {0}
         run: prospector --profile linter_profile -o grouped -o pylint:pylint-report.txt --zero-exit
       - name: Run unit test / Test coverage with Scrutinizer
         run: |
           coverage run --source=mcfly -m pytest
-          pip install scrutinizer-ocular
+          python3 -m pip install scrutinizer-ocular
           ocular
 
   basic_checks:
@@ -49,25 +50,23 @@ jobs:
         python-version: ['3.7', '3.8', '3.9', '3.10']
         exclude:
           # already tested in first_check job
-          - python-version: 3.8
+          - python-version: 3.10
             os: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
       - name: Python info
         run: |
-          which python
-          python --version
+          which python3
+          python3 --version
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -e .[dev]
-      - name: Show pip list
-        run: |
-          pip list
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install -e .[dev]
       - name: Run unit tests
-        run: |
-          pytest
+        run: pytest -v
+      - name: Verify that we can build the package
+        run: python3 setup.py sdist bdist_wheel
