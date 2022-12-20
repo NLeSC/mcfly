@@ -21,7 +21,7 @@ Volume 12,
 
 ## Installation
 Prerequisites:
-- Python 3.6, 3.7 or 3.8
+- Python 3.7, 3.8, 3.9 or 3.10
 - pip
 - Tensorflow 2.0, if pip errors that it can't find it for your python/pip version
 
