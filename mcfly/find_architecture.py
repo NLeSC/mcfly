@@ -37,7 +37,8 @@ from tensorflow.keras import metrics
 from tensorflow.keras.utils import Sequence
 from tensorflow.keras.callbacks import EarlyStopping
 import tensorflow as tf
-from collections import defaultdict, Generator
+from collections import defaultdict
+from types import GeneratorType
 
 
 from . import modelgen
@@ -296,13 +297,13 @@ def _infer_task(X_train, X_val, y_train, y_val):
 
     if y_train is None:
         # Infer task from first batch
-        if isinstance(X_train, (Generator, Sequence)):
+        if isinstance(X_train, (GeneratorType, Sequence)):
             y_train = _get_first_batch(X_train)
         elif isinstance(X_train, (tf.data.Dataset)):
             y_train = _get_first_batch(X_train).numpy()
     if y_val is None:
         # Infer task from first batch
-        if isinstance(X_val, (Generator, Sequence)):
+        if isinstance(X_val, (GeneratorType, Sequence)):
             y_val = _get_first_batch(X_val)
         elif isinstance(X_val, (tf.data.Dataset)):
             y_val = _get_first_batch(X_val).numpy()

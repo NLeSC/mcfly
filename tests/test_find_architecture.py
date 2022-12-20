@@ -4,7 +4,6 @@ import math
 import json
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.metrics import Precision
 from tensorflow.keras.utils import to_categorical, Sequence
 from test_tools import safe_remove
 
