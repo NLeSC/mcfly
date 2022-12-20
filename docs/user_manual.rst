@@ -11,10 +11,7 @@ We provide a quick description for the layers used in mcfly.
 * **convolutional layer** convolves the output of the previous layer with one or more sets of weights and outputs one or more feature maps.
 * **LSTM layer** is a recurrent layer with some special features to help store information over multiple time steps in time series.
 
-Some recommended reading to make you familiar with deep learning:
-http://scarlet.stanford.edu/teach/index.php/An_Introduction_to_Convolutional_Neural_Networks
-
-Or follow a complete course on deep learning:
+To become familiar with deep learning we recommend the following course:
 http://cs231n.stanford.edu/
 
 
@@ -26,7 +23,7 @@ In this section we describe what data format is expected and what to think about
 
 Eligible data sets
 ^^^^^^^^^^^^^^^^^^
-Mcfly is a tool for *classification* of single or *multichannel timeseries data*. One (real valued) multi-channel time series is associated with one class label.
+Mcfly is a tool for *classification* and *regression* of single or *multichannel timeseries data*. One (real valued) multi-channel time series is associated with one class label.
 All sequences in the data set should be of equal length.
 
 Data format
@@ -45,7 +42,7 @@ Here are some tips for preprocessing the data:
 * One label should be associated with a complete time series. In case of multiple labels, often the last label is taken as the label for the complete sequence.
   Another possibility is to take the majority label.
 * In splitting the data into training, validation and test sets, it might be necessary to make sure that sample subject (such as test persons) for which multiple sequences are available, are not present in both train and validation/test set. The same holds for subsequences that originates from the same original sequence (in case of sliding windows).
-* The Keras function ``keras.utils.np_utils.to_categorical`` can be used to transform an array of class labels to binary class labels.
+* The Keras function ``keras.utils.np_utils.to_categorical`` can be used to transform an array of class labels to binary class labels if classification tasks is performed.
 * Data doesn't need to be normalized. Every model mcfly produces starts by normalizing data through a Batch Normalization layer.
   This means that training data is used to learn mean and standard deviation of each channel and timestep.
 
@@ -55,7 +52,7 @@ The function :func:`~mcfly.find_architecture.find_best_architecture` generates a
 and returns the best performing model on a subset of the data.
 The following four types of architectures are possible (for more information, see the :doc:`technical_doc`):
 
-:class:`~mcfly.models.CNN`: A stack ofonvolutional layers, followed by a final dense layer
+:class:`~mcfly.models.CNN`: A stack of convolutional layers, followed by a final dense layer
 
 :class:`~mcfly.models.ConvLSTM`: Convolutional layers, followed by LSTM layers and a final dense layer
 

@@ -3,10 +3,9 @@ Installation
 
 Prerequisites:
 
-* Python 3.6, 3.7 or 3.8
+* Python 3.7, 3.8, 3.9 or 3.10
 * pip
-* Tensorflow 2.0, if pip errors that it can’t find it for your python/pip version
-
+* Tensorflow 2
 
 Installing all dependencies in separate conda environment:
 
@@ -19,19 +18,10 @@ Installing all dependencies in separate conda environment:
 
 To install the package, run in the project directory:
 
-``pip install .``
+.. code:: sh
 
-Installing on Windows
-~~~~~~~~~~~~~~~~~~~~~
+   pip install mcfly
 
-When installing on Windows, there are a few things to take into
-consideration. The preferred (in other words: easiest) way to install
-Keras and mcfly is as follows:
-
-* Use `Anaconda <https://www.anaconda.com/download>`__
-* Install numpy and scipy through the conda package manager (and not with pip)
-* To install mcfly, run ``pip install mcfly`` in the cmd prompt.
-* Loading and saving models can give problems on Windows, see https://github.com/NLeSC/mcfly-tutorial/issues/17
 
 
 Visualization
@@ -42,7 +32,9 @@ models. The tool can be found on http://nlesc.github.io/mcfly/. To run
 the model visualization on your own computer, cd to the ``html``
 directory and start up a python web server:
 
-``python -m http.server 8888 &``
+.. code:: sh
+
+    python -m http.server 8888 &
 
 Navigate to ``http://localhost:8888/`` in your browser to open the
 visualization. For a more elaborate description of the visualization see

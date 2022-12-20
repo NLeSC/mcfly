@@ -6,14 +6,14 @@
 Welcome to mcfly's documentation!
 =================================
 
-The goal of mcfly is to ease using deep learning technology for time series classification.
+The goal of mcfly is to ease using deep learning technology for time series classification and regression.
 The advantages of deep learning algorithms is that it can handle raw data directly with no need
 to compute signal features, it does not require a expert domain knowledge about the data,
 and it has been shown to be competitive with conventional machine learning techniques.
-As an example, you can apply mcfly on, accelerometer data for activity classification,
+As an example, you can apply mcfly on accelerometer data for activity classification,
 as shown in the mcfly `tutorial <https://github.com/NLeSC/mcfly-tutorial>`_.
 
-If you use mcfly in your reserach, please cite the following software paper:
+If you use mcfly in your research, please cite the following software paper:
 
 D. van Kuppevelt, C. Meijer, F. Huber, A. van der Ploeg, S. Georgievska, V.T. van Hees. Mcfly: Automated deep learning on time series.
 SoftwareX,
