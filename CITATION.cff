@@ -11,6 +11,7 @@ authors:
     affiliation: "Netherlands eScience Center"
     family-names: Meijer
     given-names: Christiaan
+    orcid: "https://orcid.org/0000-0002-5529-5761"
   -
     affiliation: "Netherlands eScience Center"
     family-names: Huber
@@ -48,6 +49,16 @@ authors:
     family-names: Ploeg
     given-names: Atze
     name-particle: "van der"
+  -
+    affiliation: "Netherlands eScience Center"
+    family-names: Lüken
+    given-names: Malte
+    orcid: "https://orcid.org/0000-0001-7095-203X"
+  -
+    affiliation: "Netherlands eScience Center"
+    family-names: Lyashevska
+    given-names: Olga
+    orcid: "https://orcid.org/0000-0002-8686-8550"
 cff-version: "1.0.3"
 date-released: 2019-11-05
 doi: "10.5281/zenodo.596127"
