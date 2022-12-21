@@ -37,6 +37,7 @@ extensions = [
 #    'sphinx.ext.pngmath',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
+    'sphinx.ext.autosectionlabel'
 ]
 
 napoleon_numpy_docstring = True
