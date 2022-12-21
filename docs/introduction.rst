@@ -25,10 +25,6 @@ Licensing
 Source code and data of mcfly are licensed under the Apache License,
 version 2.0.
 
-.. |Build Status| image:: https://travis-ci.org/NLeSC/mcfly.svg?branch=master
-   :target: https://travis-ci.org/NLeSC/mcfly
-.. |AppVeyor Build Status| image:: https://ci.appveyor.com/api/projects/status/lv8hih1hvxbuu5f7/branch/master?svg=true
-   :target: https://ci.appveyor.com/project/NLeSC/mcfly/
 .. |Coverage| image:: https://scrutinizer-ci.com/g/NLeSC/mcfly/badges/coverage.png?b=master
    :target: https://scrutinizer-ci.com/g/NLeSC/mcfly/statistics/
 .. |PyPI| image:: https://img.shields.io/pypi/v/mcfly.svg

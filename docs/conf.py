@@ -74,13 +74,13 @@ release = __version__
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
 #today = ''
 # Else, today_fmt is used as the format for a strftime call.
-#today_fmt = '%B %d, %Y'
+today_fmt = '%B %d, %Y'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -93,7 +93,7 @@ exclude_patterns = ['_build']
 # If true, '()' will be appended to :func: etc. cross-reference text.
 #add_function_parentheses = True
 
-# If true, the current module name will be prepended to all description
+# Some recommended reading  course on deep learnin If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).
 #add_module_names = True
 
@@ -185,7 +185,7 @@ html_sidebars = { '**': ['globaltoc.html', 'relations.html', 'sourcelink.html', 
 #html_show_sphinx = True
 
 # If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
-#html_show_copyright = True
+html_show_copyright = True
 
 # If true, an OpenSearch description file will be output, and all pages will
 # contain a <link> tag referring to it.  The value of this option must be the
