@@ -7,13 +7,12 @@ Task inference
 --------------
 The funciton :func:`~mcfly.find_architecture.find_best_architecture` automatically infers the task (classification vs. regression) from the input data.
 The task is inferred from *y_train* and *y_val* if both are not `None`. If *X_train* and *X_val* are Tensorflow datasets or generators, 
-the task is inferred from the targets of the first batch. The function performs classification if the target complies with one-hot encoding, specifically if all three conditions are met:
+the task is inferred from the targets of the first batch. The function performs classification if the target complies with one-hot encoding, specifically if both conditions are met:
 
 * The target array contains only two unique values
 * The unique values are 0 and 1
-* The second dimension of the target array has length > 1 (i.e., there are at least two classes)
 
-If any condition is not met, regression is performed. If :func:`~mcfly.find_architecture.find_best_architecture` received `metric=None`, a default metric is chosen
+If either condition is not met, regression is performed. If :func:`~mcfly.find_architecture.find_best_architecture` received `metric=None`, a default metric is chosen
 depending on the inferred task (see :ref:`Other choices`).
 
 Hyperparameter search
