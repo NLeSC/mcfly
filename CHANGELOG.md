@@ -1,5 +1,10 @@
 # Change Log
 
+## v4.0.0
+- Add regression functionality
+- Fix Dataset/data generator support
+- Dropped support for python 3.6, added support for python 3.9 and 3.10
+
 ## v3.1.0
 - Added support for training with Datasets, generators, and other data types supported by Keras [#211](https://github.com/NLeSC/mcfly/issues/211)
 - Added separate classes for each model type, also allowing easier extension by own custom models [#239](https://github.com/NLeSC/mcfly/pull/239)

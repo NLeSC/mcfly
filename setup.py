@@ -22,7 +22,7 @@ setup(
         'Programming Language :: Python',
     ],
     test_suite="tests",
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     install_requires=[
         "numpy",
         "scikit-learn>=0.15.0",
