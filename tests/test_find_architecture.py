@@ -134,6 +134,40 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         self.assertIsNotNone(best_model_type)
         assert 1 >= knn_acc >= 0
 
+    def test_find_best_architecture_classification_with_dataset(self):
+        """ Find_best_architecture should return a single model, parameters, type and valid knn accuracy."""
+        X_train, y_train = self.classification_train_dataset
+        X_val, y_val = self.classification_val_dataset
+
+        data_train = tf.data.Dataset.from_tensor_slices(
+            (X_train, y_train)).batch(self.batch_size)
+        data_val = tf.data.Dataset.from_tensor_slices(
+            (X_val, y_val)).batch(self.batch_size)
+
+        best_model, best_params, best_model_type, knn_acc = find_architecture.find_best_architecture(
+            data_train, None, data_val, None, verbose=False, subset_size=None,
+            number_of_models=1, nr_epochs=1)
+        assert hasattr(best_model, 'fit')
+        self.assertIsNotNone(best_params)
+        self.assertIsNotNone(best_model_type)
+        self.assertIsNone(knn_acc)
+
+    def test_find_best_architecture_classification_with_generator(self):
+        """ Find_best_architecture should return a single model, parameters, type and valid knn accuracy."""
+        X_train, y_train = self.classification_train_dataset
+        X_val, y_val = self.classification_val_dataset
+
+        data_train = DataGenerator(X_train, y_train, self.batch_size)
+        data_val = DataGenerator(X_val, y_val, self.batch_size)
+
+        best_model, best_params, best_model_type, knn_acc = find_architecture.find_best_architecture(
+            data_train, None, data_val, None, verbose=False, subset_size=None,
+            number_of_models=1, nr_epochs=1)
+        assert hasattr(best_model, 'fit')
+        self.assertIsNotNone(best_params)
+        self.assertIsNotNone(best_model_type)
+        self.assertIsNone(knn_acc)
+
     def test_find_best_architecture_classification_non_default_metric(self):
         """ Find_best_architecture should return a single model, parameters, type and valid knn accuracy."""
         X_train, y_train = self.classification_train_dataset
