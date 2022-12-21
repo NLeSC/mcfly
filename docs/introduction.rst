@@ -2,7 +2,7 @@ Introduction
 ============
 
 The goal of mcfly is to ease the use of deep learning technology for
-time series classification. The advantage of deep learning is that it
+time series classification and regression. The advantage of deep learning is that it
 can handle raw data directly, without the need to compute signal
 features. Deep learning does not require expert domain knowledge about
 the data, and has been shown to be competitive with conventional machine

@@ -95,7 +95,7 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
     subset_size :
         The number of samples used from the complete train set. If set to 'None'
         use the entire dataset. Default is 100, but should be adjusted depending
-        on the type ans size of the dataset.
+        on the type and size of the dataset.
         Subset is not supported for tf.data.Dataset objects or generators
     verbose : bool, optional
         flag for displaying verbose output
@@ -275,10 +275,14 @@ def _create_or_append_to_json(jsondata, outputfile):
 
 
 def _is_one_hot_encoding(y):
+    """Helper function that checks if a target complies with one-hot encoding.
+    """
     return np.unique(y).shape[0] == 2 and np.unique(y) in np.array([0, 1]) and y.shape[1] > 1
 
 
 def _infer_task_from_y(y_train, y_val):
+    """Helper function that returns the task inferred from training and validation targets.
+    """
     y_train_is_one_hot = _is_one_hot_encoding(y_train)
     y_val_is_one_hot = _is_one_hot_encoding(y_val)
 
@@ -292,6 +296,12 @@ def _infer_task_from_y(y_train, y_val):
 
 
 def _infer_task(X_train, X_val, y_train, y_val):
+    """Helper function that returns the task inferred from training and validation targets.
+
+    If `y_train` and `y_val` are `None`, infers the task from the target of the first batch
+    of the `tf.keras.Dataset` or generator. 
+
+    """
     def _get_first_batch(y):
         return next(iter(y))[1]
 
@@ -312,6 +322,8 @@ def _infer_task(X_train, X_val, y_train, y_val):
 
 
 def _infer_default_metric(task):
+    """Helper function that returns the default metric for each task.
+    """
     if task is Task.classification:
         return 'accuracy'
     if task is Task.regression:
@@ -333,6 +345,9 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
     """
     Tries out a number of models on a subsample of the data,
     and outputs the best found architecture and hyperparameters.
+
+    Infers the task (classification vs. regression) automatically from the 
+    input data. For further details, see the :ref:`Technical documentation`.
 
     Parameters
     ----------
@@ -377,7 +392,9 @@ def find_best_architecture(X_train, y_train, X_val, y_val, verbose=True,
         The number of epochs that each model is trained
     subset_size : int, optional
         The size of the subset of the data that is used for finding
-        the optimal architecture. Default is 100.
+        the optimal architecture. Default is 100. If set to 'None'
+        use the entire dataset. Subset is not supported for 
+        tf.data.Dataset objects or generators
     outputpath : str, optional
         File location to store the model results
     model_path: str, optional

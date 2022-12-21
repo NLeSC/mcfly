@@ -23,7 +23,7 @@ from mcfly.task import Task
 
 
 def generate_models(x_shape,
-                    number_of_classes,
+                    number_of_output_dimensions,
                     number_of_models,
                     model_types=['CNN', 'DeepConvLSTM', 'ResNet', 'InceptionTime'],
                     task=Task.classification,
@@ -37,8 +37,8 @@ def generate_models(x_shape,
     ----------
     x_shape : tuple
         Shape of the input dataset: (num_samples, num_timesteps, num_channels)
-    number_of_classes : int
-        Number of classes for classification task.
+    number_of_output_dimensions : int
+        Number of classes for classification task or number of targets for regression.
     number_of_models : int
         Number of models to generate. Should at least be >= the number
         of given model types.
@@ -113,10 +113,10 @@ def generate_models(x_shape,
     models = []
     for current_model_type in model_types_selected[:number_of_models]:
         if current_model_type in default_models:
-            model_type = default_models[current_model_type](x_shape, number_of_classes,
+            model_type = default_models[current_model_type](x_shape, number_of_output_dimensions,
                                                             metrics, **hyperparameter_ranges)
         else: # Assume model class was passed
-            model_type = current_model_type(x_shape, number_of_classes,
+            model_type = current_model_type(x_shape, number_of_output_dimensions,
                                             metrics, **hyperparameter_ranges)
 
         hyperparameters = model_type.generate_hyperparameters()

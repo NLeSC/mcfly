@@ -16,7 +16,7 @@ class IntegrationSuite(unittest.TestCase):
         num_classes = y_train.shape[1]
         metric = 'accuracy'
         models = modelgen.generate_models(X_train.shape,
-                                          number_of_classes=num_classes,
+                                          number_of_output_dimensions=num_classes,
                                           number_of_models=2,
                                           metrics=[metric],
                                           model_type='CNN')  # Because CNNs are quick to train.
