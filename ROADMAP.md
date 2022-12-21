@@ -1,0 +1,8 @@
+- Transformer architecture
+- literature review for architectures wrt regression (and classification as well)
+- not all data loaded in memory
+- not all models loaded in memory
+- add support for other metric classes (besides the str metrics)
+- wider data format support: support single channel (without channel dimension)
+- literature review on forecasting architecures/methods formats
+- compatibility with dianna and s4s
