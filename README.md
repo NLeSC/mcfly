@@ -1,8 +1,8 @@
 <p align="left">
-  <img src="https://raw.githubusercontent.com/NLeSC/mcfly/master/mcflylogo.png" width="200"/>
+  <img src="https://raw.githubusercontent.com/NLeSC/mcfly/master/mcflylogo_with_regression.png" width="200"/>
 </p>
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/NLeSC/mcfly/CI%20Build)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/NLeSC/mcfly/CI_build.yml?branch=main)](https://github.com/NLeSC/mcfly/actions/workflows/CI_build.yml)
 [![Coverage](https://scrutinizer-ci.com/g/NLeSC/mcfly/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/NLeSC/mcfly/statistics/)
 [![PyPI](https://img.shields.io/pypi/v/mcfly.svg)](https://pypi.python.org/pypi/mcfly/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.596127.svg)](https://doi.org/10.5281/zenodo.596127)
