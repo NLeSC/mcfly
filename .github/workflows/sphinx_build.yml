@@ -28,7 +28,7 @@ jobs:
            path: "docs/requirements.txt"
 
       - name: Trigger Sphinx build
-        run:
+        run: |
           cd docs
           make html
 
