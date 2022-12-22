@@ -13,8 +13,22 @@ jobs:
     name: Build documentation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: ammaraskar/sphinx-action@master
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          docs-folder: "docs/"
-          build-command: "sphinx-build -b html . _build"
+          python-version: 3:10
+
+        # this action updates pip, setuptools, and wheel before install
+      - name: Install Python dependencies
+        uses: py-actions/py-dependency-install@v4
+        with:
+           path: "docs/requirements.txt"
+
+      - name: Trigger sphinx build
+        uses: ammaraskar/sphinx-action@master
+        with:
+           docs-folder: "docs/"
+           build-command: "sphinx-build -b html . _build"
