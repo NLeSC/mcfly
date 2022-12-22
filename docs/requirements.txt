@@ -3,3 +3,5 @@ scikit-learn
 scipy
 tensorflow
 h5py
+sphinx
+sphinx-rtd-theme

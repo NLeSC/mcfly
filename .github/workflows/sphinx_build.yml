@@ -27,8 +27,8 @@ jobs:
         with:
            path: "docs/requirements.txt"
 
-      - name: Trigger sphinx build
-        uses: ammaraskar/sphinx-action@master
-        with:
-           docs-folder: "docs/"
-           build-command: "sphinx-build -b html . _build"
+      - name: Trigger Sphinx build
+        run:
+          cd docs
+          make html
+
