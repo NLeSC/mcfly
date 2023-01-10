@@ -24,8 +24,7 @@ jobs:
         # this action updates pip, setuptools, and wheel before install
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v4
-        with:
-           path: "docs/requirements.txt"
+        run: pip install .[dev]
 
       - name: Trigger Sphinx build
         run: |
