@@ -23,8 +23,9 @@ jobs:
 
         # this action updates pip, setuptools, and wheel before install
       - name: Install Python dependencies
-        uses: py-actions/py-dependency-install@v4
-        run: pip install .[publishing]
+        run: |
+          pip install --upgrade pip setuptools wheel
+          pip install .[publishing]
 
       - name: Trigger Sphinx build
         run: |
