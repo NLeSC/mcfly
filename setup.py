@@ -38,7 +38,9 @@ setup(
                     "publishing": [
                         "build",
                         "twine",
-                        "wheel"
+                        "wheel",
+                        "sphinx",
+                        "sphinx-rtd-theme"
                     ]
     }
 )
