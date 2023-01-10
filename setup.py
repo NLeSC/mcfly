@@ -31,7 +31,7 @@ setup(
         "h5py",
     ],
     extras_require={"dev": ["coverage",
-                            "prospector[with_pyroma]",
+                            "prospector[with_pyroma]==1.7.7",
                             "pytest",
                             "pytest-cov",
                             ],
