@@ -81,41 +81,25 @@ def generate_models(x_shape,
                 'low_reg': 1,
                 'high_reg': 4}
 
-    models = [CNN, DeepConvLSTM, ResNet, InceptionTime]
-    default_models = {model.model_name: model for model in models}
+    default_models = {model.model_name: model for model in [CNN, DeepConvLSTM, ResNet, InceptionTime]}
 
-    for model_type in model_types:
-        if isinstance(model_type, str) and model_type not in default_models:
-            raise NameError("Unknown model name, '{}'.".format(model_type))
-    if number_of_models < len(model_types):
-        warnings.warn("Specified number_of_models is smaller than the given number of model types.")
+    _check_arguments_validity(default_models, model_types, number_of_models)
+    _update_hyperparameter_ranges(defaults, hyperparameter_ranges)
+    model_types_selected = _sample_model_types(model_types, number_of_models)
+
+    return _instantiate_models(default_models, hyperparameter_ranges, metrics, model_types_selected,
+                               number_of_output_dimensions, x_shape, task)
 
 
-    # Replace default hyperparameter ranges with input
-    for key, value in hyperparameter_ranges.items():
-        if key in defaults:
-            print("The value of {} is set from {} (default) to {}".format(key, defaults[key], value))
-            defaults[key] = value
-
-    # Add missing parameters from default
-    for key, value in defaults.items():
-        if key not in hyperparameter_ranges:
-            hyperparameter_ranges[key] = value
-
-    model_types_selected = []
-
-    for _ in range(int(np.ceil(number_of_models/len(model_types)))):
-        np.random.shuffle(model_types)
-        model_types_selected.extend(model_types)
-
-    # Create list of Keras models and their hyperparameters
-    # -------------------------------------------------------------------------
+def _instantiate_models(default_models, hyperparameter_ranges, metrics, model_types_selected, number_of_output_dimensions,
+                        x_shape, task):
     models = []
-    for current_model_type in model_types_selected[:number_of_models]:
+    for current_model_type in model_types_selected:
         if current_model_type in default_models:
             model_type = default_models[current_model_type](x_shape, number_of_output_dimensions,
                                                             metrics, **hyperparameter_ranges)
-        else: # Assume model class was passed
+
+        else:  # Assume model class was passed
             model_type = current_model_type(x_shape, number_of_output_dimensions,
                                             metrics, **hyperparameter_ranges)
 
@@ -125,3 +109,31 @@ def generate_models(x_shape,
 
         models.append((model, hyperparameters, model_name))
     return models
+
+
+def _sample_model_types(model_types, number_of_models):
+    selected = []
+    for _ in range(int(np.ceil(number_of_models / len(model_types)))):
+        np.random.shuffle(model_types)
+        selected.extend(model_types)
+    return selected[:number_of_models]
+
+
+def _update_hyperparameter_ranges(defaults, hyperparameter_ranges):
+    # Replace default hyperparameter ranges with input
+    for key, value in hyperparameter_ranges.items():
+        if key in defaults:
+            print("The value of {} is set from {} (default) to {}".format(key, defaults[key], value))
+            defaults[key] = value
+    # Add missing parameters from default
+    for key, value in defaults.items():
+        if key not in hyperparameter_ranges:
+            hyperparameter_ranges[key] = value
+
+
+def _check_arguments_validity(default_models, model_types, number_of_models):
+    for model_type in model_types:
+        if isinstance(model_type, str) and model_type not in default_models:
+            raise NameError("Unknown model name, '{}'.".format(model_type))
+    if number_of_models < len(model_types):
+        warnings.warn("Specified number_of_models is smaller than the given number of model types.")
