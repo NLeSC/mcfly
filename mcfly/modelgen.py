@@ -88,19 +88,18 @@ def generate_models(x_shape,
     model_types_selected = _sample_model_types(model_types, number_of_models)
 
     return _instantiate_models(default_models, hyperparameter_ranges, metrics, model_types_selected,
-                               [CNN, DeepConvLSTM, ResNet, InceptionTime],
-                               number_of_classes, x_shape)
+                               number_of_output_dimensions, x_shape, task)
 
 
-def _instantiate_models(default_models, hyperparameter_ranges, metrics, model_types_selected, models, number_of_classes,
-                        x_shape):
+def _instantiate_models(default_models, hyperparameter_ranges, metrics, model_types_selected, number_of_output_dimensions,
+                        x_shape, task):
     models = []
     for current_model_type in model_types_selected:
         if current_model_type in default_models:
             model_type = default_models[current_model_type](x_shape, number_of_output_dimensions,
                                                             metrics, **hyperparameter_ranges)
 
-        else: # Assume model class was passed
+        else:  # Assume model class was passed
             model_type = current_model_type(x_shape, number_of_output_dimensions,
                                             metrics, **hyperparameter_ranges)
 
