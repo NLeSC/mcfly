@@ -29,10 +29,4 @@ mcfly.modelgen module
     :undoc-members:
     :show-inheritance:
 
-mcfly.storage module
---------------------
 
-.. automodule:: mcfly.storage
-    :members:
-    :undoc-members:
-    :show-inheritance:

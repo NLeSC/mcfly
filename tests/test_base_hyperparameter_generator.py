@@ -5,7 +5,7 @@ from mcfly.models.base_hyperparameter_generator import generate_base_hyperparame
 def test_regularization_is_float():
     """ Regularization should be a float. """
     reg = get_regularization(0, 5)
-    assert isinstance(reg, np.float), "Expected different type."
+    assert isinstance(reg, float), "Expected different type."
 
 def test_regularization_0size_interval():
     """ Regularization from zero size interval [2,2] should be 10^-2. """

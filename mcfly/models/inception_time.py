@@ -7,9 +7,10 @@ from tensorflow.keras.optimizers import Adam
 import numpy as np
 from argparse import Namespace
 from .base_hyperparameter_generator import generate_base_hyperparameter_set
+from ..task import Task
+
 
 class InceptionTime:
-
     model_name = "InceptionTime"
 
     def __init__(self,
@@ -98,7 +99,8 @@ class InceptionTime:
                      use_bottleneck=True,
                      max_kernel_size=20,
                      learning_rate=0.01,
-                     regularization_rate=0.0):
+                     regularization_rate=0.0,
+                     task=Task.classification):
         """
         Generate a InceptionTime model. See Fawaz et al. 2019.
 
@@ -125,6 +127,8 @@ class InceptionTime:
             learning rate
         regularization_rate: float
             regularization rate
+        task: str
+            Task type, either 'classification' or 'regression'
 
         Returns
         -------
@@ -202,13 +206,18 @@ class InceptionTime:
         gap_layer = GlobalAveragePooling1D()(x)
 
         # Final classification layer
-        output_layer = Dense(
-            self.number_of_classes, activation='softmax')(gap_layer)
+        output_layer = Dense(self.number_of_classes)(gap_layer)
 
-        # Create model and compile
+        if task is Task.classification:
+            loss_function = 'categorical_crossentropy'
+            output_layer = Activation('softmax')(output_layer)
+        elif task is Task.regression:
+            loss_function = 'mean_squared_error'
+
+            # Create model and compile
         model = Model(inputs=input_layer, outputs=output_layer)
 
-        model.compile(loss='categorical_crossentropy',
+        model.compile(loss=loss_function,
                       optimizer=Adam(lr=learning_rate),
                       metrics=self.metrics)
 

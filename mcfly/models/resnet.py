@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from keras.layers import Activation
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Convolution1D, BatchNormalization, ReLU, Add, \
     Input, GlobalAvgPool1D, Dense
@@ -8,6 +8,7 @@ from tensorflow.keras.optimizers import Adam
 import numpy as np
 from argparse import Namespace
 from .base_hyperparameter_generator import generate_base_hyperparameter_set
+from ..task import Task
 
 
 class ResNet:
@@ -62,7 +63,7 @@ class ResNet:
             'resnet_max_filters_number': resnet_max_filters_number,
             'resnet_min_max_kernel_size': resnet_min_max_kernel_size,
             'resnet_max_max_kernel_size': resnet_max_max_kernel_size,
-            }
+        }
 
         # Add missing parameters from default
         for key, value in _other.items():
@@ -90,14 +91,14 @@ class ResNet:
                                                                params.resnet_max_max_kernel_size + 1)
         return hyperparameters
 
-
     def create_model(
             self,
             min_filters_number,
             max_kernel_size,
             network_depth=3,
             learning_rate=0.01,
-            regularization_rate=0.01):
+            regularization_rate=0.01,
+            task=Task.classification):
         """
         Generate a ResNet model (see also https://arxiv.org/pdf/1611.06455.pdf).
 
@@ -116,6 +117,8 @@ class ResNet:
             Set learning rate. Default is 0.01.
         regularization_rate : float
             Set regularization rate. Default is 0.01.
+        task: str
+            Task type, either 'classification' or 'regression'
 
         Returns
         -------
@@ -156,12 +159,18 @@ class ResNet:
             x = conv_bn_relu_3_sandwich(x, filter_numbers[i], kernel_sizes[i])
 
         x = GlobalAvgPool1D()(x)
-        output_layer = Dense(self.number_of_classes, activation='softmax')(x)
+        output_layer = Dense(self.number_of_classes)(x)
+
+        if task is Task.classification:
+            loss_function = 'categorical_crossentropy'
+            output_layer = Activation('softmax')(output_layer)
+        elif task is Task.regression:
+            loss_function = 'mean_squared_error'
 
         # Create model and compile
         model = Model(inputs=inputs, outputs=output_layer)
 
-        model.compile(loss='categorical_crossentropy',
+        model.compile(loss=loss_function,
                       optimizer=Adam(lr=learning_rate),
                       metrics=self.metrics)
 

@@ -17,7 +17,7 @@
 #
 
 from .modelgen import generate_models
-from .find_architecture import train_models_on_samples, find_best_architecture, kNN_accuracy
+from .find_architecture import train_models_on_samples, find_best_architecture, kNN_performance
 from ._version import __version__
 
 
@@ -27,5 +27,5 @@ __all__ = [
     "find_best_architecture",
     "generate_models",
     "train_models_on_samples",
-    "kNN_accuracy",
+    "kNN_performance",
 ]

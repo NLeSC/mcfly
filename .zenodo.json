@@ -1,58 +1,71 @@
 {
-    "creators": [
-        {
-            "affiliation": "Netherlands eScience Center",
-            "name": "van Kuppevelt, Dafne"
-        },
-        {
-            "affiliation": "Netherlands eScience Center",
-            "name": "Meijer, Christiaan"
-        },
-        {
-            "affiliation": "Netherlands eScience Center",
-            "name": "Huber, Florian",
-            "orcid": "0000-0002-3535-9406"
-        },
-        {
-            "affiliation": "Netherlands eScience Center",
-            "name": "van Hees, Vincent",
-            "orcid": "0000-0003-0182-9008"
-        },
-        {
-            "affiliation": "Netherlands eScience Center",
-            "name": "Solino Fernandez, Breixo"
-        },
-        {
-            "affiliation": "Netherlands eScience Center",
-            "name": "Bos, Patrick"
-        },
-        {
-            "affiliation": "Netherlands eScience Center",
-            "name": "Spaaks, Jurriaan"
-        },
-        {
-            "affiliation": "Netherlands eScience Center",
-            "name": "Kuzak, Mateusz",
-            "orcid": "0000-0003-0087-6021"
-        },
-        {
-            "affiliation": "Netherlands eScience Center",
-            "name": "Hidding, Johan"
-        },
-        {
-            "affiliation": "Netherlands eScience Center",
-            "name": "van der Ploeg, Atze"
-        }
-    ],
-    "description": "The goal of mcfly is to ease the use of deep learning technology for time series classification. The advantage of deep learning is that it can handle raw data directly, without the need to compute signal features. Deep learning does not require expert domain knowledge about the data, and has been shown to be competitive with conventional machine learning techniques. As an example, you can apply mcfly on accelerometer data for activity classification.",
-    "keywords": [
-        "machine learning",
-        "deep learning",
-        "time series",
-        "automated machine learning"
-    ],
-    "license": {
-        "id": "Apache-2.0"
+  "creators": [
+    {
+      "affiliation": "Netherlands eScience Center",
+      "name": "van Kuppevelt, Dafne"
     },
-    "title": "mcfly: deep learning for time series"
+    {
+      "affiliation": "Netherlands eScience Center",
+      "name": "Meijer, Christiaan",
+      "orcid": "0000-0002-5529-5761"
+    },
+    {
+      "affiliation": "Netherlands eScience Center",
+      "name": "Huber, Florian",
+      "orcid": "0000-0002-3535-9406"
+    },
+    {
+      "affiliation": "Netherlands eScience Center",
+      "name": "van Hees, Vincent",
+      "orcid": "0000-0003-0182-9008"
+    },
+    {
+      "affiliation": "Netherlands eScience Center",
+      "name": "Solino Fernandez, Breixo"
+    },
+    {
+      "affiliation": "Netherlands eScience Center",
+      "name": "Bos, Patrick"
+    },
+    {
+      "affiliation": "Netherlands eScience Center",
+      "name": "Spaaks, Jurriaan"
+    },
+    {
+      "affiliation": "Netherlands eScience Center",
+      "name": "Kuzak, Mateusz",
+      "orcid": "0000-0003-0087-6021"
+    },
+    {
+      "affiliation": "Netherlands eScience Center",
+      "name": "Hidding, Johan"
+    },
+    {
+      "affiliation": "Netherlands eScience Center",
+      "name": "van der Ploeg, Atze"
+    },
+    {
+      "affiliation": "Netherlands eScience Center",
+      "name": "Lüken, Malte",
+      "orcid": "0000-0001-7095-203X"
+    },
+    {
+      "affiliation": "Netherlands eScience Center",
+      "name": "Lyashevska, Olga",
+      "orcid": "0000-0002-8686-8550"
+    }
+  ],
+  "description": "The goal of mcfly is to ease the use of deep learning technology for time series classification. The advantage of deep learning is that it can handle raw data directly, without the need to compute signal features. Deep learning does not require expert domain knowledge about the data, and has been shown to be competitive with conventional machine learning techniques. As an example, you can apply mcfly on accelerometer data for activity classification.",
+  "keywords": [
+    "machine learning",
+    "deep learning",
+    "time series",
+    "automated machine learning"
+  ],
+  "license": {
+    "id": "Apache-2.0"
+  },
+  "publication_date": "2022-12-21",
+  "title": "mcfly: deep learning for time series",
+  "version": "4.0.0"
 }

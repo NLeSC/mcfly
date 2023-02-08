@@ -7,6 +7,7 @@ from tensorflow.keras.optimizers import Adam
 import numpy as np
 from argparse import Namespace
 from .base_hyperparameter_generator import generate_base_hyperparameter_set
+from ..task import Task
 
 
 class DeepConvLSTM:
@@ -99,7 +100,7 @@ class DeepConvLSTM:
         return hyperparameters
 
     def create_model(self, filters, lstm_dims, learning_rate=0.01,
-                     regularization_rate=0.01):
+                     regularization_rate=0.01, task=Task.classification):
         """Generate a model with convolution and LSTM layers.
 
         See Ordonez et al., 2016, http://dx.doi.org/10.3390/s16010115
@@ -114,9 +115,8 @@ class DeepConvLSTM:
             learning rate
         regularization_rate : float
             regularization rate
-        metrics : list
-            Metrics to calculate on the validation set.
-            See https://keras.io/metrics/ for possible values.
+        task: str
+            Task type, either 'classification' or 'regression'
 
         Returns
         -------
@@ -155,11 +155,19 @@ class DeepConvLSTM:
         model.add(
             TimeDistributed(
                 Dense(units=dim_output, kernel_regularizer=l2(regularization_rate))))
-        model.add(Activation("softmax"))
+
+        if task is Task.classification:
+            model.add(Activation("softmax"))
+
         # Final classification layer - per timestep
         model.add(Lambda(lambda x: x[:, -1, :], output_shape=[dim_output]))
 
-        model.compile(loss='categorical_crossentropy',
+        if task is Task.classification:
+            loss_function = 'categorical_crossentropy'
+        elif task is Task.regression:
+            loss_function = 'mean_squared_error'
+
+        model.compile(loss=loss_function,
                       optimizer=Adam(lr=learning_rate),
                       metrics=self.metrics)
 

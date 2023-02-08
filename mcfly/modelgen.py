@@ -19,12 +19,14 @@
 import warnings
 import numpy as np
 from mcfly.models import CNN, DeepConvLSTM, ResNet, InceptionTime
+from mcfly.task import Task
 
 
 def generate_models(x_shape,
-                    number_of_classes,
+                    number_of_output_dimensions,
                     number_of_models,
                     model_types=['CNN', 'DeepConvLSTM', 'ResNet', 'InceptionTime'],
+                    task=Task.classification,
                     metrics=['accuracy'],
                     **hyperparameter_ranges):
     """
@@ -35,8 +37,8 @@ def generate_models(x_shape,
     ----------
     x_shape : tuple
         Shape of the input dataset: (num_samples, num_timesteps, num_channels)
-    number_of_classes : int
-        Number of classes for classification task.
+    number_of_output_dimensions : int
+        Number of classes for classification task or number of targets for regression.
     number_of_models : int
         Number of models to generate. Should at least be >= the number
         of given model types.
@@ -45,6 +47,9 @@ def generate_models(x_shape,
         'ResNet', or 'InceptionTime'), or custom model classes (see mcfly.models
         for examples on how such a class is build and what it must contain).
         Default is to use all built-in mcfly models.
+    task: str
+        Task type, either 'classification' or 'regression'
+
     metrics : list
         Metrics to calculate on the validation set.
         See https://keras.io/metrics/ for possible values.
@@ -92,14 +97,15 @@ def _instantiate_models(default_models, hyperparameter_ranges, metrics, model_ty
     models = []
     for current_model_type in model_types_selected:
         if current_model_type in default_models:
-            model_type = default_models[current_model_type](x_shape, number_of_classes,
+            model_type = default_models[current_model_type](x_shape, number_of_output_dimensions,
                                                             metrics, **hyperparameter_ranges)
-        else:  # Assume model class was passed
-            model_type = current_model_type(x_shape, number_of_classes,
+
+        else: # Assume model class was passed
+            model_type = current_model_type(x_shape, number_of_output_dimensions,
                                             metrics, **hyperparameter_ranges)
 
         hyperparameters = model_type.generate_hyperparameters()
-        model = model_type.create_model(**hyperparameters)
+        model = model_type.create_model(task=task, **hyperparameters)
         model_name = model_type.model_name
 
         models.append((model, hyperparameters, model_name))
