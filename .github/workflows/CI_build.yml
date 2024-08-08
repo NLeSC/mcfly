@@ -37,7 +37,7 @@ jobs:
         run: |
           coverage run --source=mcfly -m pytest
           python3 -m pip install scrutinizer-ocular
-          ocular
+          ocular --access-token ${{ secrets.SCRUTINIZER_OCULAR_TOKEN }}
 
   basic_checks:
     name: Run tests across OS and versions / python-${{ matrix.python-version }} / ${{ matrix.os }}
