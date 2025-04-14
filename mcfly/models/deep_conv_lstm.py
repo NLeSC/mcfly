@@ -1,9 +1,9 @@
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Activation, Lambda, \
+from keras.models import Sequential
+from keras.layers import Dense, Activation, Lambda, \
     Convolution2D, TimeDistributed, \
-    Reshape, LSTM, Dropout, BatchNormalization
-from tensorflow.keras.regularizers import l2
-from tensorflow.keras.optimizers import Adam
+    Reshape, LSTM, Dropout, BatchNormalization, Input
+from keras.regularizers import l2
+from keras.optimizers import Adam
 import numpy as np
 from argparse import Namespace
 from .base_hyperparameter_generator import generate_base_hyperparameter_set
@@ -128,7 +128,8 @@ class DeepConvLSTM:
         dim_output = self.number_of_classes
         weightinit = 'lecun_uniform'  # weight initialization
         model = Sequential()  # initialize model
-        model.add(BatchNormalization(input_shape=(dim_length, dim_channels)))
+        model.add(Input(shape=(dim_length, dim_channels)))
+        model.add(BatchNormalization())
         # reshape a 2 dimensional array per file/person/object into a
         # 3 dimensional array
         model.add(
@@ -160,7 +161,7 @@ class DeepConvLSTM:
             model.add(Activation("softmax"))
 
         # Final classification layer - per timestep
-        model.add(Lambda(lambda x: x[:, -1, :], output_shape=[dim_output]))
+        model.add(Lambda(lambda x: x[:, -1, :], output_shape=(dim_output, )))
 
         if task is Task.classification:
             loss_function = 'categorical_crossentropy'
@@ -168,7 +169,7 @@ class DeepConvLSTM:
             loss_function = 'mean_squared_error'
 
         model.compile(loss=loss_function,
-                      optimizer=Adam(lr=learning_rate),
+                      optimizer=Adam(learning_rate=learning_rate),
                       metrics=self.metrics)
 
         return model

@@ -33,16 +33,22 @@ import warnings
 
 import numpy as np
 from sklearn import neighbors, metrics as sklearnmetrics
-from tensorflow.keras import metrics
-from tensorflow.keras.utils import Sequence
-from tensorflow.keras.callbacks import EarlyStopping
-import tensorflow as tf
+import keras
+from keras import metrics
+from keras.utils import Sequence
+from keras.callbacks import EarlyStopping
 from collections import defaultdict
 from types import GeneratorType
 
-
 from . import modelgen
 from .task import Task
+from .keras_dataset import NumpyKerasDataset
+
+
+if keras.backend.backend() == "tensorflow":
+    import tensorflow as tf
+if keras.backend.backend() == "torch":
+    import torch
 
 
 def train_models_on_samples(X_train, y_train, X_val, y_val, models,
@@ -141,19 +147,17 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
         X_train_sub = X_train[:subset_size, :, :]
         y_train_sub = y_train[:subset_size, :]
 
-        data_train = tf.data.Dataset.from_tensor_slices(
-            (X_train_sub, y_train_sub)).batch(batch_size)
+        data_train = NumpyKerasDataset(X_train_sub, y_train_sub, batch_size)
     else:
         # TODO Subset (is it possible?)
         if subset_size != -1:
-            warnings.warn("Argument 'subset_size' is not supported for tf.data.Dataset or generators and will be ignored")
+            warnings.warn("Argument 'subset_size' is only supported for numpy arrays and will be ignored")
 
         data_train = X_train
 
     # Create dataset for validation data
     if y_val is not None:
-        data_val = tf.data.Dataset.from_tensor_slices(
-            (X_val, y_val)).batch(batch_size)
+        data_val = NumpyKerasDataset(X_val, y_val, batch_size)
     else:
         data_val = X_val
 
@@ -183,14 +187,20 @@ def train_models_on_samples(X_train, y_train, X_val, y_val, models,
                             class_weight=class_weight)
         histories.append(history)
 
-        for metric_name in model.metrics_names:
+        metric_names = [name for name in model.metrics_names if name != "compile_metrics"]
+        if "compile_metrics" in model.metrics_names:
+            metric_names.extend([
+                metric.name
+                for metric in model.metrics[model.metrics_names.index("compile_metrics")].metrics
+            ])
+        for metric_name in metric_names:
             val_metrics[metric_name].append(_get_from_history('val_' + metric_name, history.history)[-1])
 
         if outputfile is not None:
             store_train_hist_as_json(params, model_types, history.history,
                                      outputfile)
         if model_path is not None:
-            model.save(os.path.join(model_path, 'model_{}.h5'.format(i)))
+            model.save(os.path.join(model_path, 'model_{}.keras'.format(i)))
 
     val_losses = val_metrics['loss']
     return histories, val_metrics, val_losses
@@ -309,15 +319,25 @@ def _infer_task(X_train, X_val, y_train, y_val):
         # Infer task from first batch
         if isinstance(X_train, (GeneratorType, Sequence)):
             y_train = _get_first_batch(X_train)
-        elif isinstance(X_train, (tf.data.Dataset)):
+        elif keras.backend.backend() == "tensorflow" and isinstance(X_train, tf.data.Dataset):
             y_train = _get_first_batch(X_train).numpy()
+        elif keras.backend.backend() == "torch" and isinstance(X_train, torch.utils.data.DataLoader):
+            y_train = _get_first_batch(X_train).numpy()
+        else:
+            warnings.warn("unknown dataset type")
+            y_train = _get_first_batch(X_train).numpy()  # just try
     if y_val is None:
         # Infer task from first batch
         if isinstance(X_val, (GeneratorType, Sequence)):
             y_val = _get_first_batch(X_val)
-        elif isinstance(X_val, (tf.data.Dataset)):
+        elif keras.backend.backend() == "tensorflow" and isinstance(X_val, tf.data.Dataset):
             y_val = _get_first_batch(X_val).numpy()
-    
+        elif keras.backend.backend() == "torch" and isinstance(X_train, torch.utils.data.DataLoader):
+            y_val = _get_first_batch(X_val).numpy()
+        else:
+            warnings.warn("unknown dataset type")
+            y_val = _get_first_batch(X_val).numpy()  # just try
+
     return _infer_task_from_y(y_train, y_val)
 
 

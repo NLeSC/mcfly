@@ -1,7 +1,7 @@
 import numpy as np
 import unittest
 import pytest
-from tensorflow.keras.models import Model
+from keras.models import Model
 from mcfly import modelgen
 from mcfly.models import ResNet
 
@@ -65,7 +65,11 @@ class ModelGenerationSuite(unittest.TestCase):
             model[0].fit(X_train, y_train, epochs = 1)
 
         model, _, modeltype = models[0]
-        model_metrics = [m.name for m in model.metrics]
+        if "compile_metrics" in model.metrics_names:
+            model_metrics = model.metrics[model.metrics_names.index("compile_metrics")].metrics
+        else:
+            model_metrics = model.metrics
+        model_metrics = [metric.name for metric in model_metrics]
         assert "accuracy" in model_metrics, "Not found accuracy for model {}. Found {}".format(
             modeltype, model_metrics)
         assert len(models) == n_models, "Expecting {} models, found {} models".format(

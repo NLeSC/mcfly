@@ -1,32 +1,34 @@
+import pytest
 from pytest import approx, raises
 import unittest
 import math
 import json
 import numpy as np
-import tensorflow as tf
-from tensorflow.keras.utils import to_categorical, Sequence
+import keras
+from keras.utils import to_categorical, Sequence
 from test_tools import safe_remove
 
 from mcfly import find_architecture
 from mcfly.models import CNN
 from mcfly.modelgen import Task
+from mcfly.keras_dataset import NumpyKerasDataset
 from test_modelgen import get_default as get_default_settings
 
 
 class DataGenerator(Sequence):
-        def __init__(self, x_set, y_set, batch_size):
-            self.x, self.y = x_set, y_set
-            self.batch_size = batch_size
+    def __init__(self, x_set, y_set, batch_size):
+        self.x, self.y = x_set, y_set
+        self.batch_size = batch_size
 
-        def __len__(self):
-            return math.ceil(len(self.x) / self.batch_size)
+    def __len__(self):
+        return math.ceil(len(self.x) / self.batch_size)
 
-        def __getitem__(self, idx):
-            batch_x = self.x[idx * self.batch_size:(idx + 1) *
-            self.batch_size]
-            batch_y = self.y[idx * self.batch_size:(idx + 1) *
-            self.batch_size]
-            return batch_x, batch_y
+    def __getitem__(self, idx):
+        batch_x = self.x[idx * self.batch_size:(idx + 1) *
+        self.batch_size]
+        batch_y = self.y[idx * self.batch_size:(idx + 1) *
+        self.batch_size]
+        return batch_x, batch_y
 
 
 def _create_2_class_labeled_dataset(num_samples_class_a, num_samples_class_b):
@@ -134,8 +136,29 @@ class FindArchitectureBasicSuite(unittest.TestCase):
         self.assertIsNotNone(best_model_type)
         assert 1 >= knn_acc >= 0
 
-    def test_find_best_architecture_classification_with_dataset(self):
+    def test_find_best_architecture_classification_with_numpy_dataset(self):
         """ Find_best_architecture should return a single model, parameters, type and valid knn accuracy."""
+        X_train, y_train = self.classification_train_dataset
+        X_val, y_val = self.classification_val_dataset
+
+        data_train = NumpyKerasDataset(X_train, y_train, self.batch_size)
+        data_val = NumpyKerasDataset(X_val, y_val, self.batch_size)
+
+        best_model, best_params, best_model_type, knn_acc = find_architecture.find_best_architecture(
+            data_train, None, data_val, None, verbose=False, subset_size=None,
+            number_of_models=1, nr_epochs=1)
+        assert hasattr(best_model, 'fit')
+        self.assertIsNotNone(best_params)
+        self.assertIsNotNone(best_model_type)
+        self.assertIsNone(knn_acc)
+
+    @unittest.skipIf(keras.backend.backend() != "tensorflow", reason="requires keras backend tensorflow")
+    @pytest.mark.tensorflow
+    def test_find_best_architecture_classification_with_tensorflow_dataset(self):
+        """ Find_best_architecture should return a single model, parameters, type and valid knn accuracy."""
+        assert keras.backend.backend() == "tensorflow", "Unexpected keras backend."
+        import tensorflow as tf
+
         X_train, y_train = self.classification_train_dataset
         X_val, y_val = self.classification_val_dataset
 
@@ -143,6 +166,34 @@ class FindArchitectureBasicSuite(unittest.TestCase):
             (X_train, y_train)).batch(self.batch_size)
         data_val = tf.data.Dataset.from_tensor_slices(
             (X_val, y_val)).batch(self.batch_size)
+
+        best_model, best_params, best_model_type, knn_acc = find_architecture.find_best_architecture(
+            data_train, None, data_val, None, verbose=False, subset_size=None,
+            number_of_models=1, nr_epochs=1)
+        assert hasattr(best_model, 'fit')
+        self.assertIsNotNone(best_params)
+        self.assertIsNotNone(best_model_type)
+        self.assertIsNone(knn_acc)
+
+    @unittest.skipIf(keras.backend.backend() != "torch", reason="requires keras backend torch")
+    @pytest.mark.torch
+    def test_find_best_architecture_classification_with_torch_dataset(self):
+        """ Find_best_architecture should return a single model, parameters, type and valid knn accuracy."""
+        assert keras.backend.backend() == "torch", "Unexpected keras backend."
+        import torch
+        from torch.utils.data import TensorDataset, DataLoader
+
+        X_train, y_train = self.classification_train_dataset
+        X_val, y_val = self.classification_val_dataset
+
+        data_train = DataLoader(
+            TensorDataset(torch.from_numpy(X_train), torch.from_numpy(y_train)),
+            batch_size=self.batch_size
+        )
+        data_val = DataLoader(
+            TensorDataset(torch.from_numpy(X_val), torch.from_numpy(y_val)),
+            batch_size=self.batch_size
+        )
 
         best_model, best_params, best_model_type, knn_acc = find_architecture.find_best_architecture(
             data_train, None, data_val, None, verbose=False, subset_size=None,
@@ -239,18 +290,82 @@ class FindArchitectureBasicSuite(unittest.TestCase):
                 batch_size=self.batch_size)
         assert len(histories) == 1
 
-    def test_train_models_on_samples_with_dataset(self):
+    def test_train_models_on_samples_with_numpy_dataset(self):
         """
         Model should be able to train using a dataset as an input
         """
         X_train, y_train = self.classification_train_dataset
         X_val, y_val = self.classification_val_dataset
 
+        data_train = NumpyKerasDataset(X_train, y_train, self.batch_size)
+        data_val = NumpyKerasDataset(X_val, y_val, self.batch_size)
+
+        custom_settings = get_default_settings()
+        model_type = CNN(X_train.shape, 2, **custom_settings)
+        hyperparams = model_type.generate_hyperparameters()
+        model = model_type.create_model(**hyperparams)
+        models = [(model, hyperparams, "CNN")]
+
+        histories, _, _ = \
+            find_architecture.train_models_on_samples(
+                data_train, None, data_val, None, models,
+                nr_epochs=1, subset_size=None, verbose=False,
+                outputfile=None, early_stopping_patience='auto',
+                batch_size=self.batch_size)
+        assert len(histories) == 1
+
+    @unittest.skipIf(keras.backend.backend() != "tensorflow", reason="requires keras backend tensorflow")
+    @pytest.mark.tensorflow
+    def test_train_models_on_samples_with_tensorflow_dataset(self):
+        """
+        Model should be able to train using a dataset as an input
+        """
+        assert keras.backend.backend() == "tensorflow", "Unexpected keras backend."
+        import tensorflow as tf
+
+        X_train, y_train = self.classification_train_dataset
+        X_val, y_val = self.classification_val_dataset
+
         data_train = tf.data.Dataset.from_tensor_slices(
             (X_train, y_train)).batch(self.batch_size)
-
         data_val = tf.data.Dataset.from_tensor_slices(
             (X_val, y_val)).batch(self.batch_size)
+
+        custom_settings = get_default_settings()
+        model_type = CNN(X_train.shape, 2, **custom_settings)
+        hyperparams = model_type.generate_hyperparameters()
+        model = model_type.create_model(**hyperparams)
+        models = [(model, hyperparams, "CNN")]
+
+        histories, _, _ = \
+            find_architecture.train_models_on_samples(
+                data_train, None, data_val, None, models,
+                nr_epochs=1, subset_size=None, verbose=False,
+                outputfile=None, early_stopping_patience='auto',
+                batch_size=self.batch_size)
+        assert len(histories) == 1
+
+    @unittest.skipIf(keras.backend.backend() != "torch", reason="requires keras backend torch")
+    @pytest.mark.torch
+    def test_train_models_on_samples_with_torch_dataset(self):
+        """
+        Model should be able to train using a dataset as an input
+        """
+        assert keras.backend.backend() == "torch", "Unexpected keras backend."
+        import torch
+        from torch.utils.data import TensorDataset, DataLoader
+
+        X_train, y_train = self.classification_train_dataset
+        X_val, y_val = self.classification_val_dataset
+
+        data_train = DataLoader(
+            TensorDataset(torch.from_numpy(X_train), torch.from_numpy(y_train)),
+            batch_size=self.batch_size
+        )
+        data_val = DataLoader(
+            TensorDataset(torch.from_numpy(X_val), torch.from_numpy(y_val)),
+            batch_size=self.batch_size
+        )
 
         custom_settings = get_default_settings()
         model_type = CNN(X_train.shape, 2, **custom_settings)
@@ -354,7 +469,23 @@ class TaskInferenceSuite(unittest.TestCase):
         assert task == Task.regression
 
 
-    def test_infer_task_dataset_classification(self):
+    def test_infer_task_numpy_dataset_classification(self):
+        X_train, y_train = self.classification_train_dataset
+        X_val, y_val = self.classification_val_dataset
+
+        data_train = NumpyKerasDataset(X_train, y_train, self.batch_size)
+        data_val = NumpyKerasDataset(X_val, y_val, self.batch_size)
+
+        task = find_architecture._infer_task(data_train, data_val, None, None)
+
+        assert task == Task.classification
+
+    @unittest.skipIf(keras.backend.backend() != "tensorflow", reason="requires keras backend tensorflow")
+    @pytest.mark.tensorflow
+    def test_infer_task_tensorflow_dataset_classification(self):
+        assert keras.backend.backend() == "tensorflow", "Unexpected keras backend."
+        import tensorflow as tf
+
         X_train, y_train = self.classification_train_dataset
         X_val, y_val = self.classification_val_dataset
 
@@ -364,11 +495,50 @@ class TaskInferenceSuite(unittest.TestCase):
             (X_val, y_val)).batch(self.batch_size)
 
         task = find_architecture._infer_task(data_train, data_val, None, None)
-        
+
+        assert task == Task.classification
+
+    @unittest.skipIf(keras.backend.backend() != "torch", reason="requires keras backend torch")
+    @pytest.mark.torch
+    def test_infer_task_torch_dataset_classification(self):
+        assert keras.backend.backend() == "torch", "Unexpected keras backend."
+        import torch
+        from torch.utils.data import TensorDataset, DataLoader
+
+        X_train, y_train = self.classification_train_dataset
+        X_val, y_val = self.classification_val_dataset
+
+        data_train = DataLoader(
+            TensorDataset(torch.from_numpy(X_train), torch.from_numpy(y_train)),
+            batch_size=self.batch_size
+        )
+        data_val = DataLoader(
+            TensorDataset(torch.from_numpy(X_val), torch.from_numpy(y_val)),
+            batch_size=self.batch_size
+        )
+
+        task = find_architecture._infer_task(data_train, data_val, None, None)
+
         assert task == Task.classification
 
 
-    def test_infer_task_dataset_regression(self):
+    def test_infer_task_numpy_dataset_regression(self):
+        X_train, y_train = self.regression_train_dataset
+        X_val, y_val = self.regression_val_dataset
+
+        data_train = NumpyKerasDataset(X_train, y_train, self.batch_size)
+        data_val = NumpyKerasDataset(X_val, y_val, self.batch_size)
+
+        task = find_architecture._infer_task(data_train, data_val, None, None)
+
+        assert task == Task.regression
+
+    @unittest.skipIf(keras.backend.backend() != "tensorflow", reason="requires keras backend tensorflow")
+    @pytest.mark.tensorflow
+    def test_infer_task_tensorflow_dataset_regression(self):
+        assert keras.backend.backend() == "tensorflow", "Unexpected keras backend."
+        import tensorflow as tf
+
         X_train, y_train = self.regression_train_dataset
         X_val, y_val = self.regression_val_dataset
 
@@ -378,7 +548,30 @@ class TaskInferenceSuite(unittest.TestCase):
             (X_val, y_val)).batch(self.batch_size)
 
         task = find_architecture._infer_task(data_train, data_val, None, None)
-        
+
+        assert task == Task.regression
+
+    @unittest.skipIf(keras.backend.backend() != "torch", reason="requires keras backend torch")
+    @pytest.mark.torch
+    def test_infer_task_torch_dataset_regression(self):
+        assert keras.backend.backend() == "torch", "Unexpected keras backend."
+        import torch
+        from torch.utils.data import TensorDataset, DataLoader
+
+        X_train, y_train = self.regression_train_dataset
+        X_val, y_val = self.regression_val_dataset
+
+        data_train = DataLoader(
+            TensorDataset(torch.from_numpy(X_train), torch.from_numpy(y_train)),
+            batch_size=self.batch_size
+        )
+        data_val = DataLoader(
+            TensorDataset(torch.from_numpy(X_val), torch.from_numpy(y_val)),
+            batch_size=self.batch_size
+        )
+
+        task = find_architecture._infer_task(data_train, data_val, None, None)
+
         assert task == Task.regression
 
 

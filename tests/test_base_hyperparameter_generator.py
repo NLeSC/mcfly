@@ -1,4 +1,3 @@
-import numpy as np
 from mcfly.models.base_hyperparameter_generator import generate_base_hyperparameter_set, \
     get_regularization
 

@@ -15,7 +15,7 @@ class DeepConvLSTMSuite(unittest.TestCase):
                                            "lstm_dims": [32, 32]})
 
         batchnormlay = model.layers[3]
-        assert batchnormlay.output_shape == (None, 20, 3, 32)
+        assert batchnormlay.output.shape == (None, 20, 3, 32)
 
     def test_deepconvlstm_enough_batchnorm(self):
         """LSTM model should contain as many batch norm layers as it has activations layers"""
