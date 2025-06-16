@@ -45,8 +45,11 @@ all = ["mcfly[dev,publishing,tensorflow,torch,jax]"]
 "Source" = "https://github.com/NLeSC/mcfly"
 
 [tool.setuptools]
-packages = ["mcfly"]
 license-files = ["LICENSE"]
+
+[tool.setuptools.packages.find]
+include = ["mcfly*"]
+namespaces = false
 
 [build-system]
 requires = ["setuptools>=64.0", "wheel"]
