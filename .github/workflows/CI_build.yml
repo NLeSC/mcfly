@@ -48,6 +48,7 @@ jobs:
       - name: Combine coverage reports
         run: coverage combine --keep .coverage.tensorflow .coverage.jax .coverage.torch
       - name: Upload test coverage with Scrutinizer
+      if: github.event.pull_request.head.repo.full_name == github.repository
         run: |
           python3 -m pip install scrutinizer-ocular
           ocular --access-token ${{ secrets.SCRUTINIZER_OCULAR_TOKEN }}
