@@ -25,7 +25,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           pip install --upgrade pip setuptools wheel
-          pip install .[publishing]
+          pip install .[tensorflow,publishing]
 
       - name: Trigger Sphinx build
         run: |
