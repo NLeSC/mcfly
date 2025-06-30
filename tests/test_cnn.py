@@ -25,7 +25,7 @@ class CNNSuite(unittest.TestCase):
                                            "fc_hidden_nodes": fc_hidden_nodes})
 
         dense_layer = [layer for layer in model.layers if 'Dense' in str(layer)][0]
-        assert dense_layer.output_shape[1] == fc_hidden_nodes, 'Wrong number of fc nodes.'
+        assert dense_layer.output.shape[1] == fc_hidden_nodes, 'Wrong number of fc nodes.'
 
 
     def test_cnn_batchnorm_dim(self):
@@ -35,7 +35,7 @@ class CNNSuite(unittest.TestCase):
                                            "fc_hidden_nodes": 100})
 
         batchnormlay = model.layers[2]
-        assert batchnormlay.output_shape == (None, 20, 32)
+        assert batchnormlay.output.shape == (None, 20, 32)
 
 
     def test_cnn_enough_batchnorm(self):
@@ -61,7 +61,11 @@ class CNNSuite(unittest.TestCase):
                                            "fc_hidden_nodes": 100})
         model.fit(X_train, y_train, epochs=1)
 
-        model_metrics = [m.name for m in model.metrics]
+        if "compile_metrics" in model.metrics_names:
+            model_metrics = model.metrics[model.metrics_names.index("compile_metrics")].metrics
+        else:
+            model_metrics = model.metrics
+        model_metrics = [metric.name for metric in model_metrics]
         for metric in metrics:
             assert metric in model_metrics
 

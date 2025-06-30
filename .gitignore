@@ -5,3 +5,5 @@ notebooks/.ipynb_checkpoints
 .pylint.d/
 docs/_build/
 notebooks/tutorial/data
+.venv
+build/

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from keras.layers import Activation
-from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Convolution1D, BatchNormalization, ReLU, Add, \
+from keras.models import Model
+from keras.layers import Convolution1D, BatchNormalization, ReLU, Add, \
     Input, GlobalAvgPool1D, Dense
-from tensorflow.keras.regularizers import l2
-from tensorflow.keras.optimizers import Adam
+from keras.regularizers import l2
+from keras.optimizers import Adam
 import numpy as np
 from argparse import Namespace
 from .base_hyperparameter_generator import generate_base_hyperparameter_set
@@ -171,7 +171,7 @@ class ResNet:
         model = Model(inputs=inputs, outputs=output_layer)
 
         model.compile(loss=loss_function,
-                      optimizer=Adam(lr=learning_rate),
+                      optimizer=Adam(learning_rate=learning_rate),
                       metrics=self.metrics)
 
         return model

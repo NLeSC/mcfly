@@ -47,8 +47,8 @@ class ResNetSuite(unittest.TestCase):
 
         firstConvlayer = model.layers[2]
         firstAddlayer = model.layers[12]
-        assert firstConvlayer.output_shape == (None, 30, min_filters_number)
-        assert firstAddlayer.output_shape == (None, 30, min_filters_number)
+        assert firstConvlayer.output.shape == (None, 30, min_filters_number)
+        assert firstAddlayer.output.shape == (None, 30, min_filters_number)
 
     def test_ResNet_metrics(self):
         """ResNet model should be compiled with the metrics that we give it"""
@@ -61,7 +61,11 @@ class ResNetSuite(unittest.TestCase):
         model = model_type.create_model(16, 20)
         model.fit(X_train, y_train, epochs=1)
 
-        model_metrics = [m.name for m in model.metrics]
+        if "compile_metrics" in model.metrics_names:
+            model_metrics = model.metrics[model.metrics_names.index("compile_metrics")].metrics
+        else:
+            model_metrics = model.metrics
+        model_metrics = [metric.name for metric in model_metrics]
         for metric in metrics:
             assert metric in model_metrics
 

@@ -1,8 +1,8 @@
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Activation, Convolution1D, \
-    Flatten, BatchNormalization
-from tensorflow.keras.regularizers import l2
-from tensorflow.keras.optimizers import Adam
+from keras.models import Sequential
+from keras.layers import Dense, Activation, Convolution1D, \
+    Flatten, BatchNormalization, Input
+from keras.regularizers import l2
+from keras.optimizers import Adam
 import numpy as np
 from argparse import Namespace
 from .base_hyperparameter_generator import generate_base_hyperparameter_set
@@ -115,11 +115,8 @@ class CNN:
         dim_output = self.number_of_classes
         weightinit = 'lecun_uniform'  # weight initialization
         model = Sequential()
-        model.add(
-            BatchNormalization(
-                input_shape=(
-                    dim_length,
-                    dim_channels)))
+        model.add(Input(shape=(dim_length, dim_channels)))
+        model.add(BatchNormalization())
         for filter_number in filters:
             model.add(Convolution1D(filter_number, kernel_size=3, padding='same',
                                     kernel_regularizer=l2(regularization_rate),
@@ -142,7 +139,7 @@ class CNN:
             loss_function = 'mean_squared_error'
 
         model.compile(loss=loss_function,
-                      optimizer=Adam(lr=learning_rate),
+                      optimizer=Adam(learning_rate=learning_rate),
                       metrics=self.metrics)
 
         return model

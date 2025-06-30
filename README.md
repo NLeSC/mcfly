@@ -23,7 +23,7 @@ Volume 12,
 Prerequisites:
 - Python 3.10, 3.11
 - pip
-- Tensorflow 2
+- Tensorflow 2, PyTorch or JAX
 
 Installing all dependencies in separate conda environment:
 ```sh
@@ -33,10 +33,15 @@ conda env create -f environment.yml
 source activate mcfly
 ```
 
-To install the package, run in the project directory:
+To install the package, run one of the following commands in the project directory:
 
-`pip install mcfly`
+- `pip install mcfly[tensorflow]`
+- `pip install mcfly[torch]`
+- `pip install mcfly[jax]`
 
+Please note: If you are not using tensorflow, you have to set the environment variable `KERAS_BACKEND` accordingly to your chosen backend.
+
+For GPU support take a look at the latest version of the requirements section "[most stable GPU environment](https://keras.io/getting_started/#most-stable-gpu-environment)" inside the Keras documentation or directly in their [GitHub repository](https://github.com/keras-team/keras).
 
 ## Visualization
 We build a tool to visualize the configuration and performance of the models. The tool can be found on http://nlesc.github.io/mcfly/. To run the  model visualization on your own computer, cd to the `html` directory and start up a python web server:

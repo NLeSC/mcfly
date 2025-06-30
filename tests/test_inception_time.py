@@ -48,8 +48,8 @@ class InceptionTimeSuite(unittest.TestCase):
 
         secondConvlayer = model.layers[5]
         firstConcatlayer = model.layers[8]
-        assert secondConvlayer.output_shape == (None, 30, min_filters_number)
-        assert firstConcatlayer.output_shape == (None, 30, min_filters_number * 4)
+        assert secondConvlayer.output.shape == (None, 30, min_filters_number)
+        assert firstConcatlayer.output.shape == (None, 30, min_filters_number * 4)
 
 
     def test_InceptionTime_metrics(self):
@@ -63,7 +63,11 @@ class InceptionTimeSuite(unittest.TestCase):
         model = model_type.create_model(16)
         model.fit(X_train, y_train)
 
-        model_metrics = [m.name for m in model.metrics]
+        if "compile_metrics" in model.metrics_names:
+            model_metrics = model.metrics[model.metrics_names.index("compile_metrics")].metrics
+        else:
+            model_metrics = model.metrics
+        model_metrics = [metric.name for metric in model_metrics]
         for metric in metrics:
             assert metric in model_metrics
 

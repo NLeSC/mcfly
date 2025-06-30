@@ -29,13 +29,27 @@ jobs:
       - name: Build package and create dev environment
         run: |
           python3 -m pip install --upgrade pip setuptools wheel
-          python3 -m pip install -e .[dev]
+          python3 -m pip install -e ".[dev]"
       - name: Check style against standards using prospector
         shell: bash -l {0}
         run: prospector --profile linter_profile -o grouped -o pylint:pylint-report.txt --zero-exit
-      - name: Run unit test / Test coverage with Scrutinizer
+      - name: Run all unit test with Tensorflow backend
         run: |
-          coverage run --source=mcfly -m pytest
+          python3 -m pip install -e ".[tensorflow]"
+          coverage run --source=mcfly --data-file=.coverage.tensorflow -m pytest
+      - name: Run JAX backend tests
+        run: |
+          python3 -m pip install -e ".[jax]"
+          keras_backend=jax coverage run --source=mcfly --data-file=.coverage.jax -m pytest -m jax
+      - name: Run PyTorch backend tests
+        run: |
+          python3 -m pip install --extra-index-url https://download.pytorch.org/whl/cpu -e ".[torch]"
+          keras_backend=torch coverage run --source=mcfly --data-file=.coverage.torch -m pytest -m torch
+      - name: Combine coverage reports
+        run: coverage combine --keep .coverage.tensorflow .coverage.jax .coverage.torch
+      - name: Upload test coverage with Scrutinizer
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        run: |
           python3 -m pip install scrutinizer-ocular
           ocular --access-token ${{ secrets.SCRUTINIZER_OCULAR_TOKEN }}
 
@@ -65,8 +79,6 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip setuptools wheel
-          python3 -m pip install -e .[dev]
+          python3 -m pip install -e ".[dev,tensorflow]"
       - name: Run unit tests
-        run: pytest -v
-      - name: Verify that we can build the package
-        run: python3 setup.py sdist bdist_wheel
+        run: coverage run --source=mcfly --data-file=.coverage.tensorflow -m pytest -v

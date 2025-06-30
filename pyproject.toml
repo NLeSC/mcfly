@@ -1,0 +1,66 @@
+[project]
+name = "mcfly"
+dynamic = ["version"]
+description = "Deep learning for time series data"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+keywords = ["deep-learning", "time-series", "auto-ml"]
+classifiers = [
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3 :: Only",
+]
+dependencies = [
+  "numpy",
+  "scikit-learn",
+  "scipy",
+  "keras>=3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "coverage",
+  "prospector[with_pyroma]",
+  "pytest",
+  "pytest-cov",
+]
+publishing = [
+  "build",
+  "twine",
+  "wheel",
+  "sphinx",
+  "sphinx-rtd-theme",
+]
+tensorflow = ["tensorflow>=2.16.1"]
+torch = ["torch>=2.1.0"]
+jax = ["jax>=0.4.20"]
+all = ["mcfly[dev,publishing,tensorflow,torch,jax]"]
+
+[project.urls]
+"Homepage" = "https://github.com/NLeSC/mcfly"
+"Bug Tracker" = "https://github.com/NLeSC/mcfly/issues"
+"Source" = "https://github.com/NLeSC/mcfly"
+
+[tool.setuptools]
+license-files = ["LICENSE"]
+
+[tool.setuptools.packages.find]
+include = ["mcfly*"]
+namespaces = false
+
+[build-system]
+requires = ["setuptools>=64.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+markers = [
+  "tensorflow: Requires Keras backend TensorFlow.",
+  "torch: Requires Keras backend PyTorch.",
+  "jax: Requires Keras backend JAX.",
+  "integration: Slow and more complicated tests.",
+]
