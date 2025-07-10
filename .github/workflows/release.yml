@@ -26,7 +26,7 @@ jobs:
           python3 -m pip install .[publishing]
       - name: Build wheel and source distribution
         run: python3 -m build
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           path: dist/*
 
