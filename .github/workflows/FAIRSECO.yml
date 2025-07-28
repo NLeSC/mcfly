@@ -8,9 +8,9 @@ jobs:
   RunTortellini:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - uses: tortellini-tools/action@v3
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: tortellini-result
                   path: .tortellini/out
@@ -18,7 +18,7 @@ jobs:
   RunSBOM:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - uses: anchore/sbom-action@v0
               with:
                   artifact-name: SBOM.spdx
@@ -27,15 +27,15 @@ jobs:
         needs: [RunTortellini, RunSBOM]
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v3
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
+            - uses: actions/checkout@v4
               with:
                 repository: SecureSECO/FAIRSECO
                 path: FAIRSECO_Assets
             - uses: SecureSECO/FAIRSECO@v1.0.0 # this is the main action
               with:
                   myToken: ${{ secrets.GITHUB_TOKEN }}
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: FAIRSECO Result
                   path: .FAIRSECO/
