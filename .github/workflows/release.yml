@@ -12,11 +12,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/install-python-and-package
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          extras-require: publishing
+          python-version: '3.12'
+      - name: Python info
+        run: |
+          which python3
+          python3 --version
+      - name: Build package
+        run: |
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install .[publishing]
       - name: Build wheel and source distribution
-        run: python -m build
+        run: python3 -m build
       - uses: actions/upload-artifact@v4
         with:
           path: dist/*
