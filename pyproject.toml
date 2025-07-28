@@ -1,6 +1,6 @@
 [project]
 name = "mcfly"
-version = "attr: mcfly._version.version"
+dynamic = ["version"]
 description = "Deep learning for time series data"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -53,7 +53,7 @@ include = ["mcfly*"]
 namespaces = false
 
 [build-system]
-requires = ["setuptools>=64.0", "wheel"]
+requires = ["setuptools>=64.0", "wheel", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
